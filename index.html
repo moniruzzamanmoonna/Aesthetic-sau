@@ -1204,6 +1204,8 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
 </footer>
 
 <script>
+var FIREBASE_URL = "https://aesthetic-sau-default-rtdb.firebaseio.com";
+
 // ── SITE CONFIG — Firebase থেকে load হবে ──
 var SITE_CONFIG = {
   followerCount: 4272,
@@ -1394,10 +1396,6 @@ function updateCountdown() {
 }
 updateCountdown();
 setInterval(updateCountdown, 1000);
-
-
-// ── FIREBASE CONFIG ──
-var FIREBASE_URL = "https://aesthetic-sau-default-rtdb.firebaseio.com";
 
 // ── BIRTHDAY POPUP ──
 function showBdayPopup(html) {
