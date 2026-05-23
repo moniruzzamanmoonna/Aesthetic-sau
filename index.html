@@ -1222,18 +1222,18 @@ var SITE_CONFIG = {
   extraPanels: []
 };
 
-// Firebase থেকে config load করো
+// Firebase থেকে config load করো — সব render এখানেই হবে
 fetch(FIREBASE_URL + '/site-config.json')
   .then(function(r){ return r.json(); })
   .then(function(data) {
-    if (data) {
+    if (data && typeof data === 'object') {
       if (data.followerCount) SITE_CONFIG.followerCount = data.followerCount;
-      if (data.fans && data.fans.length) SITE_CONFIG.fans = data.fans;
-      if (data.team && data.team.length) SITE_CONFIG.team = data.team;
+      if (data.fans && Array.isArray(data.fans) && data.fans.length) SITE_CONFIG.fans = data.fans;
+      if (data.team && Array.isArray(data.team) && data.team.length) SITE_CONFIG.team = data.team;
       if (data.announcement) SITE_CONFIG.announcement = data.announcement;
-      if (data.extraPanels) SITE_CONFIG.extraPanels = data.extraPanels;
+      if (data.extraPanels && Array.isArray(data.extraPanels)) SITE_CONFIG.extraPanels = data.extraPanels;
     }
-    // Announcement
+    // Announcement bar
     if (SITE_CONFIG.announcement && SITE_CONFIG.announcement.show && SITE_CONFIG.announcement.text) {
       var bar = document.getElementById('ann-bar');
       if (!bar) {
@@ -1248,21 +1248,22 @@ fetch(FIREBASE_URL + '/site-config.json')
     renderFans();
     renderTeam();
     renderExtraPanels();
-    // Follower count
     setTimeout(function() {
-      countUp(document.getElementById("fcount"), SITE_CONFIG.followerCount, 2200);
+      var fcEl = document.getElementById("fcount");
+      if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
     }, 500);
   })
   .catch(function() {
+    // Firebase fail হলে default data দিয়ে render
     renderFans();
     renderTeam();
     setTimeout(function() {
-      countUp(document.getElementById("fcount"), SITE_CONFIG.followerCount, 2200);
+      var fcEl = document.getElementById("fcount");
+      if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
     }, 500);
   });
 
-var FANS = SITE_CONFIG.fans;
-var TEAM = SITE_CONFIG.team;
+// FANS এবং TEAM এখন SITE_CONFIG থেকে directly নেওয়া হয়
 
 function countUp(el, to, ms) {
   var s = performance.now();
