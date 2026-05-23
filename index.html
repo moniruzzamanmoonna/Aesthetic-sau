@@ -569,6 +569,7 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
   <!-- TABS -->
   <div class="adm-tabs">
     <button class="adm-tab active" id="tab-data" onclick="switchTab('data')">🎂 Birthday Data</button>
+    <button class="adm-tab" id="tab-live" onclick="switchTab('live')">⚡ Live Editor</button>
     <button class="adm-tab" id="tab-site" onclick="switchTab('site')">✏️ Website Editor</button>
   </div>
 
@@ -589,6 +590,77 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
           <tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- TAB: Live Editor -->
+  <div id="adm-tab-live" class="adm-body" style="display:none">
+    <div class="site-editor-grid">
+
+      <!-- Follower Count -->
+      <div class="site-editor-card">
+        <div class="site-editor-section-title">📊 Follower Count</div>
+        <div class="site-editor-field">
+          <label>Facebook Followers</label>
+          <input type="number" id="le-followers" placeholder="4272"/>
+        </div>
+        <button class="site-save-btn" onclick="leSave('followers')">⚡ Save & Update</button>
+      </div>
+
+      <!-- Announcement -->
+      <div class="site-editor-card">
+        <div class="site-editor-section-title">📢 Announcement Bar</div>
+        <div class="site-editor-field">
+          <label>দেখাবে?</label>
+          <select id="le-ann-show">
+            <option value="true">হ্যাঁ দেখাও</option>
+            <option value="false">না লুকাও</option>
+          </select>
+        </div>
+        <div class="site-editor-field">
+          <label>Announcement Text</label>
+          <input type="text" id="le-ann-text" placeholder="🎉 New announcement..."/>
+        </div>
+        <button class="site-save-btn" onclick="leSave('announcement')">⚡ Save & Update</button>
+      </div>
+
+      <!-- Top Fans -->
+      <div class="site-editor-card" style="grid-column:1/-1">
+        <div class="site-editor-section-title">⭐ Top Fans</div>
+        <div id="le-fans-list"></div>
+        <button class="site-save-btn" onclick="leSave('fans')" style="margin-top:12px">⚡ Save & Update</button>
+      </div>
+
+      <!-- Team -->
+      <div class="site-editor-card" style="grid-column:1/-1">
+        <div class="site-editor-section-title">👥 Admin & Moderators</div>
+        <div id="le-team-list"></div>
+        <button class="site-save-btn" onclick="leSave('team')" style="margin-top:12px">⚡ Save & Update</button>
+      </div>
+
+      <!-- Extra Panel -->
+      <div class="site-editor-card" style="grid-column:1/-1">
+        <div class="site-editor-section-title">➕ নতুন Panel যোগ করো</div>
+        <div class="site-editor-field">
+          <label>Eyebrow Text (ছোট উপরের লেখা)</label>
+          <input type="text" id="le-ep-eye" placeholder="e.g. Special Feature"/>
+        </div>
+        <div class="site-editor-field">
+          <label>Title</label>
+          <input type="text" id="le-ep-title" placeholder="Panel Title"/>
+        </div>
+        <div class="site-editor-field">
+          <label>Subtitle</label>
+          <input type="text" id="le-ep-sub" placeholder="Panel Subtitle"/>
+        </div>
+        <div class="site-editor-field">
+          <label>Content (HTML লেখা যাবে)</label>
+          <textarea id="le-ep-content" rows="4" placeholder="এখানে content লেখো..."></textarea>
+        </div>
+        <button class="site-save-btn" onclick="leAddPanel()">➕ Panel যোগ করো</button>
+        <div id="le-panels-list" style="margin-top:16px"></div>
+      </div>
+
     </div>
   </div>
 
@@ -1103,6 +1175,8 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
 </div>
 </section>
 
+<div id="extra-panels-wrap"></div>
+
 <footer>
 <div class="foot-wrap">
   <div class="foot-top">
@@ -1130,17 +1204,65 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
 </footer>
 
 <script>
-var FANS = [
-  {name:"Fan Name 01",img:""},{name:"Fan Name 02",img:""},{name:"Fan Name 03",img:""},
-  {name:"Fan Name 04",img:""},{name:"Fan Name 05",img:""}
-];
-var TEAM = [
-  {role:"Admin",     name:"Moniruzzaman Moonna",  bio:"Page Admin", img:""},
-  {role:"Admin",     name:"Al Mehedi Emon",        bio:"Page Admin", img:""},
-  {role:"Admin",     name:"Utso Saha",             bio:"Page Admin", img:""},
-  {role:"Moderator", name:"Isfat Jahan Famia",     bio:"Page Moderator", img:""},
-  {role:"Moderator", name:"Mariya",                bio:"Page Moderator", img:""}
-];
+// ── SITE CONFIG — Firebase থেকে load হবে ──
+var SITE_CONFIG = {
+  followerCount: 4272,
+  fans: [
+    {name:"Fan Name 01",img:""},{name:"Fan Name 02",img:""},{name:"Fan Name 03",img:""},
+    {name:"Fan Name 04",img:""},{name:"Fan Name 05",img:""}
+  ],
+  team: [
+    {role:"Admin",     name:"Moniruzzaman Moonna",  bio:"Page Admin", img:""},
+    {role:"Admin",     name:"Al Mehedi Emon",        bio:"Page Admin", img:""},
+    {role:"Admin",     name:"Utso Saha",             bio:"Page Admin", img:""},
+    {role:"Moderator", name:"Isfat Jahan Famia",     bio:"Page Moderator", img:""},
+    {role:"Moderator", name:"Mariya",                bio:"Page Moderator", img:""}
+  ],
+  announcement: {show: false, text: ""},
+  extraPanels: []
+};
+
+// Firebase থেকে config load করো
+fetch(FIREBASE_URL + '/site-config.json')
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    if (data) {
+      if (data.followerCount) SITE_CONFIG.followerCount = data.followerCount;
+      if (data.fans && data.fans.length) SITE_CONFIG.fans = data.fans;
+      if (data.team && data.team.length) SITE_CONFIG.team = data.team;
+      if (data.announcement) SITE_CONFIG.announcement = data.announcement;
+      if (data.extraPanels) SITE_CONFIG.extraPanels = data.extraPanels;
+    }
+    // Announcement
+    if (SITE_CONFIG.announcement && SITE_CONFIG.announcement.show && SITE_CONFIG.announcement.text) {
+      var bar = document.getElementById('ann-bar');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'ann-bar';
+        bar.style.cssText = 'background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;text-align:center;padding:10px 20px;font-size:13px;font-weight:600;position:relative;z-index:100';
+        document.body.insertBefore(bar, document.body.children[2]);
+      }
+      bar.textContent = SITE_CONFIG.announcement.text;
+      bar.style.display = 'block';
+    }
+    renderFans();
+    renderTeam();
+    renderExtraPanels();
+    // Follower count
+    setTimeout(function() {
+      countUp(document.getElementById("fcount"), SITE_CONFIG.followerCount, 2200);
+    }, 500);
+  })
+  .catch(function() {
+    renderFans();
+    renderTeam();
+    setTimeout(function() {
+      countUp(document.getElementById("fcount"), SITE_CONFIG.followerCount, 2200);
+    }, 500);
+  });
+
+var FANS = SITE_CONFIG.fans;
+var TEAM = SITE_CONFIG.team;
 
 function countUp(el, to, ms) {
   var s = performance.now();
@@ -1152,10 +1274,6 @@ function countUp(el, to, ms) {
     else el.textContent = to.toLocaleString();
   })(performance.now());
 }
-window.addEventListener("load", function() {
-  setTimeout(function() { countUp(document.getElementById("fcount"), 4272, 2200); }, 500);
-});
-
 // Gallery lightbox
 document.getElementById("gallery-grid").addEventListener("click", function(e) {
   var card = e.target.closest(".gc-card");
@@ -1172,19 +1290,26 @@ document.addEventListener("keydown", function(e) { if (e.key === "Escape") close
 
 function renderFans() {
   var g = document.getElementById("fans-grid"), h = "";
-  for (var i = 0; i < FANS.length; i++) {
-    var f = FANS[i];
-    h += '<div class="fan-card"><div class="fan-rank">#' + (i+1) + '</div><div class="fan-av"><span>' + f.name.charAt(0) + '</span></div><div class="fan-name">' + f.name + '</div><div class="fan-tag">&#11088; Top Fan</div></div>';
+  var fans = SITE_CONFIG.fans;
+  for (var i = 0; i < fans.length; i++) {
+    var f = fans[i];
+    h += '<div class="fan-card"><div class="fan-rank">#' + (i+1) + '</div>'
+      + '<div class="fan-av">'
+      + (f.img ? '<img src="'+f.img+'" alt="'+f.name+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>' : '<span>' + f.name.charAt(0) + '</span>')
+      + '</div><div class="fan-name">' + f.name + '</div><div class="fan-tag">&#11088; Top Fan</div></div>';
   }
   g.innerHTML = h;
 }
 
 function renderTeam() {
   var g = document.getElementById("team-grid"), h = "";
-  for (var i = 0; i < TEAM.length; i++) {
-    var m = TEAM[i];
+  var team = SITE_CONFIG.team;
+  for (var i = 0; i < team.length; i++) {
+    var m = team[i];
     h += '<div class="tm-card">'
-      + '<div class="tm-av"><span>&#128100;</span></div>'
+      + '<div class="tm-av">'
+      + (m.img ? '<img src="'+m.img+'" alt="'+m.name+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>' : '<span>&#128100;</span>')
+      + '</div>'
       + '<div>'
       + '<span class="tm-role">' + m.role + '</span>'
       + '<div class="tm-name tm-name-blur" onclick="this.classList.toggle(\'revealed\')">'
@@ -1194,6 +1319,23 @@ function renderTeam() {
       + '</div></div>';
   }
   g.innerHTML = h;
+}
+
+function renderExtraPanels() {
+  var panels = SITE_CONFIG.extraPanels;
+  if (!panels || !panels.length) return;
+  var container = document.getElementById('extra-panels-wrap');
+  if (!container) return;
+  var h = '';
+  panels.forEach(function(p) {
+    h += '<section style="padding:60px 0;border-top:1px solid rgba(255,255,255,.06)"><div class="wrap">'
+      + '<div class="sec-head rv"><div><div class="sec-ey">' + (p.eyebrow||'') + '</div>'
+      + '<h2 class="sec-ti">' + (p.title||'') + '</h2></div>'
+      + '<span class="sec-no">' + (p.subtitle||'') + '</span></div>'
+      + '<div class="rv" style="margin-top:24px;color:rgba(255,255,255,.7);line-height:1.8">' + (p.content||'') + '</div>'
+      + '</div></section>';
+  });
+  container.innerHTML = h;
 }
 
 var obs = new IntersectionObserver(function(es) {
@@ -1364,17 +1506,159 @@ function findBdayMate() {
   });
 }
 
-// ── ADMIN TABS ──
-renderFans();
-renderTeam();
-
+// ── LIVE EDITOR ──
 function switchTab(tab) {
-  document.getElementById('adm-tab-data').style.display = tab === 'data' ? 'block' : 'none';
-  document.getElementById('adm-tab-site').style.display = tab === 'site' ? 'block' : 'none';
-  document.getElementById('tab-data').classList.toggle('active', tab === 'data');
-  document.getElementById('tab-site').classList.toggle('active', tab === 'site');
+  ['data','live','site'].forEach(function(t) {
+    var tabEl = document.getElementById('adm-tab-'+t);
+    var btnEl = document.getElementById('tab-'+t);
+    if (tabEl) tabEl.style.display = tab === t ? 'block' : 'none';
+    if (btnEl) btnEl.classList.toggle('active', tab === t);
+  });
   if (tab === 'site') loadSiteEditorValues();
+  if (tab === 'live') loadLiveEditorValues();
 }
+
+function loadLiveEditorValues() {
+  // Followers
+  document.getElementById('le-followers').value = SITE_CONFIG.followerCount || '';
+  // Announcement
+  if (SITE_CONFIG.announcement) {
+    document.getElementById('le-ann-show').value = SITE_CONFIG.announcement.show ? 'true' : 'false';
+    document.getElementById('le-ann-text').value = SITE_CONFIG.announcement.text || '';
+  }
+  // Fans
+  var fansHtml = '';
+  SITE_CONFIG.fans.forEach(function(f, i) {
+    fansHtml += '<div style="display:flex;gap:10px;margin-bottom:10px;align-items:center">'
+      + '<input style="flex:2;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="নাম" value="'+f.name+'" id="le-fan-name-'+i+'"/>'
+      + '<input style="flex:3;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Photo URL (optional)" value="'+(f.img||'')+'" id="le-fan-img-'+i+'"/>'
+      + '</div>';
+  });
+  document.getElementById('le-fans-list').innerHTML = fansHtml;
+  // Team
+  var teamHtml = '';
+  SITE_CONFIG.team.forEach(function(m, i) {
+    teamHtml += '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">'
+      + '<select style="background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 10px;border-radius:8px;font-size:12px;outline:none" id="le-tm-role-'+i+'">'
+      + '<option'+(m.role==='Admin'?' selected':'')+'>Admin</option>'
+      + '<option'+(m.role==='Moderator'?' selected':'')+'>Moderator</option>'
+      + '</select>'
+      + '<input style="flex:2;min-width:120px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="নাম" value="'+m.name+'" id="le-tm-name-'+i+'"/>'
+      + '<input style="flex:3;min-width:150px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Photo URL (optional)" value="'+(m.img||'')+'" id="le-tm-img-'+i+'"/>'
+      + '</div>';
+  });
+  document.getElementById('le-team-list').innerHTML = teamHtml;
+  // Extra panels
+  renderLePanelsList();
+}
+
+function renderLePanelsList() {
+  var panels = SITE_CONFIG.extraPanels || [];
+  var h = panels.length ? '' : '<div style="color:rgba(255,255,255,.3);font-size:13px">কোনো extra panel নেই</div>';
+  panels.forEach(function(p, i) {
+    h += '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
+      + '<div><strong style="color:#a78bfa">'+p.title+'</strong><div style="font-size:12px;color:rgba(255,255,255,.4)">'+p.eyebrow+'</div></div>'
+      + '<button onclick="leDeletePanel('+i+')" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);color:#f87171;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer">🗑 মুছো</button>'
+      + '</div>';
+  });
+  document.getElementById('le-panels-list').innerHTML = h;
+}
+
+function leSave(type) {
+  var update = {};
+  if (type === 'followers') {
+    var val = parseInt(document.getElementById('le-followers').value);
+    if (!val) return;
+    SITE_CONFIG.followerCount = val;
+    update = {followerCount: val};
+    countUp(document.getElementById("fcount"), val, 1500);
+  }
+  if (type === 'announcement') {
+    var show = document.getElementById('le-ann-show').value === 'true';
+    var text = document.getElementById('le-ann-text').value.trim();
+    SITE_CONFIG.announcement = {show: show, text: text};
+    update = {announcement: {show: show, text: text}};
+    var bar = document.getElementById('ann-bar');
+    if (!bar) { bar = document.createElement('div'); bar.id='ann-bar'; bar.style.cssText='background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;text-align:center;padding:10px 20px;font-size:13px;font-weight:600;position:relative;z-index:100'; document.body.insertBefore(bar, document.body.children[2]); }
+    bar.textContent = text;
+    bar.style.display = show ? 'block' : 'none';
+  }
+  if (type === 'fans') {
+    var fans = [];
+    SITE_CONFIG.fans.forEach(function(f, i) {
+      var n = document.getElementById('le-fan-name-'+i);
+      var im = document.getElementById('le-fan-img-'+i);
+      if (n) fans.push({name: n.value.trim(), img: im ? im.value.trim() : ''});
+    });
+    SITE_CONFIG.fans = fans;
+    update = {fans: fans};
+    renderFans();
+  }
+  if (type === 'team') {
+    var team = [];
+    SITE_CONFIG.team.forEach(function(m, i) {
+      var r = document.getElementById('le-tm-role-'+i);
+      var n = document.getElementById('le-tm-name-'+i);
+      var im = document.getElementById('le-tm-img-'+i);
+      if (n) team.push({role: r?r.value:'Admin', name: n.value.trim(), bio: r&&r.value==='Moderator'?'Page Moderator':'Page Admin', img: im?im.value.trim():''});
+    });
+    SITE_CONFIG.team = team;
+    update = {team: team};
+    renderTeam();
+  }
+  // Firebase এ save করো
+  fetch(FIREBASE_URL + '/site-config.json', {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(update)
+  }).then(function() {
+    showAdmToast('✅ সাইটে সাথে সাথে update হয়েছে!');
+  }).catch(function() {
+    showAdmToast('⚠️ Save হয়নি, internet চেক করো');
+  });
+}
+
+function leAddPanel() {
+  var eye  = document.getElementById('le-ep-eye').value.trim();
+  var title= document.getElementById('le-ep-title').value.trim();
+  var sub  = document.getElementById('le-ep-sub').value.trim();
+  var cont = document.getElementById('le-ep-content').value.trim();
+  if (!title) { showAdmToast('Title দাও!'); return; }
+  var panels = SITE_CONFIG.extraPanels || [];
+  panels.push({eyebrow:eye, title:title, subtitle:sub, content:cont});
+  SITE_CONFIG.extraPanels = panels;
+  fetch(FIREBASE_URL + '/site-config.json', {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({extraPanels: panels})
+  }).then(function() {
+    renderExtraPanels();
+    renderLePanelsList();
+    document.getElementById('le-ep-eye').value = '';
+    document.getElementById('le-ep-title').value = '';
+    document.getElementById('le-ep-sub').value = '';
+    document.getElementById('le-ep-content').value = '';
+    showAdmToast('✅ Panel যোগ হয়েছে!');
+  });
+}
+
+function leDeletePanel(idx) {
+  if (!confirm('এই panel মুছবেন?')) return;
+  var panels = SITE_CONFIG.extraPanels || [];
+  panels.splice(idx, 1);
+  SITE_CONFIG.extraPanels = panels;
+  fetch(FIREBASE_URL + '/site-config.json', {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({extraPanels: panels})
+  }).then(function() {
+    renderExtraPanels();
+    renderLePanelsList();
+    showAdmToast('🗑 Panel মুছে গেছে!');
+  });
+}
+
+// ── ADMIN TABS (old switchTab replaced above) ──
 
 function loadSiteEditorValues() {
   // Contest
