@@ -470,7 +470,12 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
   #prize-wrap > div { flex-direction: column; padding: 24px 18px !important; }
 }
 
-/* ── ADMIN TABS ── */
+.tm-name-blur{cursor:pointer;position:relative;display:inline-block;user-select:none}
+.tm-name-blur .tm-blur-text{filter:blur(6px);transition:filter .3s;display:inline-block}
+.tm-name-blur .tm-reveal-hint{font-size:10px;color:rgba(255,255,255,.3);margin-left:6px;letter-spacing:.5px;transition:opacity .3s}
+.tm-name-blur.revealed .tm-blur-text{filter:blur(0)}
+.tm-name-blur.revealed .tm-reveal-hint{opacity:0}
+
 .adm-tabs{display:flex;gap:4px;padding:16px 32px 0;background:#13131f;border-bottom:1px solid rgba(167,139,250,.15)}
 .adm-tab{background:none;border:none;color:rgba(255,255,255,.4);font-size:13px;font-weight:600;padding:10px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;border-radius:8px 8px 0 0}
 .adm-tab:hover{color:rgba(255,255,255,.7)}
@@ -824,12 +829,12 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
   <div class="bday-card rv">
     <div class="bday-top">
       <h3>Find Your <span>Birthday Mate</span></h3>
-      <p>তোমার নাম, faculty আর জন্মতারিখ দাও — SAU campus এ তোমার birthday twin খুঁজে বের করো!</p>
+      <p>Enter your name, faculty and date of birth — find your birthday twin on the SAU campus!</p>
     </div>
     <div class="bday-form">
       <div class="bday-fields">
         <div class="bday-field">
-          <label>তোমার নাম</label>
+          <label>Your Name</label>
           <input type="text" id="bd-name" placeholder="Full Name"/>
         </div>
         <div class="bday-field">
@@ -845,7 +850,7 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
           </select>
         </div>
         <div class="bday-field">
-          <label>জন্মতারিখ</label>
+          <label>Date of Birth</label>
           <input type="date" id="bd-date"/>
         </div>
       </div>
@@ -1178,7 +1183,16 @@ function renderTeam() {
   var g = document.getElementById("team-grid"), h = "";
   for (var i = 0; i < TEAM.length; i++) {
     var m = TEAM[i];
-    h += '<div class="tm-card"><div class="tm-av"><span>&#128100;</span></div><div><span class="tm-role">' + m.role + '</span><div class="tm-name">' + m.name + '</div><div class="tm-bio">' + m.bio + '</div></div></div>';
+    h += '<div class="tm-card">'
+      + '<div class="tm-av"><span>&#128100;</span></div>'
+      + '<div>'
+      + '<span class="tm-role">' + m.role + '</span>'
+      + '<div class="tm-name tm-name-blur" onclick="this.classList.toggle(\'revealed\')" title="Click to reveal">'
+      + '<span class="tm-blur-text">' + m.name + '</span>'
+      + '<span class="tm-reveal-hint">👆 Click</span>'
+      + '</div>'
+      + '<div class="tm-bio">' + m.bio + '</div>'
+      + '</div></div>';
   }
   g.innerHTML = h;
 }
