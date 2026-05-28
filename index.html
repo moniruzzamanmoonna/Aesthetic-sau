@@ -315,6 +315,13 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
 .rv{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
 .rv.show{opacity:1;transform:translateY(0)}
 
+/* AESTHETIC TAB MOBILE */
+@media(max-width:768px){
+  #aesthetic-tab [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;display:flex!important;flex-direction:column}
+  #aesthetic-tab [style*="border-right"]{border-right:none!important;border-bottom:1px solid rgba(76,175,80,.1)!important;padding:32px 22px!important}
+  #aesthetic-tab [style*="padding:48px 44px"]{padding:24px 20px!important}
+}
+
 /* ═══════════════════════════════
    MOBILE RESPONSIVE
 ═══════════════════════════════ */
@@ -767,6 +774,7 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
     <li><a href="#contest">Contest</a></li>
     <li><a href="#content">Gallery</a></li>
     <li><a href="#chithi">Chithi.me</a></li>
+    <li><a href="#aesthetic-tab" style="color:var(--green)">✨ Aesthetic Tab</a></li>
     <li><a href="#products">Merch</a></li><li><a href="#event">Events</a></li>
     <li><a href="#fans">Top Fans</a></li>
     <li><a href="#birthday">Birthday</a></li>
@@ -788,6 +796,7 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
   <a href="#birthday" onclick="toggleMenu()">🎂 Birthday Mate</a>
   <a href="#content" onclick="toggleMenu()">Content</a>
   <a href="#chithi" onclick="toggleMenu()">Chithi.me</a>
+  <a href="#aesthetic-tab" onclick="toggleMenu()" style="color:var(--green)">✨ Aesthetic Tab</a>
   <a href="#products" onclick="toggleMenu()">Merch</a>
   <a href="#event" onclick="toggleMenu()">Events</a>
   <a href="#fans" onclick="toggleMenu()">Top Fans</a>
@@ -851,6 +860,90 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
     <a href="https://www.facebook.com/AestheticSAU" target="_blank" style="display:inline-flex;align-items:center;gap:10px;margin-top:28px;background:var(--green);color:#000;padding:14px 32px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none">
       📘 Facebook এ আপডেট দেখুন
     </a>
+  </div>
+</div>
+</section>
+
+<!-- AESTHETIC TAB — ANONYMOUS CHAT -->
+<section id="aesthetic-tab" class="sec-dark">
+<div class="wrap">
+  <div class="sec-head rv">
+    <div>
+      <div class="sec-ey">✨ New Feature</div>
+      <h2 class="sec-ti">Aesthetic <span style="color:var(--green)">Tab</span></h2>
+    </div>
+    <span class="sec-no" style="display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);color:var(--green);padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">
+      <span style="width:7px;height:7px;background:var(--green);border-radius:50%;animation:lp 1.6s infinite;display:inline-block"></span>
+      পরীক্ষামূলকভাবে উন্মুক্ত
+    </span>
+  </div>
+
+  <!-- Main Card -->
+  <div class="rv" style="background:linear-gradient(140deg,#060f1a,#0a1a2e,#06100f);border:1px solid rgba(76,175,80,.25);border-radius:20px;overflow:hidden">
+
+    <!-- Top Banner -->
+    <div style="background:linear-gradient(90deg,rgba(76,175,80,.12),rgba(99,102,241,.1));border-bottom:1px solid rgba(76,175,80,.15);padding:14px 28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green)">✨ আপনার Anonymous Chat Link তৈরি করুন</span>
+      <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:auto">anon-box2026.web.app</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+
+      <!-- Left: Caption / Description -->
+      <div style="padding:48px 44px;border-right:1px solid rgba(76,175,80,.1)">
+        <div style="font-size:40px;margin-bottom:18px">💬</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;line-height:1.2;margin-bottom:16px">
+          আপনার নিজস্ব<br/>
+          <span style="color:var(--green)">Anonymous Chat Link</span>
+        </h3>
+        <p style="font-size:14px;color:rgba(255,255,255,.55);line-height:1.9;margin-bottom:8px;font-family:'Noto Serif Bengali',serif">
+          সম্পূর্ণ বিনামূল্যে — কোনো subscription নেই, কোনো hidden charge নেই। একটি account তৈরি করুন এবং আপনার ব্যক্তিগত chat link পান।
+        </p>
+        <p style="font-size:14px;color:rgba(255,255,255,.55);line-height:1.9;font-family:'Noto Serif Bengali',serif">
+          আমাদের বিশ্ববিদ্যালয়ের এই platform-এ আপনি নিজের একটি chat page তৈরি করতে পারবেন — link যেকাউকে শেয়ার করুন, তারা আপনাকে message পাঠাবেন এবং আপনি reply করবেন।
+        </p>
+      </div>
+
+      <!-- Right: Use Cases + CTA -->
+      <div style="padding:48px 44px;display:flex;flex-direction:column;gap:18px">
+
+        <!-- Use Cases -->
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:14px">কখন ব্যবহার করবেন? 👇</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(76,175,80,.05);border:1px solid rgba(76,175,80,.12);border-radius:10px;padding:12px 14px">
+              <span style="font-size:18px;flex-shrink:0">🎓</span>
+              <span style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.7;font-family:'Noto Serif Bengali',serif">Junior-রা ভর্তি সংক্রান্ত তথ্য জানতে চান কিন্তু সরাসরি যোগাযোগ করতে সংকোচ বোধ করছেন? <strong style="color:var(--white)">Link শেয়ার করুন</strong></span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(76,175,80,.05);border:1px solid rgba(76,175,80,.12);border-radius:10px;padding:12px 14px">
+              <span style="font-size:18px;flex-shrink:0">📚</span>
+              <span style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.7;font-family:'Noto Serif Bengali',serif">Classmate notes চাইতে চান কিন্তু সরাসরি inbox করতে দ্বিধা হচ্ছে? <strong style="color:var(--white)">Link শেয়ার করুন</strong></span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(76,175,80,.05);border:1px solid rgba(76,175,80,.12);border-radius:10px;padding:12px 14px">
+              <span style="font-size:18px;flex-shrink:0">🙃</span>
+              <span style="font-size:13px;color:rgba(255,255,255,.65);line-height:1.7;font-family:'Noto Serif Bengali',serif">Anonymous message পেতে আগ্রহী? <strong style="color:var(--white)">Link শেয়ার করুন এবং messages উপভোগ করুন</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Safety Features -->
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px">গুরুত্বপূর্ণ তথ্য 👇</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:13px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:8px"><span>🤬</span><span>অনুপযুক্ত ভাষা ব্যবহার করা হলে <code style="background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px;font-size:12px">****</code> — system স্বয়ংক্রিয়ভাবে filter করবে</span></div>
+            <div style="font-size:13px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:8px"><span>⏱️</span><span>অবাঞ্ছিত ব্যক্তিকে নির্দিষ্ট সময়ের জন্য restrict করতে পারবেন</span></div>
+            <div style="font-size:13px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:8px"><span>📢</span><span>নির্দিষ্ট message report করতে পারবেন — screenshot ছাড়াই</span></div>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <a href="https://anon-box2026.web.app" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;gap:12px;background:var(--green);color:#000;padding:16px 32px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:all .25s;box-shadow:0 8px 28px rgba(76,175,80,.35);margin-top:4px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Account তৈরি করুন, Link নিন, শেয়ার করুন
+        </a>
+        <p style="font-size:11px;color:rgba(255,255,255,.25);text-align:center;margin-top:-8px;font-style:italic">আপনার সুবিধার্থে প্রস্তুত। 🫡</p>
+      </div>
+    </div>
   </div>
 </div>
 </section>
