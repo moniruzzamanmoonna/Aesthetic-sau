@@ -1919,7 +1919,7 @@ function renderBdayForm() {
       + '<div style="flex:1;min-width:180px">'
       + '<div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(167,139,250,.7);margin-bottom:4px">Your Birthday is Registered</div>'
       + '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:800;color:#fff">' + saved.name + '</div>'
-      + '<div style="font-size:13px;color:rgba(167,139,250,.8);margin-top:3px">📅 ' + formatBdayDisplay(saved.birthday) + '</div>'
+      + '<div style="font-size:13px;color:rgba(167,139,250,.8);margin-top:3px">📅 ' + formatBdayDisplay(saved.birthday) + (saved.district ? ' &nbsp;·&nbsp; 📍 ' + saved.district : '') + '</div>'
       + '</div>'
       + '<div style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:8px 16px;font-size:11px;color:rgba(167,139,250,.6);font-weight:600;letter-spacing:1px;text-transform:uppercase;white-space:nowrap">🔒 Saved</div>'
       + '</div>'
@@ -1945,7 +1945,12 @@ function renderBdayForm() {
       + '<option>Agricultural Engineering & Technology</option>'
       + '<option>Biotechnology & Genetic Engineering</option>'
       + '</select></div>'
+      + '<div class="bday-field"><label>District</label>'
+      + '<select id="bd-district"><option value="">Select District</option>'
+      + ['Bagerhat','Bandarban','Barguna','Barishal','Bhola','Bogura','Brahmanbaria','Chandpur','Chapai Nawabganj','Chattogram','Chuadanga','Cox\'s Bazar','Cumilla','Dhaka','Dinajpur','Faridpur','Feni','Gaibandha','Gazipur','Gopalganj','Habiganj','Jamalpur','Jashore','Jhalokati','Jhenaidah','Joypurhat','Khagrachhari','Khulna','Kishoreganj','Kurigram','Kushtia','Lakshmipur','Lalmonirhat','Madaripur','Magura','Manikganj','Meherpur','Moulvibazar','Munshiganj','Mymensingh','Naogaon','Narail','Narayanganj','Narsingdi','Natore','Netrokona','Nilphamari','Noakhali','Pabna','Panchagarh','Patuakhali','Pirojpur','Rajbari','Rajshahi','Rangamati','Rangpur','Satkhira','Shariatpur','Sherpur','Sirajganj','Sunamganj','Sylhet','Tangail','Thakurgaon'].map(function(d){ return '<option>'+d+'</option>'; }).join('')
+      + '</select></div>'
       + '<div class="bday-field"><label>Date of Birth</label><input type="date" id="bd-date"/></div>'
+      + '<div class="bday-field"><label>Gmail <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.5px">(optional — get notified when a match is found)</span></label><input type="email" id="bd-gmail" placeholder="yourname@gmail.com"/></div>'
       + '</div>'
       + '<button class="bday-submit" id="bd-btn" onclick="findBdayMate()" style="margin-top:4px">🎂 Find My Birthday Mate!</button>';
   }
@@ -2032,11 +2037,13 @@ function findBdayMate() {
   var name    = document.getElementById('bd-name') ? document.getElementById('bd-name').value.trim() : '';
   var faculty = document.getElementById('bd-faculty') ? document.getElementById('bd-faculty').value.trim() : '';
   var dateVal = document.getElementById('bd-date') ? document.getElementById('bd-date').value.trim() : '';
+  var district= document.getElementById('bd-district') ? document.getElementById('bd-district').value.trim() : '';
+  var gmail   = document.getElementById('bd-gmail') ? document.getElementById('bd-gmail').value.trim() : '';
 
-  if (!name || !faculty || !dateVal) {
+  if (!name || !faculty || !dateVal || !district) {
     showBdayPopup('<div class="bmp-icon">⚠️</div>'
       + '<div class="bmp-title">Fill in all fields!</div>'
-      + '<div class="bmp-sub">Please enter your name, faculty, and date of birth.</div>');
+      + '<div class="bmp-sub">Please enter your name, faculty, district, and date of birth.</div>');
     return;
   }
 
@@ -2049,7 +2056,8 @@ function findBdayMate() {
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
-  var entry = { name: name, faculty: faculty, birthday: dateVal, timestamp: new Date().toISOString() };
+  var entry = { name: name, faculty: faculty, district: district, birthday: dateVal, timestamp: new Date().toISOString() };
+  if (gmail) entry.gmail = gmail;
 
   fetch(FIREBASE_URL + '/birthday-mates.json', {
     method: 'POST',
@@ -2058,7 +2066,7 @@ function findBdayMate() {
   })
   .then(function(r){ return r.json(); })
   .then(function(saved) {
-    try { localStorage.setItem('sau_bday_entry', JSON.stringify({ name: name, birthday: dateVal, key: saved.name })); } catch(e){}
+    try { localStorage.setItem('sau_bday_entry', JSON.stringify({ name: name, birthday: dateVal, district: district, key: saved.name })); } catch(e){}
     // Re-render form to show locked state
     renderBdayForm();
     return fetch(FIREBASE_URL + '/birthday-mates.json');
@@ -2135,7 +2143,7 @@ function showMatchResults(allData, myName, myMD, myYear) {
       }
       return '<div class="bmp-match-card">'
         + '<div class="bmp-match-name">🎂 ' + m.name + '</div>'
-        + '<div class="bmp-match-fac">' + m.faculty + '</div>'
+        + '<div class="bmp-match-fac">' + m.faculty + (m.district ? ' · 📍 ' + m.district : '') + '</div>'
         + (ageLine ? '<div class="bmp-match-age">' + ageLine + '</div>' : '')
         + '</div>';
     }).join('');
