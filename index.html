@@ -27,8 +27,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;align-items:cen
 .nav-join:hover{border-color:var(--green);color:var(--green)}
 .nav-participate{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1.5px solid var(--green);color:var(--green);padding:7px 18px;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none;transition:all .2s;letter-spacing:1px;text-transform:uppercase}
 .nav-participate:hover{background:var(--green);color:#000}
-.nav-fb{display:inline-flex;align-items:center;gap:7px;background:var(--green);color:#000;padding:8px 20px;border-radius:7px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s}
+.nav-fb{display:inline-flex;align-items:center;gap:7px;background:var(--green);color:#000;padding:8px 20px;border-radius:7px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;flex-shrink:0}
 .nav-fb:hover{background:var(--gl);transform:translateY(-1px)}
+.nav-fb,.nav-fb *{color:#000 !important}
 
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 72px;position:relative;overflow:hidden}
 .hero-glow{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(76,175,80,.09) 0%,transparent 72%);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);animation:gp 6s ease-in-out infinite;pointer-events:none}
@@ -743,10 +744,36 @@ html[data-mode] section,html[data-mode] .card,html[data-mode] [class*="card"]{tr
 .theme-swatch-sunset{background:linear-gradient(135deg,#ff7849,#c2410c)}
 .theme-mode-toggle{all:unset;cursor:pointer;width:34px;height:28px;border-radius:999px;display:grid;place-items:center;background:color-mix(in srgb,var(--theme-surface) 80%,transparent);backdrop-filter:blur(10px);border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;transition:transform .2s}
 .theme-mode-toggle:hover{transform:scale(1.08)}
-.theme-controls{display:inline-flex;align-items:center;margin-left:10px;vertical-align:middle}
-@media(max-width:760px){.theme-controls{display:none}.theme-controls-mobile{display:flex!important;justify-content:center;padding:14px;gap:8px}}
+.theme-controls{display:inline-flex;align-items:center;margin-left:10px;vertical-align:middle;flex-shrink:0}
+@media(max-width:760px){.theme-controls{margin-left:4px;margin-right:4px}.theme-bar{padding:3px;gap:4px}.theme-bar button{width:22px;height:22px}.theme-mode-toggle{width:30px;height:24px;font-size:12px}.theme-controls-mobile{display:none!important}}
 .theme-controls-mobile{display:none}
+/* Hide public vote counts & full voting section — admin-only */
+.vg-count{display:none!important}
+#vote-total-count{display:none!important}
+#voting{display:none!important}
+a[href="#voting"]{display:none!important}
 @media (prefers-reduced-motion:reduce){html[data-mode],html[data-mode] body,*{transition:none!important}}
+
+/* === Global theme propagation: make every section/card/nav respect theme === */
+html[data-mode]{--accent:var(--theme-accent);--accent-2:var(--theme-accent-2);--grad-accent:linear-gradient(135deg,var(--theme-accent) 0%,var(--theme-accent-2) 100%)}
+html[data-mode] body{background:var(--theme-bg)!important}
+html[data-mode] body::before{opacity:.025}
+html[data-mode] nav{background:color-mix(in srgb,var(--theme-bg) 70%,transparent)!important;border-bottom:1px solid var(--theme-border)!important}
+html[data-mode] nav.scrolled{background:color-mix(in srgb,var(--theme-bg) 92%,transparent)!important}
+html[data-mode] section,html[data-mode] footer{background:var(--theme-bg)!important;color:var(--theme-text)!important}
+html[data-mode] footer{border-top:1px solid var(--theme-border)!important;background:linear-gradient(180deg,var(--theme-bg),color-mix(in srgb,var(--theme-bg) 80%,#000))!important}
+html[data-mode] .how-card,html[data-mode] .gc-card,html[data-mode] .fan-card,html[data-mode] .tm-card,html[data-mode] .ev-card,html[data-mode] .chithi-box,html[data-mode] .contest-hero,html[data-mode] .deadline-banner,html[data-mode] .rule-item,html[data-mode] .contest-pill,html[data-mode] .cd-box,html[data-mode] .adm-card,html[data-mode] .stat-card{background:var(--theme-surface)!important;border-color:var(--theme-border)!important;color:var(--theme-text)!important}
+html[data-mode] .h-title,html[data-mode] .sec-ti,html[data-mode] .stat-num{background:linear-gradient(180deg,var(--theme-text),color-mix(in srgb,var(--theme-text) 60%,transparent))!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+html[data-mode] .h-title span,html[data-mode] .stat-num span{background:var(--grad-accent)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+html[data-mode] .btn-fill,html[data-mode] .participate-big-btn,html[data-mode] .ch-btn,html[data-mode] .nav-fb{background:var(--grad-accent)!important;color:#03200a!important}
+html[data-mode="light"] .btn-fill,html[data-mode="light"] .participate-big-btn,html[data-mode="light"] .ch-btn,html[data-mode="light"] .nav-fb{color:#fff!important}
+html[data-mode] .sec-ey::before,html[data-mode] #scroll-progress{background:var(--theme-accent)!important}
+html[data-mode] .nav-links a{color:var(--theme-text)!important}
+html[data-mode] .nav-links a::after{background:var(--theme-accent)!important}
+html[data-mode] .sec-ey{color:var(--theme-accent)!important}
+html[data-mode] .text-gray-400,html[data-mode] .text-gray-500,html[data-mode] .text-gray-300,html[data-mode] .text-gray-600{color:var(--theme-muted)!important}
+html[data-mode] input,html[data-mode] textarea,html[data-mode] select{background:var(--theme-surface)!important;color:var(--theme-text)!important;border-color:var(--theme-border)!important}
+html[data-mode="light"] body::before{display:none}
 </style>
 
 </head>
@@ -789,6 +816,7 @@ html[data-mode] section,html[data-mode] .card,html[data-mode] [class*="card"]{tr
       <div class="adm-stat"><div class="adm-stat-num" id="stat-total">—</div><div class="adm-stat-lbl">মোট এন্ট্রি</div></div>
       <div class="adm-stat"><div class="adm-stat-num" id="stat-today">—</div><div class="adm-stat-lbl">আজকের এন্ট্রি</div></div>
       <div class="adm-stat"><div class="adm-stat-num" id="stat-matched">—</div><div class="adm-stat-lbl">Match আছে এমন</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="stat-photo-likes">—</div><div class="adm-stat-lbl">📷 মোট Photo Likes</div></div>
     </div>
     <input type="text" class="adm-search" id="adm-search" placeholder="🔍 নাম বা Faculty দিয়ে খুঁজুন..." oninput="filterTable()"/>
     <div class="adm-table-wrap">
@@ -971,10 +999,10 @@ html[data-mode] section,html[data-mode] .card,html[data-mode] [class*="card"]{tr
     <li><a href="#voting" style="color:var(--green);font-weight:700">❤️ Vote</a></li>
     <li><a href="#content">Gallery</a></li>
     <li><a href="#chithi">Chithi.me</a></li>
+    <li><a href="#birthday" style="color:#a78bfa;font-weight:700">🎂 Birthday</a></li>
     <li><a href="#aesthetic-tab" style="color:var(--green)">✨ Aesthetic Tab</a></li>
     <li><a href="#products">Merch</a></li><li><a href="#event">Events</a></li>
     <li><a href="#fans">Top Fans</a></li>
-    <li><a href="#birthday">Birthday</a></li>
     <li><a href="#team">Team</a></li>
     <li><a href="https://forms.gle/AdqUi57p5uPKYNJS8" class="nav-participate" target="_blank">&#128247; Participate</a></li>
     <li><a href="https://forms.gle/jNaQTFBY7Z7PT1FM7" class="nav-join" target="_blank">&#10024; Join as Moderator</a></li>
@@ -991,10 +1019,10 @@ html[data-mode] section,html[data-mode] .card,html[data-mode] [class*="card"]{tr
 <div class="nav-mobile-menu" id="mob-menu">
   <a href="#contest" onclick="toggleMenu()">&#128247; Contest</a>
   <a href="#voting" onclick="toggleMenu()" style="color:var(--green);font-weight:700">❤️ Vote করো</a>
-  <a href="#birthday" onclick="toggleMenu()">🎂 Birthday Mate</a>
+  <a href="#birthday" onclick="toggleMenu()" style="color:#a78bfa;font-weight:700">🎂 Birthday Mate</a>
+  <a href="#aesthetic-tab" onclick="toggleMenu()" style="color:var(--green)">✨ Aesthetic Tab</a>
   <a href="#content" onclick="toggleMenu()">Content</a>
   <a href="#chithi" onclick="toggleMenu()">Chithi.me</a>
-  <a href="#aesthetic-tab" onclick="toggleMenu()" style="color:var(--green)">✨ Aesthetic Tab</a>
   <a href="#products" onclick="toggleMenu()">Merch</a>
   <a href="#event" onclick="toggleMenu()">Events</a>
   <a href="#fans" onclick="toggleMenu()">Top Fans</a>
@@ -1029,6 +1057,21 @@ html[data-mode] section,html[data-mode] .card,html[data-mode] [class*="card"]{tr
     <a href="#contest" class="btn-ghost">Explore &#8595;</a>
   </div>
 </section>
+
+<!-- TODAY'S BIRTHDAY WISH -->
+<section id="today-bday" style="background:var(--black);padding:48px 0;border-top:1px solid var(--border);display:none">
+  <div class="wrap">
+    <div id="today-bday-card" style="background:linear-gradient(140deg,#1a0f2e,#13131f,#1a0f2e);border:1px solid rgba(167,139,250,.3);border-radius:20px;padding:36px 32px;text-align:center;position:relative;overflow:hidden">
+      <div style="font-size:48px;margin-bottom:10px">🎉🎂🎈</div>
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#a78bfa;font-weight:700;margin-bottom:8px">Today's Birthday</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:900;margin-bottom:10px;color:#fff">আজ <span id="tb-count" style="color:#a78bfa">0</span> জন SAUian-এর জন্মদিন!</h3>
+      <p style="font-size:13px;color:var(--muted);max-width:480px;margin:0 auto 22px;line-height:1.7;font-family:'Noto Serif Bengali',serif">Facebook follow করার পর তাদের একটু শুভেচ্ছা জানিয়ে দিন — দিনটা আরও সুন্দর হয়ে উঠুক ✨</p>
+      <div id="tb-list" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px"></div>
+      <a href="https://www.facebook.com/share/1CMzNM8vvG/" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 28px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.5px">💌 Facebook-এ শুভেচ্ছা জানাও</a>
+    </div>
+  </div>
+</section>
+
 
 <!-- PHOTO CONTEST -->
 <section id="contest" class="sec-dark">
@@ -2478,6 +2521,21 @@ function loadAdminData() {
       renderAdminTable(adminData);
       updateStats(adminData);
     });
+  // Photo likes total (admin-only display)
+  fetch(FIREBASE_URL + '/photo-votes.json')
+    .then(function(r){ return r.json(); })
+    .then(function(votes){
+      var total = 0;
+      if (votes && typeof votes === 'object') {
+        Object.values(votes).forEach(function(v){ total += (parseInt(v,10) || 0); });
+      }
+      var el = document.getElementById('stat-photo-likes');
+      if (el) el.textContent = total;
+    })
+    .catch(function(){
+      var el = document.getElementById('stat-photo-likes');
+      if (el) el.textContent = '0';
+    });
 }
 
 function updateStats(data) {
@@ -2758,8 +2816,56 @@ function toggleMenu() {
 })();
 </script>
 
+<script>
+// ── TODAY'S BIRTHDAY LOADER ──
+(function(){
+  function loadTodayBdays(){
+    var FB = (typeof FIREBASE_URL !== 'undefined') ? FIREBASE_URL : 'https://aesthetic-sau-default-rtdb.firebaseio.com';
+    fetch(FB + '/birthday-mates.json').then(function(r){return r.json()}).then(function(data){
+      if(!data) return;
+      var now = new Date();
+      var todayMD = String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+      var seen = {};
+      var today = [];
+      Object.keys(data).forEach(function(k){
+        var p = data[k];
+        if(!p || !p.birthday || !p.name) return;
+        var pp = p.birthday.split('-');
+        if(pp.length < 3) return;
+        var md = String(parseInt(pp[1],10)).padStart(2,'0') + '-' + String(parseInt(pp[2],10)).padStart(2,'0');
+        if(md !== todayMD) return;
+        var key = p.name.trim().toLowerCase();
+        if(seen[key]) return;
+        seen[key] = 1;
+        today.push(p);
+      });
+      if(today.length === 0) return;
+      var sec = document.getElementById('today-bday');
+      var list = document.getElementById('tb-list');
+      var cnt = document.getElementById('tb-count');
+      if(!sec || !list || !cnt) return;
+      cnt.textContent = today.length;
+      list.innerHTML = today.slice(0,12).map(function(p){
+        var sub = [p.faculty, p.district].filter(Boolean).join(' • ');
+        return '<div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:10px 16px;min-width:140px">'
+          + '<div style="font-weight:700;font-size:14px;color:#fff">🎂 ' + escapeHTML(p.name) + '</div>'
+          + (sub ? '<div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:3px">' + escapeHTML(sub) + '</div>' : '')
+          + '</div>';
+      }).join('');
+      if(today.length > 12){
+        list.innerHTML += '<div style="background:rgba(255,255,255,.05);border:1px dashed rgba(167,139,250,.3);border-radius:12px;padding:10px 16px;font-size:12px;color:#a78bfa;display:flex;align-items:center">+ আরও ' + (today.length-12) + ' জন</div>';
+      }
+      sec.style.display = 'block';
+    }).catch(function(){});
+  }
+  function escapeHTML(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadTodayBdays);else loadTodayBdays();
+})();
+</script>
+
 </body>
-</html
+</html>
+
 
 <!-- PRE-ORDER MODAL -->
 <div id="preorder-modal" style="display:none;position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px">
