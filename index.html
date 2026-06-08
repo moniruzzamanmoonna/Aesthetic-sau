@@ -806,6 +806,7 @@ html[data-mode="light"] body::before{display:none}
   <!-- TABS -->
   <div class="adm-tabs">
     <button class="adm-tab active" id="tab-data" onclick="switchTab('data')">🎂 Birthday Data</button>
+    <button class="adm-tab" id="tab-likes" onclick="switchTab('likes')">📷 Photo Likes</button>
     <button class="adm-tab" id="tab-live" onclick="switchTab('live')">⚡ Live Editor</button>
     <button class="adm-tab" id="tab-site" onclick="switchTab('site')">✏️ Website Editor</button>
   </div>
@@ -826,6 +827,41 @@ html[data-mode="light"] body::before{display:none}
         </thead>
         <tbody id="adm-tbody">
           <tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: Photo Likes -->
+  <div id="adm-tab-likes" class="adm-body" style="display:none">
+    <div class="adm-stats" style="margin-bottom:20px">
+      <div class="adm-stat"><div class="adm-stat-num" id="pl-total">—</div><div class="adm-stat-lbl">মোট Likes</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="pl-photos">—</div><div class="adm-stat-lbl">Liked ছবির সংখ্যা</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="pl-top-count">—</div><div class="adm-stat-lbl">সর্বোচ্চ Like (১টি)</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="pl-zero">—</div><div class="adm-stat-lbl">Like নেই এমন</div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="pl-search" placeholder="🔍 Photographer নাম..." oninput="renderLikeTable()" style="background:#1c1c1c;border:1px solid rgba(167,139,250,.25);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;outline:none;flex:1;min-width:180px;"/>
+      <select id="pl-sort" onchange="renderLikeTable()" style="background:#1c1c1c;border:1px solid rgba(167,139,250,.25);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;outline:none;cursor:pointer;">
+        <option value="desc">সবচেয়ে বেশি Like আগে</option>
+        <option value="asc">সবচেয়ে কম Like আগে</option>
+        <option value="name">নাম অনুযায়ী</option>
+      </select>
+      <button onclick="loadPhotoLikes()" style="background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:#a78bfa;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Refresh</button>
+    </div>
+    <div class="adm-table-wrap">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th style="width:48px">#</th>
+            <th style="width:72px">ছবি</th>
+            <th>Photographer</th>
+            <th style="width:100px;text-align:center">❤️ Likes</th>
+            <th style="width:120px;text-align:center">Bar</th>
+          </tr>
+        </thead>
+        <tbody id="pl-tbody">
+          <tr><td colspan="5" class="adm-empty">লোড হচ্ছে...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1108,11 +1144,17 @@ html[data-mode="light"] body::before{display:none}
       </div>
     </div>
 
-    <!-- Full Fixture Toggle -->
-    <div style="text-align:center;margin-top:16px;">
+    <!-- Buttons Row -->
+    <div style="text-align:center;margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button id="wc-fixture-btn" onclick="wcToggleFixture()" style="background:transparent;border:1.5px solid rgba(76,175,80,.4);color:#4caf50;padding:10px 28px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.8px;transition:all .25s;display:inline-flex;align-items:center;gap:8px;">
         <span id="wc-fixture-btn-icon">▼</span> Full Fixture দেখো
       </button>
+      <button id="wc-notif-btn" onclick="wcRequestNotif()" style="background:transparent;border:1.5px solid rgba(255,193,7,.4);color:#ffc107;padding:10px 22px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.8px;transition:all .25s;display:inline-flex;align-items:center;gap:8px;">
+        🔔 ম্যাচ Notification চালু করো
+      </button>
+    </div>
+    <div id="wc-notif-toast" style="display:none;margin-top:12px;text-align:center;">
+      <span id="wc-notif-toast-msg" style="display:inline-block;background:rgba(0,0,0,.6);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:8px 20px;border-radius:20px;font-size:13px;"></span>
     </div>
 
     <!-- Full Fixture Panel -->
@@ -1375,6 +1417,129 @@ html[data-mode="light"] body::before{display:none}
     if (!html) html = '<div style="color:#555;font-size:14px;text-align:center;padding:20px;">কোনো ম্যাচ নেই</div>';
     container.innerHTML = html;
   }
+
+  // ── NOTIFICATION SYSTEM ──
+  var WC_NOTIF_KEY = 'wc_notif_enabled';
+  var WC_NOTIF_SENT_KEY = 'wc_notif_sent'; // comma-sep list of sent match keys
+  var wcNotifInterval = null;
+
+  function wcShowToast(msg, duration) {
+    var toast = document.getElementById('wc-notif-toast');
+    var toastMsg = document.getElementById('wc-notif-toast-msg');
+    toastMsg.textContent = msg;
+    toast.style.display = 'block';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function(){ toast.style.display = 'none'; }, duration || 4000);
+  }
+
+  function wcUpdateNotifBtn(enabled) {
+    var btn = document.getElementById('wc-notif-btn');
+    if (!btn) return;
+    if (enabled) {
+      btn.textContent = '🔕 Notification বন্ধ করো';
+      btn.style.borderColor = 'rgba(229,57,53,.5)';
+      btn.style.color = '#ef5350';
+    } else {
+      btn.innerHTML = '🔔 ম্যাচ Notification চালু করো';
+      btn.style.borderColor = 'rgba(255,193,7,.4)';
+      btn.style.color = '#ffc107';
+    }
+  }
+
+  function wcSendNotif(title, body, tag) {
+    if (Notification.permission !== 'granted') return;
+    var sent = (localStorage.getItem(WC_NOTIF_SENT_KEY) || '').split(',');
+    if (sent.indexOf(tag) !== -1) return; // already sent
+    new Notification(title, {
+      body: body,
+      icon: 'https://i.imgur.com/aRxuSTw.jpeg',
+      badge: 'https://i.imgur.com/aRxuSTw.jpeg',
+      tag: tag,
+      requireInteraction: false
+    });
+    sent.push(tag);
+    localStorage.setItem(WC_NOTIF_SENT_KEY, sent.filter(Boolean).join(','));
+  }
+
+  function wcCheckUpcoming() {
+    if (Notification.permission !== 'granted') return;
+    if (localStorage.getItem(WC_NOTIF_KEY) !== '1') return;
+    var now = new Date();
+    FIXTURES.forEach(function(f) {
+      var matchTime = parseBST(f[0], f[1]);
+      var msUntil = matchTime - now;
+      var alertMs = 15 * 60 * 1000; // 15 min
+      var tag = 'wc26-' + f[0] + '-' + f[1] + '-' + f[2];
+      // Within 15min window: 15min-0 before start
+      if (msUntil > 0 && msUntil <= alertMs) {
+        var minsLeft = Math.ceil(msUntil / 60000);
+        wcSendNotif(
+          '⚽ ম্যাচ শুরু হতে ' + minsLeft + ' মিনিট!',
+          f[2] + ' vs ' + f[3] + ' — Group ' + f[4] + ' · ' + formatTime12(f[1]),
+          tag
+        );
+      }
+    });
+  }
+
+  window.wcRequestNotif = function() {
+    if (!('Notification' in window)) {
+      wcShowToast('❌ এই browser-এ notification support নেই।', 4000);
+      return;
+    }
+    var enabled = localStorage.getItem(WC_NOTIF_KEY) === '1';
+    if (enabled) {
+      // Turn off
+      localStorage.setItem(WC_NOTIF_KEY, '0');
+      clearInterval(wcNotifInterval);
+      wcUpdateNotifBtn(false);
+      wcShowToast('🔕 Notification বন্ধ করা হয়েছে।', 3500);
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      localStorage.setItem(WC_NOTIF_KEY, '1');
+      wcUpdateNotifBtn(true);
+      wcStartNotifLoop();
+      wcShowToast('✅ Notification চালু! ম্যাচের ১৫ মিনিট আগে alert পাবে।', 5000);
+    } else if (Notification.permission === 'denied') {
+      wcShowToast('❌ Browser-এ notification block করা আছে। Browser settings থেকে allow করো।', 6000);
+    } else {
+      Notification.requestPermission().then(function(perm) {
+        if (perm === 'granted') {
+          localStorage.setItem(WC_NOTIF_KEY, '1');
+          wcUpdateNotifBtn(true);
+          wcStartNotifLoop();
+          wcShowToast('✅ Notification চালু! ম্যাচের ১৫ মিনিট আগে alert পাবে।', 5000);
+          // Send a test notification
+          setTimeout(function(){
+            new Notification('🏆 World Cup Notification চালু!', {
+              body: 'ম্যাচের ১৫ মিনিট আগে তোমাকে মনে করিয়ে দেওয়া হবে।',
+              icon: 'https://i.imgur.com/aRxuSTw.jpeg',
+              tag: 'wc26-test'
+            });
+          }, 500);
+        } else {
+          wcShowToast('❌ Notification allow করা হয়নি।', 4000);
+        }
+      });
+    }
+  };
+
+  function wcStartNotifLoop() {
+    clearInterval(wcNotifInterval);
+    wcCheckUpcoming();
+    wcNotifInterval = setInterval(wcCheckUpcoming, 60000); // check every minute
+  }
+
+  // On load — restore state
+  (function wcInitNotif() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted' && localStorage.getItem(WC_NOTIF_KEY) === '1') {
+      wcUpdateNotifBtn(true);
+      wcStartNotifLoop();
+    }
+  })();
+  // ── END NOTIFICATION ──
 
   updateCountdown();
   renderMatches();
@@ -2531,7 +2696,7 @@ function showMatchResults(allData, myName, myMD, myYear) {
 
 // ── LIVE EDITOR ──
 function switchTab(tab) {
-  ['data','live','site'].forEach(function(t) {
+  ['data','likes','live','site'].forEach(function(t) {
     var tabEl = document.getElementById('adm-tab-'+t);
     var btnEl = document.getElementById('tab-'+t);
     if (tabEl) tabEl.style.display = tab === t ? 'block' : 'none';
@@ -2539,7 +2704,110 @@ function switchTab(tab) {
   });
   if (tab === 'site') loadSiteEditorValues();
   if (tab === 'live') loadLiveEditorValues();
+  if (tab === 'likes') loadPhotoLikes();
 }
+
+// ── PHOTO LIKES ADMIN ──
+var PL_DATA = {}; // { firebaseKey: count }
+
+window.loadPhotoLikes = function() {
+  document.getElementById('pl-tbody').innerHTML = '<tr><td colspan="5" class="adm-empty">লোড হচ্ছে...</td></tr>';
+  fetch(FIREBASE_URL + '/photo-votes.json')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      PL_DATA = data && typeof data === 'object' ? data : {};
+      renderLikeStats();
+      renderLikeTable();
+    })
+    .catch(function(){
+      PL_DATA = {};
+      document.getElementById('pl-tbody').innerHTML = '<tr><td colspan="5" class="adm-empty">লোড করতে সমস্যা হয়েছে।</td></tr>';
+    });
+};
+
+function getPhotographerName(photoId) {
+  // ID format: "PhotoName_-_PhotographerName_cloudinaryId"
+  var parts = photoId.split('_-_');
+  if (parts.length >= 2) {
+    // Last part has cloudinary suffix, remove it
+    var nameWithSuffix = parts[parts.length - 1];
+    var nameParts = nameWithSuffix.split('_');
+    // Remove last token (cloudinary id like bzsflg)
+    nameParts.pop();
+    return nameParts.join(' ').replace(/_/g,' ').trim() || photoId;
+  }
+  return photoId;
+}
+
+function renderLikeStats() {
+  var total = 0, likedPhotos = 0, maxCount = 0, zeroCount = 0;
+  var allKeys = PHOTOS.map(function(p){ return safeFirebaseKey(p.id); });
+  allKeys.forEach(function(k){
+    var c = parseInt(PL_DATA[k] || 0, 10);
+    total += c;
+    if (c > 0) likedPhotos++;
+    else zeroCount++;
+    if (c > maxCount) maxCount = c;
+  });
+  document.getElementById('pl-total').textContent = total;
+  document.getElementById('pl-photos').textContent = likedPhotos;
+  document.getElementById('pl-top-count').textContent = maxCount;
+  document.getElementById('pl-zero').textContent = zeroCount;
+  // Also update main stat
+  var el = document.getElementById('stat-photo-likes');
+  if (el) el.textContent = total;
+}
+
+window.renderLikeTable = function() {
+  var search = (document.getElementById('pl-search') || {}).value || '';
+  var sort = (document.getElementById('pl-sort') || {}).value || 'desc';
+  var maxCount = 0;
+  Object.values(PL_DATA).forEach(function(v){ if((v||0) > maxCount) maxCount = v; });
+
+  var rows = PHOTOS.map(function(p) {
+    var key = safeFirebaseKey(p.id);
+    var count = parseInt(PL_DATA[key] || 0, 10);
+    var name = getPhotographerName(p.id);
+    return { key: key, count: count, name: name, url: p.url, id: p.id };
+  });
+
+  // Filter
+  if (search) {
+    var q = search.toLowerCase();
+    rows = rows.filter(function(r){ return r.name.toLowerCase().indexOf(q) !== -1; });
+  }
+
+  // Sort
+  rows.sort(function(a, b) {
+    if (sort === 'desc') return b.count - a.count;
+    if (sort === 'asc') return a.count - b.count;
+    return a.name.localeCompare(b.name);
+  });
+
+  if (rows.length === 0) {
+    document.getElementById('pl-tbody').innerHTML = '<tr><td colspan="5" class="adm-empty">কোনো ফলাফল নেই</td></tr>';
+    return;
+  }
+
+  var html = rows.map(function(r, i) {
+    var pct = maxCount > 0 ? Math.round((r.count / maxCount) * 100) : 0;
+    var barColor = r.count === maxCount && maxCount > 0 ? '#ffd700' : r.count === 0 ? '#333' : '#a78bfa';
+    var rankBadge = i === 0 && r.count > 0 ? '🥇 ' : i === 1 && r.count > 0 ? '🥈 ' : i === 2 && r.count > 0 ? '🥉 ' : (i+1)+'.';
+    return '<tr>'
+      + '<td style="color:rgba(255,255,255,.4);font-weight:700;">' + rankBadge + '</td>'
+      + '<td><img src="' + r.url + '" style="width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1);" loading="lazy" onerror="this.style.display=\'none\'"/></td>'
+      + '<td style="font-weight:600;">' + r.name + '</td>'
+      + '<td style="text-align:center;font-size:16px;font-weight:700;color:' + (r.count > 0 ? '#f472b6' : '#444') + ';">' + (r.count > 0 ? '❤️ ' : '') + r.count + '</td>'
+      + '<td style="padding-right:16px;">'
+        + '<div style="background:#1a1a1a;border-radius:4px;height:8px;overflow:hidden;">'
+          + '<div style="width:' + pct + '%;height:100%;background:' + barColor + ';border-radius:4px;transition:width .4s;"></div>'
+        + '</div>'
+      + '</td>'
+      + '</tr>';
+  }).join('');
+
+  document.getElementById('pl-tbody').innerHTML = html;
+};
 
 function loadLiveEditorValues() {
   // Followers
