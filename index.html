@@ -735,17 +735,22 @@ html[data-mode] body{background:var(--theme-bg)!important;color:var(--theme-text
 html[data-mode] section,html[data-mode] .card,html[data-mode] [class*="card"]{transition:background-color .35s,border-color .35s,color .35s}
 
 /* === Theme Bar === */
-.theme-bar{display:inline-flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--theme-surface) 80%,transparent);backdrop-filter:blur(10px);border:1px solid var(--theme-border);padding:5px;border-radius:999px;margin-right:8px}
-.theme-bar button{all:unset;cursor:pointer;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;transition:transform .2s,box-shadow .2s;position:relative}
-.theme-bar button:hover{transform:scale(1.12)}
-.theme-bar button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--theme-text),0 0 0 4px var(--theme-accent)}
+.theme-bar{display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);padding:4px 6px;border-radius:999px;margin-right:8px}
+.theme-swatch-btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;transition:all .2s;}
+.theme-swatch-btn:hover{transform:scale(1.15)}
+.theme-swatch-btn .tswatch{width:16px;height:16px;border-radius:50%;flex-shrink:0;transition:all .2s;border:2px solid transparent;}
+.theme-swatch-btn[aria-pressed="true"] .tswatch{width:18px;height:18px;box-shadow:0 0 0 2px rgba(255,255,255,.8);transform:scale(1.1)}
+.theme-swatch-forest .tswatch{background:linear-gradient(135deg,#5fd068,#2e7d32)}
+.theme-swatch-ocean .tswatch{background:linear-gradient(135deg,#38bdf8,#0c4a6e)}
+.theme-swatch-sunset .tswatch{background:linear-gradient(135deg,#ff7849,#c2410c)}
+/* keep old class names for backward compat */
 .theme-swatch-forest{background:linear-gradient(135deg,#5fd068,#2e7d32)}
 .theme-swatch-ocean{background:linear-gradient(135deg,#38bdf8,#0c4a6e)}
 .theme-swatch-sunset{background:linear-gradient(135deg,#ff7849,#c2410c)}
-.theme-mode-toggle{all:unset;cursor:pointer;width:34px;height:28px;border-radius:999px;display:grid;place-items:center;background:color-mix(in srgb,var(--theme-surface) 80%,transparent);backdrop-filter:blur(10px);border:1px solid var(--theme-border);color:var(--theme-text);font-size:14px;transition:transform .2s}
-.theme-mode-toggle:hover{transform:scale(1.08)}
-.theme-controls{display:inline-flex;align-items:center;margin-left:10px;vertical-align:middle;flex-shrink:0}
-@media(max-width:760px){.theme-controls{margin-left:4px;margin-right:4px}.theme-bar{padding:3px;gap:4px}.theme-bar button{width:22px;height:22px}.theme-mode-toggle{width:30px;height:24px;font-size:12px}.theme-controls-mobile{display:none!important}}
+.theme-mode-toggle{all:unset;cursor:pointer;width:30px;height:28px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:13px;transition:all .2s;flex-shrink:0}
+.theme-mode-toggle:hover{background:rgba(255,255,255,.14);color:#fff}
+.theme-controls{display:inline-flex;align-items:center;margin-left:6px;vertical-align:middle;flex-shrink:0}
+@media(max-width:760px){.theme-controls{margin-left:2px;margin-right:2px}.theme-bar{padding:3px 4px;gap:2px}.theme-swatch-btn{padding:3px 6px;font-size:9px;gap:4px}.theme-swatch-btn .tswatch{width:9px;height:9px}.theme-mode-toggle{width:26px;height:24px;font-size:11px}.theme-controls-mobile{display:none!important}}
 .theme-controls-mobile{display:none}
 /* Hide public vote counts & full voting section — admin-only */
 .vg-count{display:none!important}
@@ -3365,9 +3370,15 @@ function toggleMenu() {
     wrap.className='theme-controls';
     wrap.innerHTML=`
       <div class="theme-bar" role="radiogroup" aria-label="Color theme">
-        <button type="button" data-theme="forest" class="theme-swatch-forest" role="radio" aria-label="Forest green theme" title="Forest"></button>
-        <button type="button" data-theme="ocean" class="theme-swatch-ocean" role="radio" aria-label="Ocean blue theme" title="Ocean"></button>
-        <button type="button" data-theme="sunset" class="theme-swatch-sunset" role="radio" aria-label="Sunset orange theme" title="Sunset"></button>
+        <button type="button" data-theme="forest" class="theme-swatch-btn theme-swatch-forest" role="radio" aria-label="Forest green theme" title="Green">
+          <span class="tswatch"></span>
+        </button>
+        <button type="button" data-theme="ocean" class="theme-swatch-btn theme-swatch-ocean" role="radio" aria-label="Ocean blue theme" title="Blue">
+          <span class="tswatch"></span>
+        </button>
+        <button type="button" data-theme="sunset" class="theme-swatch-btn theme-swatch-sunset" role="radio" aria-label="Sunset orange theme" title="Orange">
+          <span class="tswatch"></span>
+        </button>
       </div>
       <button type="button" class="theme-mode-toggle" aria-label="Toggle dark mode"></button>`;
     wrap.querySelectorAll('.theme-bar button').forEach(b=>b.addEventListener('click',()=>{state.theme=b.dataset.theme;apply()}));
