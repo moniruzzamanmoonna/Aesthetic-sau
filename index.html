@@ -3521,6 +3521,7 @@ function toggleMenu() {
   // ── LIVE PRESENCE ──
   const sid = getSessionId();
   const presenceRef = ref(db, 'presence/' + sid);
+  const presenceRootRef = ref(db, 'presence');
 
   // Write presence, remove on disconnect
   set(presenceRef, { t: Date.now() });
@@ -3597,7 +3598,6 @@ function toggleMenu() {
   });
 </script>
 </html>
-
 
 
 <!-- PRE-ORDER MODAL -->
