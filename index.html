@@ -227,6 +227,9 @@ footer{background:var(--deep);border-top:1px solid var(--border)}
 .foot-links a{font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s;font-weight:500}
 .foot-links a:hover{color:var(--green)}
 .foot-copy{font-size:12px;color:rgba(120,120,120,.5);margin-top:24px;text-align:center;padding-top:18px;border-top:1px solid rgba(255,255,255,.04)}
+.foot-total-visits{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:28px;padding:14px 0 0;border-top:1px solid rgba(255,255,255,.04);font-size:13px;color:rgba(150,150,150,.7);letter-spacing:.5px}
+.ftv-icon{font-size:16px;opacity:.7}
+.ftv-count{font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:rgba(76,175,80,.8);letter-spacing:-0.5px;min-width:60px;text-align:left}
 
 
 /* VOTING GALLERY */
@@ -823,6 +826,8 @@ html[data-mode="light"] body::before{display:none}
       <div class="adm-stat"><div class="adm-stat-num" id="stat-today">—</div><div class="adm-stat-lbl">আজকের এন্ট্রি</div></div>
       <div class="adm-stat"><div class="adm-stat-num" id="stat-matched">—</div><div class="adm-stat-lbl">Match আছে এমন</div></div>
       <div class="adm-stat"><div class="adm-stat-num" id="stat-photo-likes">—</div><div class="adm-stat-lbl">📷 মোট Photo Likes</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="stat-live-visitors">—</div><div class="adm-stat-lbl">🟢 এখন Active</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="stat-daily-visitors">—</div><div class="adm-stat-lbl">📅 আজ Visited</div></div>
     </div>
     <input type="text" class="adm-search" id="adm-search" placeholder="🔍 নাম বা Faculty দিয়ে খুঁজুন..." oninput="filterTable()"/>
     <div class="adm-table-wrap">
@@ -1098,6 +1103,19 @@ html[data-mode="light"] body::before{display:none}
     <a href="#contest" class="btn-ghost">Explore &#8595;</a>
   </div>
 </section>
+
+<!-- VISITOR BAR -->
+<div id="visitor-bar" style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);padding:8px 20px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;">
+  <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.5px;">
+    <span style="width:7px;height:7px;border-radius:50%;background:#4caf50;box-shadow:0 0 6px #4caf50;display:inline-block;animation:vbpulse 1.8s infinite;flex-shrink:0;"></span>
+    Live Visitor <span id="live-visitor-count" style="color:#fff;font-size:13px;font-weight:700;min-width:18px;text-align:center;">—</span>
+  </span>
+  <span style="width:1px;height:14px;background:rgba(255,255,255,.12);display:inline-block;"></span>
+  <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.5px;">
+    📅 Today's Total Visit <span id="daily-visitor-count" style="color:#fff;font-size:13px;font-weight:700;min-width:18px;text-align:center;">—</span>
+  </span>
+</div>
+<style>@keyframes vbpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}</style>
 
 <!-- WORLD CUP COUNTDOWN -->
 <section id="wc-countdown" style="background:linear-gradient(135deg,#0a1a0a 0%,#071407 50%,#0a0a0a 100%);border-top:1px solid rgba(76,175,80,.15);border-bottom:1px solid rgba(76,175,80,.15);padding:48px 24px 40px;position:relative;overflow:hidden;">
@@ -2067,6 +2085,11 @@ html[data-mode="light"] body::before{display:none}
       <a href="https://chithi.me/aestheticsau" target="_blank">Chithi.me</a>
       <a href="https://sau.ac.bd" target="_blank">SAU Official</a>
     </div>
+  </div>
+  <div class="foot-total-visits">
+    <span class="ftv-icon">👁</span>
+    <span>মোট ভিজিট</span>
+    <span id="total-visit-count" class="ftv-count">—</span>
   </div>
   <div class="foot-copy">&#169; 2025 Aesthetic SAU, Sylhet &middot; Sylhet Agricultural University &middot; Made with &#128154;</div>
 </div>
@@ -3467,7 +3490,112 @@ function toggleMenu() {
 })();
 </script>
 
-</body>
+<!-- Firebase SDK for live presence -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, onValue, set, remove, onDisconnect, serverTimestamp, increment, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+  const FIREBASE_CONFIG = {
+    databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(FIREBASE_CONFIG, 'visitors');
+  const db = getDatabase(app);
+
+  // ── Unique session ID ──
+  function getSessionId() {
+    let sid = sessionStorage.getItem('sau_sid');
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('sau_sid', sid);
+    }
+    return sid;
+  }
+
+  // ── BST date key ──
+  function bstDateKey() {
+    const bst = new Date(Date.now() + 6 * 3600000);
+    return bst.toISOString().slice(0, 10).replace(/-/g, '');
+  }
+
+  // ── LIVE PRESENCE ──
+  const sid = getSessionId();
+  const presenceRef = ref(db, 'presence/' + sid);
+
+  // Write presence, remove on disconnect
+  set(presenceRef, { t: Date.now() });
+  onDisconnect(presenceRef).remove();
+
+  // ── Sync to admin panel stats ──
+  onValue(presenceRootRef, (snap) => {
+    const count = snap.exists() ? Object.keys(snap.val()).length : 1;
+    const el = document.getElementById('live-visitor-count');
+    const dot = document.getElementById('live-visitor-dot');
+    const adm = document.getElementById('stat-live-visitors');
+    if (el) el.textContent = count;
+    if (dot) dot.style.opacity = '1';
+    if (adm) adm.textContent = count;
+  });
+
+  // Heartbeat — keep presence alive every 90s
+  setInterval(() => {
+    set(presenceRef, { t: Date.now() }).catch(() => {});
+  }, 90000);
+
+  // ── DAILY VISITOR COUNT ──
+  const todayKey = bstDateKey();
+  const dailyRef = ref(db, 'daily-visits/' + todayKey);
+
+  // Check if already counted this session today
+  const seenKey = 'sau_seen_' + todayKey;
+  if (!sessionStorage.getItem(seenKey)) {
+    sessionStorage.setItem(seenKey, '1');
+    runTransaction(dailyRef, (current) => (current || 0) + 1);
+  }
+
+  // Listen for daily count
+  const DAILY_OFFSET = 15; // Default base visitors added to real count
+  onValue(dailyRef, (snap) => {
+    const count = snap.exists() ? snap.val() : 0;
+    const display = count + DAILY_OFFSET;
+    const el = document.getElementById('daily-visitor-count');
+    const adm = document.getElementById('stat-daily-visitors');
+    if (adm) adm.textContent = display;
+    if (el) {
+      // Animate count up if first load
+      if (el.textContent === '—') {
+        let start = 0;
+        const duration = 1200;
+        const step = Math.ceil(display / (duration / 30));
+        const timer = setInterval(() => {
+          start = Math.min(start + step, display);
+          el.textContent = start;
+          if (start >= display) clearInterval(timer);
+        }, 30);
+      } else {
+        el.textContent = display;
+      }
+    }
+  });
+  // ── TOTAL (CUMULATIVE) VISITOR COUNT ──
+  const TOTAL_OFFSET = 5000; // Base count before Firebase tracking started
+  const totalRef = ref(db, 'total-visits');
+
+  // Increment total count once per session (reuse daily seenKey logic)
+  const totalSeenKey = 'sau_total_seen';
+  if (!sessionStorage.getItem(totalSeenKey)) {
+    sessionStorage.setItem(totalSeenKey, '1');
+    runTransaction(totalRef, (current) => (current || 0) + 1);
+  }
+
+  // Listen and display total
+  onValue(totalRef, (snap) => {
+    const real = snap.exists() ? snap.val() : 0;
+    const display = real + TOTAL_OFFSET;
+    const el = document.getElementById('total-visit-count');
+    if (el) el.textContent = display.toLocaleString('en-BD');
+  });
+</script>
 </html>
 
 
