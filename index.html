@@ -815,6 +815,7 @@ html[data-mode="light"] body::before{display:none}
   <div class="adm-tabs">
     <button class="adm-tab active" id="tab-data" onclick="switchTab('data')">🎂 Birthday Data</button>
     <button class="adm-tab" id="tab-likes" onclick="switchTab('likes')">📷 Photo Likes</button>
+    <button class="adm-tab" id="tab-scores" onclick="switchTab('scores')">⚽ WC Scores</button>
     <button class="adm-tab" id="tab-live" onclick="switchTab('live')">⚡ Live Editor</button>
     <button class="adm-tab" id="tab-site" onclick="switchTab('site')">✏️ Website Editor</button>
   </div>
@@ -875,6 +876,19 @@ html[data-mode="light"] body::before{display:none}
         </tbody>
       </table>
     </div>
+  </div>
+
+  <!-- TAB: WC Scores -->
+  <div id="adm-tab-scores" class="adm-body" style="display:none">
+    <div style="margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <input type="text" id="sc-search" placeholder="🔍 দল খোঁজো..." oninput="wcScoreRenderList()" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.25);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;outline:none;flex:1;min-width:180px;"/>
+      <select id="sc-filter" onchange="wcScoreRenderList()" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.25);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;outline:none;cursor:pointer;">
+        <option value="pending">ফলাফল দেওয়া হয়নি</option>
+        <option value="done">ফলাফল দেওয়া হয়েছে</option>
+        <option value="all">সব ম্যাচ</option>
+      </select>
+    </div>
+    <div id="sc-list" style="display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto;"></div>
   </div>
 
   <!-- TAB: Live Editor -->
@@ -1316,39 +1330,81 @@ html[data-mode="light"] body::before{display:none}
     return h12 + ':' + m.toString().padStart(2,'0') + ' ' + ampm + ' BST';
   }
 
+  // WC_SCORES loaded from Firebase: { 'matchKey': { h: 2, a: 1 } }
+  var WC_SCORES = {};
+  var FIREBASE_URL_WC = 'https://aesthetic-sau-default-rtdb.firebaseio.com';
+
+  function matchKey(f) { return f[0].replace(/-/g,'') + '_' + f[1].replace(':','') + '_' + f[2].replace(/\s/g,''); }
+
+  function loadWCScores(cb) {
+    fetch(FIREBASE_URL_WC + '/wc-scores.json')
+      .then(function(r){ return r.json(); })
+      .then(function(data){ WC_SCORES = data && typeof data === 'object' ? data : {}; if(cb) cb(); })
+      .catch(function(){ if(cb) cb(); });
+  }
+
   function renderMatches() {
-    const today = todayBST();
-    const now = new Date();
-    const list = document.getElementById('wc-matches-list');
-    const label = document.getElementById('wc-match-day-label');
+    loadWCScores(function() {
+      var now = new Date();
+      var list = document.getElementById('wc-matches-list');
+      var label = document.getElementById('wc-match-day-label');
 
-    let todayMatches = FIXTURES.filter(function(f){ return f[0] === today; });
-    var useLabel = '⚽ আজকের ম্যাচ (BST)';
-    var matches = todayMatches;
+      // Split fixtures into past and future
+      var past = [], upcoming = [];
+      FIXTURES.forEach(function(f) {
+        var mt = parseBST(f[0], f[1]);
+        var ended = (now - mt) > 105 * 60000;
+        if (ended) past.push(f);
+        else upcoming.push(f);
+      });
 
-    if (todayMatches.length === 0) {
-      var upcoming = FIXTURES.filter(function(f){ return f[0] > today; });
-      if (upcoming.length > 0) {
-        var nextDate = upcoming[0][0];
-        matches = FIXTURES.filter(function(f){ return f[0] === nextDate; });
-        var parts = nextDate.split('-');
-        var dObj = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
-        useLabel = '📅 পরবর্তী ম্যাচ — ' + dObj.toLocaleDateString('bn-BD', {day:'numeric',month:'long'}) + ' (BST)';
-      } else {
-        list.innerHTML = '<div style="color:#555;font-size:14px;text-align:center;padding:16px;">গ্রুপ পর্ব শেষ! ⚽ Knockout Stage-এর জন্য অপেক্ষা করুন।</div>';
-        label.textContent = '🏆 Group Stage শেষ';
-        return;
+      var html = '';
+
+      // ── Previous result (last 1 finished match) ──
+      if (past.length > 0) {
+        var prev = past[past.length - 1];
+        var key = matchKey(prev);
+        var score = WC_SCORES[key];
+        var scoreStr = score
+          ? '<span style="font-size:15px;font-weight:900;color:#fff;background:rgba(255,255,255,.08);padding:3px 12px;border-radius:8px;letter-spacing:1px;">' + score.h + ' – ' + score.a + '</span>'
+          : '<span style="font-size:12px;color:#555;font-style:italic;">ফলাফল আসেনি</span>';
+        html += '<div style="margin-bottom:10px;">'
+          + '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#888;text-transform:uppercase;margin-bottom:6px;">⏮ শেষ ম্যাচের ফলাফল</div>'
+          + '<div class="wc-match-row" style="opacity:.75;border-color:rgba(255,255,255,.08);">'
+          + '<div class="wc-match-teams" style="font-size:13px;">' + prev[2] + ' <span style="color:#666;">vs</span> ' + prev[3] + '</div>'
+          + '<div class="wc-match-group">GRP ' + prev[4] + '</div>'
+          + scoreStr
+          + '</div></div>';
       }
-    }
 
-    label.textContent = useLabel;
-    list.innerHTML = matches.map(function(f) {
-      var matchTime = parseBST(f[0], f[1]);
-      var diff = now - matchTime;
-      var isLive = diff >= 0 && diff < 105*60000;
-      var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:700;letter-spacing:1px;animation:lp 1.6s infinite">🔴 LIVE</span>' : '';
-      return '<div class="wc-match-row"><div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div><div class="wc-match-group">GRP ' + f[4] + '</div><div class="wc-match-time">' + formatTime12(f[1]) + '</div></div>';
-    }).join('');
+      // ── Divider ──
+      if (past.length > 0 && upcoming.length > 0) {
+        html += '<div style="height:1px;background:rgba(255,255,255,.06);margin:4px 0 10px;"></div>';
+      }
+
+      // ── Next 2 upcoming matches ──
+      if (upcoming.length > 0) {
+        html += '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#4caf50;text-transform:uppercase;margin-bottom:6px;">⏭ আসছে ম্যাচ</div>';
+        upcoming.slice(0, 2).forEach(function(f) {
+          var mt = parseBST(f[0], f[1]);
+          var isLive = (now - mt) >= 0 && (now - mt) < 105*60000;
+          var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:700;">🔴 LIVE</span>' : '';
+          var parts = f[0].split('-');
+          var dObj = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+          var dateStr = dObj.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+          html += '<div class="wc-match-row" style="margin-bottom:6px;">'
+            + '<div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div>'
+            + '<div class="wc-match-group">GRP ' + f[4] + '</div>'
+            + '<div class="wc-match-time">' + dateStr + ' · ' + formatTime12(f[1]) + '</div>'
+            + '</div>';
+        });
+      } else {
+        html += '<div style="color:#555;font-size:14px;text-align:center;padding:10px;">গ্রুপ পর্ব শেষ! 🏆</div>';
+      }
+
+      list.innerHTML = html;
+      label.textContent = '⚽ World Cup 2026';
+    });
   }
 
   function pad(n){ return String(n).padStart(2,'0'); }
@@ -1408,6 +1464,7 @@ html[data-mode="light"] body::before{display:none}
   };
 
   function wcRenderFullFixture(grp) {
+    loadWCScores(function() {
     var container = document.getElementById('wc-full-list');
     var filtered = grp === 'ALL' ? FIXTURES : FIXTURES.filter(function(f){ return f[4] === grp; });
     var now = new Date();
@@ -1428,17 +1485,23 @@ html[data-mode="light"] body::before{display:none}
       var diff = now - matchTime;
       var isLive = diff >= 0 && diff < 105*60000;
       var isPast = diff > 105*60000;
-      var rowStyle = isPast ? 'opacity:.45;' : '';
+      var rowStyle = isPast ? 'opacity:.5;' : '';
       var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:700;">🔴 LIVE</span>' : '';
+      var key = matchKey(f);
+      var score = WC_SCORES[key];
+      var scoreCell = isPast
+        ? (score ? '<div style="font-size:14px;font-weight:900;color:#fff;background:rgba(255,255,255,.08);padding:3px 10px;border-radius:8px;white-space:nowrap;">' + score.h + '–' + score.a + '</div>' : '<div style="font-size:11px;color:#444;">–</div>')
+        : '<div class="wc-match-time">' + formatTime12(f[1]) + '</div>';
       html += '<div class="wc-match-row" style="margin-bottom:6px;' + rowStyle + '">' +
         '<div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div>' +
         '<div class="wc-match-group">GRP ' + f[4] + '</div>' +
-        '<div class="wc-match-time">' + formatTime12(f[1]) + '</div>' +
+        scoreCell +
         '</div>';
     });
 
     if (!html) html = '<div style="color:#555;font-size:14px;text-align:center;padding:20px;">কোনো ম্যাচ নেই</div>';
     container.innerHTML = html;
+    }); // end loadWCScores
   }
 
   // ── NOTIFICATION SYSTEM ──
@@ -2724,7 +2787,7 @@ function showMatchResults(allData, myName, myMD, myYear) {
 
 // ── LIVE EDITOR ──
 function switchTab(tab) {
-  ['data','likes','live','site'].forEach(function(t) {
+  ['data','likes','scores','live','site'].forEach(function(t) {
     var tabEl = document.getElementById('adm-tab-'+t);
     var btnEl = document.getElementById('tab-'+t);
     if (tabEl) tabEl.style.display = tab === t ? 'block' : 'none';
@@ -2732,8 +2795,92 @@ function switchTab(tab) {
   });
   if (tab === 'site') loadSiteEditorValues();
   if (tab === 'live') loadLiveEditorValues();
+  if (tab === 'scores') wcScoreLoadAndRender();
   if (tab === 'likes') loadPhotoLikes();
 }
+
+// ── WC SCORE ADMIN ──
+var ADM_WC_SCORES = {};
+
+function wcAdmMatchKey(f) { return f[0].replace(/-/g,'') + '_' + f[1].replace(':','') + '_' + f[2].replace(/\s/g,''); }
+
+function wcScoreLoadAndRender() {
+  document.getElementById('sc-list').innerHTML = '<div style="color:#555;padding:16px;text-align:center;">লোড হচ্ছে...</div>';
+  fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores.json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      ADM_WC_SCORES = data && typeof data === 'object' ? data : {};
+      wcScoreRenderList();
+    })
+    .catch(function(){ document.getElementById('sc-list').innerHTML = '<div style="color:#e53935;padding:16px;text-align:center;">লোড করতে সমস্যা।</div>'; });
+}
+
+window.wcScoreRenderList = function() {
+  var search = (document.getElementById('sc-search')||{}).value||'';
+  var filter = (document.getElementById('sc-filter')||{}).value||'pending';
+  var now = new Date();
+
+  // Only past matches (ended)
+  var pastFixtures = FIXTURES.filter(function(f){
+    return (now - parseBST(f[0], f[1])) > 105*60000;
+  });
+
+  var filtered = pastFixtures.filter(function(f){
+    var key = wcAdmMatchKey(f);
+    var hasSc = !!ADM_WC_SCORES[key];
+    var q = search.toLowerCase();
+    var nameMatch = !q || f[2].toLowerCase().includes(q) || f[3].toLowerCase().includes(q);
+    if (!nameMatch) return false;
+    if (filter === 'pending') return !hasSc;
+    if (filter === 'done') return hasSc;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    document.getElementById('sc-list').innerHTML = '<div style="color:#555;padding:20px;text-align:center;">' + (filter==='pending' ? '✅ সব ম্যাচের ফলাফল দেওয়া হয়েছে!' : 'কোনো ম্যাচ নেই') + '</div>';
+    return;
+  }
+
+  var html = filtered.map(function(f) {
+    var key = wcAdmMatchKey(f);
+    var sc = ADM_WC_SCORES[key];
+    var parts = f[0].split('-');
+    var dObj = new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
+    var dateStr = dObj.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    return '<div style="background:#111;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">'
+        + '<div style="font-size:14px;font-weight:700;color:#f2f2ee;">' + f[2] + ' <span style="color:#4caf50;">vs</span> ' + f[3] + '</div>'
+        + '<div style="font-size:11px;color:#555;letter-spacing:1px;">' + dateStr + ' · GRP ' + f[4] + ' · ' + formatTime12(f[1]) + '</div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
+        + '<input type="number" min="0" max="99" placeholder="' + f[2].split(' ')[0] + '" id="sc-h-' + key + '" value="' + (sc ? sc.h : '') + '" style="width:64px;background:#1c1c1c;border:1px solid rgba(76,175,80,.3);color:#fff;padding:8px;border-radius:8px;font-size:16px;font-weight:700;text-align:center;outline:none;"/>'
+        + '<span style="color:#555;font-weight:700;font-size:18px;">–</span>'
+        + '<input type="number" min="0" max="99" placeholder="' + f[3].split(' ')[0] + '" id="sc-a-' + key + '" value="' + (sc ? sc.a : '') + '" style="width:64px;background:#1c1c1c;border:1px solid rgba(76,175,80,.3);color:#fff;padding:8px;border-radius:8px;font-size:16px;font-weight:700;text-align:center;outline:none;"/>'
+        + '<button onclick="wcSaveScore(\'' + key + '\')" style="background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);color:#4caf50;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-left:4px;">💾 Save</button>'
+        + (sc ? '<button onclick="wcDeleteScore(\'' + key + '\')" style="background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);color:#ef5350;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>' : '')
+      + '</div>'
+    + '</div>';
+  }).join('');
+  document.getElementById('sc-list').innerHTML = html;
+};
+
+window.wcSaveScore = function(key) {
+  var h = document.getElementById('sc-h-'+key);
+  var a = document.getElementById('sc-a-'+key);
+  if (!h || !a || h.value === '' || a.value === '') { alert('দুইটা স্কোরই দিতে হবে!'); return; }
+  var payload = { h: parseInt(h.value), a: parseInt(a.value) };
+  fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores/' + key + '.json', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(){ ADM_WC_SCORES[key] = payload; wcScoreRenderList(); }).catch(function(){ alert('Save হয়নি!'); });
+};
+
+window.wcDeleteScore = function(key) {
+  if (!confirm('এই স্কোর মুছে দেবো?')) return;
+  fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores/' + key + '.json', { method: 'DELETE' })
+    .then(function(){ delete ADM_WC_SCORES[key]; wcScoreRenderList(); }).catch(function(){ alert('মুছতে পারিনি!'); });
+};
 
 // ── PHOTO LIKES ADMIN ──
 var PL_DATA = {}; // { firebaseKey: count }
@@ -3493,7 +3640,7 @@ function toggleMenu() {
 <!-- Firebase SDK for live presence -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set, remove, onDisconnect, serverTimestamp, increment, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set, remove, onDisconnect, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
   const FIREBASE_CONFIG = {
     databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com"
@@ -3502,12 +3649,14 @@ function toggleMenu() {
   const app = initializeApp(FIREBASE_CONFIG, 'visitors');
   const db = getDatabase(app);
 
-  // ── Unique session ID ──
-  function getSessionId() {
-    let sid = sessionStorage.getItem('sau_sid');
+  // ── Unique session ID — localStorage so it persists across reloads ──
+  // But we also track "tab open" state via sessionStorage to detect new tabs
+  function getOrCreateSid() {
+    // One persistent ID per browser
+    let sid = localStorage.getItem('sau_sid');
     if (!sid) {
       sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      sessionStorage.setItem('sau_sid', sid);
+      localStorage.setItem('sau_sid', sid);
     }
     return sid;
   }
@@ -3519,15 +3668,20 @@ function toggleMenu() {
   }
 
   // ── LIVE PRESENCE ──
-  const sid = getSessionId();
+  const sid = getOrCreateSid();
   const presenceRef = ref(db, 'presence/' + sid);
   const presenceRootRef = ref(db, 'presence');
 
-  // Write presence, remove on disconnect
+  // Write presence on load, auto-remove on disconnect
   set(presenceRef, { t: Date.now() });
   onDisconnect(presenceRef).remove();
 
-  // ── Sync to admin panel stats ──
+  // Also clean up when tab/window closes (backup)
+  window.addEventListener('beforeunload', () => {
+    remove(presenceRef).catch(() => {});
+  });
+
+  // Listen to presence count
   onValue(presenceRootRef, (snap) => {
     const count = snap.exists() ? Object.keys(snap.val()).length : 1;
     const el = document.getElementById('live-visitor-count');
@@ -3538,24 +3692,20 @@ function toggleMenu() {
     if (adm) adm.textContent = count;
   });
 
-  // Heartbeat — keep presence alive every 90s
+  // Heartbeat every 50s — keeps presence alive, refreshes onDisconnect timer
   setInterval(() => {
     set(presenceRef, { t: Date.now() }).catch(() => {});
-  }, 90000);
+    onDisconnect(presenceRef).remove();
+  }, 50000);
 
-  // ── DAILY VISITOR COUNT ──
+  // ── DAILY VISITOR COUNT — counts every page load ──
   const todayKey = bstDateKey();
   const dailyRef = ref(db, 'daily-visits/' + todayKey);
 
-  // Check if already counted this session today
-  const seenKey = 'sau_seen_' + todayKey;
-  if (!sessionStorage.getItem(seenKey)) {
-    sessionStorage.setItem(seenKey, '1');
-    runTransaction(dailyRef, (current) => (current || 0) + 1);
-  }
+  runTransaction(dailyRef, (current) => (current || 0) + 1);
 
   // Listen for daily count
-  const DAILY_OFFSET = 15; // Default base visitors added to real count
+  const DAILY_OFFSET = 15;
   onValue(dailyRef, (snap) => {
     const count = snap.exists() ? snap.val() : 0;
     const display = count + DAILY_OFFSET;
@@ -3563,7 +3713,6 @@ function toggleMenu() {
     const adm = document.getElementById('stat-daily-visitors');
     if (adm) adm.textContent = display;
     if (el) {
-      // Animate count up if first load
       if (el.textContent === '—') {
         let start = 0;
         const duration = 1200;
@@ -3578,18 +3727,13 @@ function toggleMenu() {
       }
     }
   });
-  // ── TOTAL (CUMULATIVE) VISITOR COUNT ──
-  const TOTAL_OFFSET = 5000; // Base count before Firebase tracking started
+
+  // ── TOTAL (CUMULATIVE) VISITOR COUNT — counts every page load ──
+  const TOTAL_OFFSET = 5000;
   const totalRef = ref(db, 'total-visits');
 
-  // Increment total count once per session (reuse daily seenKey logic)
-  const totalSeenKey = 'sau_total_seen';
-  if (!sessionStorage.getItem(totalSeenKey)) {
-    sessionStorage.setItem(totalSeenKey, '1');
-    runTransaction(totalRef, (current) => (current || 0) + 1);
-  }
+  runTransaction(totalRef, (current) => (current || 0) + 1);
 
-  // Listen and display total
   onValue(totalRef, (snap) => {
     const real = snap.exists() ? snap.val() : 0;
     const display = real + TOTAL_OFFSET;
