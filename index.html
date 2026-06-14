@@ -1243,7 +1243,7 @@ html[data-mode="light"] body::before{display:none}
   const WC_START = new Date('2026-06-11T19:00:00Z');
 
   // All group stage matches — [date_bst, time_bst_HH:MM, team1, team2, group]
-  const FIXTURES = [
+  window.FIXTURES = [
     ['2026-06-12','01:00','Mexico','South Africa','A'],
     ['2026-06-12','08:00','Korea Republic','Czechia','A'],
     ['2026-06-13','01:00','Canada','Bosnia & Herzegovina','B'],
@@ -1311,7 +1311,7 @@ html[data-mode="light"] body::before{display:none}
     ['2026-06-28','08:00','Jordan','Argentina','J'],
   ];
 
-  function parseBST(dateStr, timeStr) {
+  window.parseBST = function parseBST(dateStr, timeStr) {
     const [y,m,d] = dateStr.split('-').map(Number);
     const [h,min] = timeStr.split(':').map(Number);
     return new Date(Date.UTC(y, m-1, d, h-6, min));
@@ -1338,37 +1338,42 @@ html[data-mode="light"] body::before{display:none}
     return f[0].replace(/-/g,'') + '_' + f[1].replace(':','') + '_' + f[2].replace(/\W/g,'');
   }
 
-  // Fetch from football-data.org (free, no key needed for WC 2026 after start)
-  // Falls back silently to Firebase manual scores
+  // Auto-fetch scores from openfootball (free, no key, updated daily)
   function fetchAutoScores(cb) {
-    fetch('https://api.football-data.org/v4/competitions/WC/matches?season=2026', {
-      headers: { 'X-Auth-Token': '' }  // free tier, no token needed for public comps
-    })
-    .then(function(r){ return r.ok ? r.json() : null; })
+    fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json')
+    .then(function(r){ return r.json(); })
     .then(function(data) {
       if (!data || !data.matches) { cb(false); return; }
-      var found = {};
+      var TEAM_MAP = {
+        'Mexico':'Mexico','South Africa':'South Africa','South Korea':'Korea Republic',
+        'Czech Republic':'Czechia','Canada':'Canada','Bosnia & Herzegovina':'Bosnia & Herzegovina',
+        'USA':'USA','Paraguay':'Paraguay','Qatar':'Qatar','Switzerland':'Switzerland',
+        'Brazil':'Brazil','Morocco':'Morocco','Haiti':'Haiti','Scotland':'Scotland',
+        'Australia':'Australia','Turkey':'Türkiye','Türkiye':'Türkiye',
+        'Germany':'Germany','Curacao':'Curaçao','Netherlands':'Netherlands',
+        'Japan':'Japan','Ivory Coast':'Ivory Coast','Ecuador':'Ecuador',
+        'Sweden':'Sweden','Tunisia':'Tunisia','Spain':'Spain',
+        'Cabo Verde':'Cabo Verde','Cape Verde':'Cabo Verde','Belgium':'Belgium',
+        'Egypt':'Egypt','Saudi Arabia':'Saudi Arabia','Uruguay':'Uruguay',
+        'Iran':'Iran','New Zealand':'New Zealand','France':'France',
+        'Senegal':'Senegal','Iraq':'Iraq','Norway':'Norway',
+        'Argentina':'Argentina','Algeria':'Algeria','England':'England',
+        'Panama':'Panama','Ghana':'Ghana','Croatia':'Croatia',
+        'Portugal':'Portugal','Colombia':'Colombia','Uzbekistan':'Uzbekistan',
+        'Congo':'Congo','DR Congo':'Congo','Austria':'Austria','Jordan':'Jordan'
+      };
       data.matches.forEach(function(m) {
-        if (m.status !== 'FINISHED') return;
-        var h = m.score && m.score.fullTime ? m.score.fullTime.home : null;
-        var a = m.score && m.score.fullTime ? m.score.fullTime.away : null;
-        if (h === null || a === null) return;
-        // Match by team names — try to find in FIXTURES
-        var hn = (m.homeTeam.name||'').toLowerCase();
-        var an = (m.awayTeam.name||'').toLowerCase();
-        FIXTURES.forEach(function(f) {
-          if (f[2].toLowerCase().indexOf(hn.split(' ')[0]) !== -1 ||
-              hn.indexOf(f[2].toLowerCase().split(' ')[0]) !== -1) {
-            if (f[3].toLowerCase().indexOf(an.split(' ')[0]) !== -1 ||
-                an.indexOf(f[3].toLowerCase().split(' ')[0]) !== -1) {
-              var key = wcMatchKey(f);
-              if (!WC_SCORES[key]) found[key] = { h: h, a: a, auto: true };
-            }
-          }
-        });
+        if (!m.score || !m.score.ft) return;
+        var t1 = TEAM_MAP[m.team1] || m.team1;
+        var t2 = TEAM_MAP[m.team2] || m.team2;
+        var fixture = FIXTURES.find(function(f){ return f[2]===t1 && f[3]===t2; });
+        if (!fixture) return;
+        var key = wcMatchKey(fixture);
+        // Only fill if no manual score exists
+        if (!WC_SCORES[key] || WC_SCORES[key].auto) {
+          WC_SCORES[key] = { h: m.score.ft[0], a: m.score.ft[1], auto: true };
+        }
       });
-      // Merge auto scores (don't overwrite manual)
-      Object.keys(found).forEach(function(k){ if(!WC_SCORES[k]) WC_SCORES[k] = found[k]; });
       cb(true);
     })
     .catch(function(){ cb(false); });
@@ -2880,13 +2885,15 @@ function wcAutoSync(cb){
     .then(function(data){
       var matches = (data.matches||[]).filter(function(m){ return m.score && m.score.ft; });
       var pending = []; var synced = 0;
+      var FX = window.FIXTURES || [];
       matches.forEach(function(m){
         var t1 = WC_TEAM_MAP[m.team1]||m.team1;
         var t2 = WC_TEAM_MAP[m.team2]||m.team2;
-        var fixture = FIXTURES.find(function(f){ return f[2]===t1 && f[3]===t2; });
+        var fixture = FX.find(function(f){ return f[2]===t1 && f[3]===t2; });
         if (!fixture) return;
         var key = wcAdmMatchKey(fixture);
-        if (!ADM_WC_SCORES[key] || ADM_WC_SCORES[key].auto) {
+        // Overwrite only if no manual score (auto:false means manual)
+        if (!ADM_WC_SCORES[key] || ADM_WC_SCORES[key].auto !== false) {
           var payload = {h:m.score.ft[0], a:m.score.ft[1], auto:true};
           pending.push(fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores/'+key+'.json',{
             method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
@@ -2919,7 +2926,8 @@ window.wcScoreRenderList = function(){
   var search=(document.getElementById('sc-search')||{}).value||'';
   var filter=(document.getElementById('sc-filter')||{}).value||'pending';
   var now=new Date();
-  var pastFixtures=FIXTURES.filter(function(f){ return (now-parseBST(f[0],f[1]))>105*60000; });
+  var FX = window.FIXTURES || [];
+  var pastFixtures=FX.filter(function(f){ return (now-parseBST(f[0],f[1]))>105*60000; });
   var filtered=pastFixtures.filter(function(f){
     var key=wcAdmMatchKey(f); var hasSc=!!ADM_WC_SCORES[key];
     var q=search.toLowerCase();
@@ -3727,21 +3735,18 @@ function toggleMenu() {
 <!-- Firebase SDK for live presence -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set, remove, onDisconnect, serverTimestamp, increment, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set, remove, onDisconnect, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-  const FIREBASE_CONFIG = {
-    databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com"
-  };
-
+  const FIREBASE_CONFIG = { databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com" };
   const app = initializeApp(FIREBASE_CONFIG, 'visitors');
   const db = getDatabase(app);
 
-  // ── Unique session ID ──
-  function getSessionId() {
-    let sid = sessionStorage.getItem('sau_sid');
+  // ── Tab-unique SID (sessionStorage = per tab, not shared across tabs) ──
+  function getTabSid() {
+    let sid = sessionStorage.getItem('sau_tab_sid');
     if (!sid) {
-      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      sessionStorage.setItem('sau_sid', sid);
+      sid = 'tab_' + Math.random().toString(36).slice(2) + '_' + Date.now().toString(36);
+      sessionStorage.setItem('sau_tab_sid', sid);
     }
     return sid;
   }
@@ -3753,86 +3758,73 @@ function toggleMenu() {
   }
 
   // ── LIVE PRESENCE ──
-  const sid = getSessionId();
+  const sid = getTabSid();
   const presenceRef = ref(db, 'presence/' + sid);
   const presenceRootRef = ref(db, 'presence');
 
-  // Write presence, remove on disconnect
-  set(presenceRef, { t: Date.now() });
-  onDisconnect(presenceRef).remove();
+  async function writePresence() {
+    await set(presenceRef, { t: Date.now() });
+    await onDisconnect(presenceRef).remove();
+  }
+  writePresence();
 
-  // ── Sync to admin panel stats ──
+  // Heartbeat every 30s — refreshes onDisconnect & keeps entry alive
+  setInterval(() => { writePresence(); }, 30000);
+
+  // Remove stale entries older than 90s (cleanup)
+  function cleanStale(snap) {
+    if (!snap.exists()) return;
+    const now = Date.now();
+    const val = snap.val();
+    Object.keys(val).forEach(k => {
+      if (val[k] && val[k].t && (now - val[k].t) > 90000) {
+        remove(ref(db, 'presence/' + k));
+      }
+    });
+  }
+
+  // Listen to presence count
   onValue(presenceRootRef, (snap) => {
+    cleanStale(snap);
     const count = snap.exists() ? Object.keys(snap.val()).length : 1;
     const el = document.getElementById('live-visitor-count');
-    const dot = document.getElementById('live-visitor-dot');
     const adm = document.getElementById('stat-live-visitors');
     if (el) el.textContent = count;
-    if (dot) dot.style.opacity = '1';
     if (adm) adm.textContent = count;
   });
 
-  // Heartbeat — keep presence alive every 90s
-  setInterval(() => {
-    set(presenceRef, { t: Date.now() }).catch(() => {});
-  }, 90000);
+  // Remove on tab close
+  window.addEventListener('beforeunload', () => remove(presenceRef));
 
-  // ── DAILY VISITOR COUNT ──
+  // ── DAILY VISITOR COUNT — every page load counts ──
   const todayKey = bstDateKey();
   const dailyRef = ref(db, 'daily-visits/' + todayKey);
+  runTransaction(dailyRef, (c) => (c || 0) + 1);
 
-  // Check if already counted this session today
-  const seenKey = 'sau_seen_' + todayKey;
-  if (!sessionStorage.getItem(seenKey)) {
-    sessionStorage.setItem(seenKey, '1');
-    runTransaction(dailyRef, (current) => (current || 0) + 1);
-  }
-
-  // Listen for daily count
-  const DAILY_OFFSET = 15; // Default base visitors added to real count
+  const DAILY_OFFSET = 15;
   onValue(dailyRef, (snap) => {
-    const count = snap.exists() ? snap.val() : 0;
-    const display = count + DAILY_OFFSET;
+    const count = (snap.exists() ? snap.val() : 0) + DAILY_OFFSET;
     const el = document.getElementById('daily-visitor-count');
     const adm = document.getElementById('stat-daily-visitors');
-    if (adm) adm.textContent = display;
+    if (adm) adm.textContent = count;
     if (el) {
-      // Animate count up if first load
       if (el.textContent === '—') {
-        let start = 0;
-        const duration = 1200;
-        const step = Math.ceil(display / (duration / 30));
-        const timer = setInterval(() => {
-          start = Math.min(start + step, display);
-          el.textContent = start;
-          if (start >= display) clearInterval(timer);
-        }, 30);
-      } else {
-        el.textContent = display;
-      }
+        let s = 0; const step = Math.ceil(count / 40);
+        const t = setInterval(() => { s = Math.min(s + step, count); el.textContent = s; if (s >= count) clearInterval(t); }, 30);
+      } else { el.textContent = count; }
     }
   });
-  // ── TOTAL (CUMULATIVE) VISITOR COUNT ──
-  const TOTAL_OFFSET = 5000; // Base count before Firebase tracking started
+
+  // ── TOTAL VISITOR COUNT — every page load ──
+  const TOTAL_OFFSET = 5000;
   const totalRef = ref(db, 'total-visits');
-
-  // Increment total count once per session (reuse daily seenKey logic)
-  const totalSeenKey = 'sau_total_seen';
-  if (!sessionStorage.getItem(totalSeenKey)) {
-    sessionStorage.setItem(totalSeenKey, '1');
-    runTransaction(totalRef, (current) => (current || 0) + 1);
-  }
-
-  // Listen and display total
+  runTransaction(totalRef, (c) => (c || 0) + 1);
   onValue(totalRef, (snap) => {
-    const real = snap.exists() ? snap.val() : 0;
-    const display = real + TOTAL_OFFSET;
+    const display = (snap.exists() ? snap.val() : 0) + TOTAL_OFFSET;
     const el = document.getElementById('total-visit-count');
-    if (el) el.textContent = display.toLocaleString('en-BD');
+    if (el) el.textContent = display.toLocaleString();
   });
 </script>
-</html>
-
 
 <!-- PRE-ORDER MODAL -->
 <div id="preorder-modal" style="display:none;position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px">
@@ -3881,4 +3873,5 @@ function toggleMenu() {
   </div>
 </div>
 
->
+</body>
+</html>
