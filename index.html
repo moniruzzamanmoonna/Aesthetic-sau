@@ -877,20 +877,6 @@ html[data-mode="light"] body::before{display:none}
     </div>
   </div>
 
-  <!-- TAB: WC Scores -->
-  <div id="adm-tab-scores" class="adm-body" style="display:none">
-    <div style="margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <input type="text" id="sc-search" placeholder="🔍 দল খোঁজো..." oninput="wcScoreRenderList()" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.25);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;outline:none;flex:1;min-width:160px;"/>
-      <select id="sc-filter" onchange="wcScoreRenderList()" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.25);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;outline:none;cursor:pointer;">
-        <option value="pending">ফলাফল দেওয়া হয়নি</option>
-        <option value="done">ফলাফল আছে</option>
-        <option value="all">সব ম্যাচ</option>
-      </select>
-      <button id="sc-sync-btn" onclick="wcScoreLoadAndRender()" style="background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);color:#4caf50;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">🌐 Auto Sync</button>
-    </div>
-    <div id="sc-list" style="display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto;"></div>
-  </div>
-
   <!-- TAB: Live Editor -->
   <div id="adm-tab-live" class="adm-body" style="display:none">
     <div class="site-editor-grid">
@@ -1131,6 +1117,60 @@ html[data-mode="light"] body::before{display:none}
 </div>
 <style>@keyframes vbpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}</style>
 
+<!-- GAME SECTION (below visitor bar) -->
+<div id="game-section" style="background:rgba(10,10,10,.95);border-bottom:1px solid rgba(76,175,80,.15);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+  <span style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">🎮 Live Games</span>
+  <button onclick="openGameLobby('ttt')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#4caf50';this.style.color='#4caf50'" onmouseout="this.style.borderColor='rgba(76,175,80,.25)';this.style.color='rgba(255,255,255,.7)'">&#9898; Tic Tac Toe</button>
+  <button onclick="openGameLobby('rps')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#4caf50';this.style.color='#4caf50'" onmouseout="this.style.borderColor='rgba(76,175,80,.25)';this.style.color='rgba(255,255,255,.7)'">&#9986; Rock Paper Scissors</button>
+</div>
+
+<!-- FLOATING GAME INVITE WIDGET -->
+<div id="game-float" style="display:none;position:fixed;bottom:24px;right:24px;z-index:8000;max-width:300px;background:rgba(15,15,15,.98);border:1px solid rgba(76,175,80,.35);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.7);overflow:hidden;">
+  <div style="background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.05));padding:12px 14px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(76,175,80,.12);">
+    <span style="font-size:12px;font-weight:700;color:#4caf50;letter-spacing:.5px;">🎮 Live Visitors-এর সাথে খেলুন</span>
+    <button onclick="closeGameFloat()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>
+  </div>
+  <div style="padding:14px;">
+    <p style="font-size:12px;color:rgba(255,255,255,.55);margin-bottom:12px;line-height:1.6;">এখন <span id="gf-live-count" style="color:#4caf50;font-weight:700;">—</span> জন online আছেন। একটা game request পাঠান!</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="openGameLobby('ttt')" style="background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">&#9898; Tic Tac Toe খেলুন</button>
+      <button onclick="openGameLobby('rps')" style="background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">&#9986; Rock Paper Scissors খেলুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME MODAL -->
+<div id="game-modal" style="display:none;position:fixed;inset:0;z-index:9500;align-items:center;justify-content:center;padding:20px;">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);" onclick="closeGameModal()"></div>
+  <div id="game-modal-box" style="position:relative;background:#111;border:1px solid rgba(76,175,80,.3);border-radius:20px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,.8);">
+    <div style="padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;">
+      <span id="gm-title" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:#fff;"></span>
+      <button onclick="closeGameModal()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>
+    </div>
+    <div id="gm-body" style="padding:20px;"></div>
+  </div>
+</div>
+
+<!-- INCOMING REQUEST NOTIFICATION -->
+<div id="game-notify" style="display:none;position:fixed;top:80px;right:20px;z-index:9600;max-width:280px;background:rgba(15,15,15,.98);border:1px solid rgba(76,175,80,.5);border-radius:14px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+  <div style="font-size:13px;font-weight:700;color:#4caf50;margin-bottom:6px;">🎮 Game Request!</div>
+  <div id="gn-msg" style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:14px;line-height:1.6;"></div>
+  <div style="display:flex;gap:8px;">
+    <button id="gn-accept" style="flex:1;background:#4caf50;border:none;color:#000;padding:8px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">&#10003; Accept</button>
+    <button onclick="dismissNotify()" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">&#10005; Decline</button>
+  </div>
+</div>
+
+<style>
+@keyframes gfSlide{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.ttt-cell{width:88px;height:88px;background:rgba(255,255,255,.04);border:2px solid rgba(76,175,80,.2);border-radius:12px;font-size:34px;font-weight:900;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;color:#f2f2ee;}
+.ttt-cell:hover:not([data-filled]){background:rgba(76,175,80,.1);border-color:rgba(76,175,80,.4);}
+.ttt-cell[data-filled]{cursor:default;}
+.rps-btn{flex:1;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:14px;padding:16px 8px;font-size:30px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;color:#f2f2ee;}
+.rps-btn:hover{background:rgba(76,175,80,.15);border-color:rgba(76,175,80,.5);}
+.rps-btn.chosen{background:rgba(76,175,80,.2);border-color:#4caf50;}
+</style>
+
 <!-- WORLD CUP COUNTDOWN -->
 <section id="wc-countdown" style="background:linear-gradient(135deg,#0a1a0a 0%,#071407 50%,#0a0a0a 100%);border-top:1px solid rgba(76,175,80,.15);border-bottom:1px solid rgba(76,175,80,.15);padding:48px 24px 40px;position:relative;overflow:hidden;">
   <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(76,175,80,.08),transparent 60%);pointer-events:none;"></div>
@@ -1243,7 +1283,7 @@ html[data-mode="light"] body::before{display:none}
   const WC_START = new Date('2026-06-11T19:00:00Z');
 
   // All group stage matches — [date_bst, time_bst_HH:MM, team1, team2, group]
-  window.FIXTURES = [
+  const FIXTURES = [
     ['2026-06-12','01:00','Mexico','South Africa','A'],
     ['2026-06-12','08:00','Korea Republic','Czechia','A'],
     ['2026-06-13','01:00','Canada','Bosnia & Herzegovina','B'],
@@ -1311,7 +1351,7 @@ html[data-mode="light"] body::before{display:none}
     ['2026-06-28','08:00','Jordan','Argentina','J'],
   ];
 
-  window.parseBST = function parseBST(dateStr, timeStr) {
+  function parseBST(dateStr, timeStr) {
     const [y,m,d] = dateStr.split('-').map(Number);
     const [h,min] = timeStr.split(':').map(Number);
     return new Date(Date.UTC(y, m-1, d, h-6, min));
@@ -1330,139 +1370,39 @@ html[data-mode="light"] body::before{display:none}
     return h12 + ':' + m.toString().padStart(2,'0') + ' ' + ampm + ' BST';
   }
 
-  // ── SCORES: cached from Firebase + auto API ──
-  var WC_SCORES = {};
-  var WC_SCORES_LOADED = false;
-
-  function wcMatchKey(f) {
-    return f[0].replace(/-/g,'') + '_' + f[1].replace(':','') + '_' + f[2].replace(/\W/g,'');
-  }
-
-  // Auto-fetch scores from openfootball (free, no key, updated daily)
-  function fetchAutoScores(cb) {
-    fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json')
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      if (!data || !data.matches) { cb(false); return; }
-      var TEAM_MAP = {
-        'Mexico':'Mexico','South Africa':'South Africa','South Korea':'Korea Republic',
-        'Czech Republic':'Czechia','Canada':'Canada','Bosnia & Herzegovina':'Bosnia & Herzegovina',
-        'USA':'USA','Paraguay':'Paraguay','Qatar':'Qatar','Switzerland':'Switzerland',
-        'Brazil':'Brazil','Morocco':'Morocco','Haiti':'Haiti','Scotland':'Scotland',
-        'Australia':'Australia','Turkey':'Türkiye','Türkiye':'Türkiye',
-        'Germany':'Germany','Curacao':'Curaçao','Netherlands':'Netherlands',
-        'Japan':'Japan','Ivory Coast':'Ivory Coast','Ecuador':'Ecuador',
-        'Sweden':'Sweden','Tunisia':'Tunisia','Spain':'Spain',
-        'Cabo Verde':'Cabo Verde','Cape Verde':'Cabo Verde','Belgium':'Belgium',
-        'Egypt':'Egypt','Saudi Arabia':'Saudi Arabia','Uruguay':'Uruguay',
-        'Iran':'Iran','New Zealand':'New Zealand','France':'France',
-        'Senegal':'Senegal','Iraq':'Iraq','Norway':'Norway',
-        'Argentina':'Argentina','Algeria':'Algeria','England':'England',
-        'Panama':'Panama','Ghana':'Ghana','Croatia':'Croatia',
-        'Portugal':'Portugal','Colombia':'Colombia','Uzbekistan':'Uzbekistan',
-        'Congo':'Congo','DR Congo':'Congo','Austria':'Austria','Jordan':'Jordan'
-      };
-      data.matches.forEach(function(m) {
-        if (!m.score || !m.score.ft) return;
-        var t1 = TEAM_MAP[m.team1] || m.team1;
-        var t2 = TEAM_MAP[m.team2] || m.team2;
-        var fixture = FIXTURES.find(function(f){ return f[2]===t1 && f[3]===t2; });
-        if (!fixture) return;
-        var key = wcMatchKey(fixture);
-        // Only fill if no manual score exists
-        if (!WC_SCORES[key] || WC_SCORES[key].auto) {
-          WC_SCORES[key] = { h: m.score.ft[0], a: m.score.ft[1], auto: true };
-        }
-      });
-      cb(true);
-    })
-    .catch(function(){ cb(false); });
-  }
-
-  function loadWCScores(cb) {
-    // Load from Firebase first, then try auto API
-    fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores.json')
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
-        WC_SCORES = data && typeof data === 'object' ? data : {};
-        WC_SCORES_LOADED = true;
-        // Try auto API to fill gaps
-        fetchAutoScores(function(){ cb(); });
-      })
-      .catch(function() {
-        WC_SCORES_LOADED = true;
-        fetchAutoScores(function(){ cb(); });
-      });
-  }
-
-  function makeScoreBadge(f, now) {
-    var mt = parseBST(f[0], f[1]);
-    var diff = now - mt;
-    var isPast = diff > 105 * 60000;
-    var isLive = diff >= 0 && diff < 105 * 60000;
-    var key = wcMatchKey(f);
-    var sc = WC_SCORES[key];
-    if (isLive) return '<span style="font-size:10px;background:#e53935;color:#fff;padding:3px 10px;border-radius:10px;font-weight:700;animation:lp 1.6s infinite">🔴 LIVE</span>';
-    if (isPast && sc) return '<span style="font-size:15px;font-weight:900;color:#fff;background:rgba(255,255,255,.1);padding:3px 12px;border-radius:8px;letter-spacing:1px;">' + sc.h + ' – ' + sc.a + '</span>';
-    if (isPast) return '<span style="font-size:11px;color:#555;padding:3px 8px;">–</span>';
-    return '<div class="wc-match-time">' + formatTime12(f[1]) + '</div>';
-  }
-
   function renderMatches() {
-    loadWCScores(function() {
-      var now = new Date();
-      var list = document.getElementById('wc-matches-list');
-      var label = document.getElementById('wc-match-day-label');
+    const today = todayBST();
+    const now = new Date();
+    const list = document.getElementById('wc-matches-list');
+    const label = document.getElementById('wc-match-day-label');
 
-      var past = [], upcoming = [];
-      FIXTURES.forEach(function(f) {
-        var mt = parseBST(f[0], f[1]);
-        ((now - mt) > 105*60000 ? past : upcoming).push(f);
-      });
+    let todayMatches = FIXTURES.filter(function(f){ return f[0] === today; });
+    var useLabel = '⚽ আজকের ম্যাচ (BST)';
+    var matches = todayMatches;
 
-      var html = '';
-
-      // ── Last finished match with result ──
-      if (past.length > 0) {
-        var prev = past[past.length - 1];
-        var key = wcMatchKey(prev);
-        var sc = WC_SCORES[key];
-        var scoreStr = sc
-          ? '<span style="font-size:15px;font-weight:900;color:#fff;background:rgba(255,255,255,.1);padding:3px 12px;border-radius:8px;letter-spacing:2px;">' + sc.h + ' – ' + sc.a + '</span>'
-          : '<span style="font-size:11px;color:#555;font-style:italic;">ফলাফল নেই</span>';
-        html += '<div style="margin-bottom:10px;">'
-          + '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#666;text-transform:uppercase;margin-bottom:6px;">⏮ শেষ ম্যাচ</div>'
-          + '<div class="wc-match-row" style="opacity:.7;border-color:rgba(255,255,255,.06);">'
-          + '<div class="wc-match-teams" style="font-size:13px;">' + prev[2] + ' <span style="color:#555;">vs</span> ' + prev[3] + '</div>'
-          + '<div class="wc-match-group">GRP ' + prev[4] + '</div>'
-          + scoreStr
-          + '</div></div>'
-          + '<div style="height:1px;background:rgba(255,255,255,.05);margin-bottom:10px;"></div>';
-      }
-
-      // ── Next 2 upcoming ──
+    if (todayMatches.length === 0) {
+      var upcoming = FIXTURES.filter(function(f){ return f[0] > today; });
       if (upcoming.length > 0) {
-        html += '<div style="font-size:9px;font-weight:700;letter-spacing:2px;color:#4caf50;text-transform:uppercase;margin-bottom:6px;">⏭ আসছে ম্যাচ</div>';
-        upcoming.slice(0, 2).forEach(function(f) {
-          var mt = parseBST(f[0], f[1]);
-          var isLive = (now-mt) >= 0 && (now-mt) < 105*60000;
-          var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:700;">🔴 LIVE</span>' : '';
-          var parts = f[0].split('-');
-          var dObj = new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
-          var dateStr = dObj.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-          html += '<div class="wc-match-row" style="margin-bottom:6px;">'
-            + '<div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div>'
-            + '<div class="wc-match-group">GRP ' + f[4] + '</div>'
-            + '<div class="wc-match-time">' + dateStr + ' · ' + formatTime12(f[1]) + '</div>'
-            + '</div>';
-        });
-      } else if (past.length > 0) {
-        html += '<div style="color:#555;font-size:14px;text-align:center;padding:10px;">গ্রুপ পর্ব শেষ! 🏆</div>';
+        var nextDate = upcoming[0][0];
+        matches = FIXTURES.filter(function(f){ return f[0] === nextDate; });
+        var parts = nextDate.split('-');
+        var dObj = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+        useLabel = '📅 পরবর্তী ম্যাচ — ' + dObj.toLocaleDateString('bn-BD', {day:'numeric',month:'long'}) + ' (BST)';
+      } else {
+        list.innerHTML = '<div style="color:#555;font-size:14px;text-align:center;padding:16px;">গ্রুপ পর্ব শেষ! ⚽ Knockout Stage-এর জন্য অপেক্ষা করুন।</div>';
+        label.textContent = '🏆 Group Stage শেষ';
+        return;
       }
+    }
 
-      list.innerHTML = html || '<div style="color:#555;text-align:center;padding:16px;">লোড হচ্ছে...</div>';
-      label.textContent = '⚽ World Cup 2026';
-    });
+    label.textContent = useLabel;
+    list.innerHTML = matches.map(function(f) {
+      var matchTime = parseBST(f[0], f[1]);
+      var diff = now - matchTime;
+      var isLive = diff >= 0 && diff < 105*60000;
+      var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:700;letter-spacing:1px;animation:lp 1.6s infinite">🔴 LIVE</span>' : '';
+      return '<div class="wc-match-row"><div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div><div class="wc-match-group">GRP ' + f[4] + '</div><div class="wc-match-time">' + formatTime12(f[1]) + '</div></div>';
+    }).join('');
   }
 
   function pad(n){ return String(n).padStart(2,'0'); }
@@ -1503,6 +1443,7 @@ html[data-mode="light"] body::before{display:none}
     if (open) {
       panel.style.display = 'none';
       icon.textContent = '▼';
+      btn.querySelector('span + span') && (btn.lastChild.textContent = ' Full Fixture দেখো');
       btn.childNodes[btn.childNodes.length-1].textContent = ' Full Fixture দেখো';
     } else {
       panel.style.display = 'block';
@@ -1525,13 +1466,6 @@ html[data-mode="light"] body::before{display:none}
     var filtered = grp === 'ALL' ? FIXTURES : FIXTURES.filter(function(f){ return f[4] === grp; });
     var now = new Date();
     var today = todayBST();
-
-    // Make sure scores are loaded
-    if (!WC_SCORES_LOADED) {
-      loadWCScores(function(){ wcRenderFullFixture(grp); });
-      return;
-    }
-
     var html = '';
     var lastDate = '';
 
@@ -1544,17 +1478,17 @@ html[data-mode="light"] body::before{display:none}
         html += '<div class="wc-full-date-row">' + (isToday ? '📅 ' : '') + dateLabel + (isToday ? ' · আজ' : '') + '</div>';
         lastDate = f[0];
       }
-      var mt = parseBST(f[0], f[1]);
-      var diff = now - mt;
-      var isPast = diff > 105*60000;
+      var matchTime = parseBST(f[0], f[1]);
+      var diff = now - matchTime;
       var isLive = diff >= 0 && diff < 105*60000;
-      var rowStyle = isPast ? 'opacity:.5;' : '';
-      var badge = makeScoreBadge(f, now);
-      html += '<div class="wc-match-row" style="margin-bottom:6px;' + rowStyle + '">'
-        + '<div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + '</div>'
-        + '<div class="wc-match-group">GRP ' + f[4] + '</div>'
-        + badge
-        + '</div>';
+      var isPast = diff > 105*60000;
+      var rowStyle = isPast ? 'opacity:.45;' : '';
+      var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:700;">🔴 LIVE</span>' : '';
+      html += '<div class="wc-match-row" style="margin-bottom:6px;' + rowStyle + '">' +
+        '<div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div>' +
+        '<div class="wc-match-group">GRP ' + f[4] + '</div>' +
+        '<div class="wc-match-time">' + formatTime12(f[1]) + '</div>' +
+        '</div>';
     });
 
     if (!html) html = '<div style="color:#555;font-size:14px;text-align:center;padding:20px;">কোনো ম্যাচ নেই</div>';
@@ -2844,7 +2778,7 @@ function showMatchResults(allData, myName, myMD, myYear) {
 
 // ── LIVE EDITOR ──
 function switchTab(tab) {
-  ['data','likes','scores','live','site'].forEach(function(t) {
+  ['data','likes','live','site'].forEach(function(t) {
     var tabEl = document.getElementById('adm-tab-'+t);
     var btnEl = document.getElementById('tab-'+t);
     if (tabEl) tabEl.style.display = tab === t ? 'block' : 'none';
@@ -2853,129 +2787,7 @@ function switchTab(tab) {
   if (tab === 'site') loadSiteEditorValues();
   if (tab === 'live') loadLiveEditorValues();
   if (tab === 'likes') loadPhotoLikes();
-  if (tab === 'scores') wcScoreLoadAndRender();
 }
-
-// ── WC SCORE ADMIN ──
-var ADM_WC_SCORES = {};
-
-var WC_TEAM_MAP = {
-  'Mexico':'Mexico','South Africa':'South Africa','South Korea':'Korea Republic',
-  'Czech Republic':'Czechia','Canada':'Canada','Bosnia & Herzegovina':'Bosnia & Herzegovina',
-  'USA':'USA','Paraguay':'Paraguay','Qatar':'Qatar','Switzerland':'Switzerland',
-  'Brazil':'Brazil','Morocco':'Morocco','Haiti':'Haiti','Scotland':'Scotland',
-  'Australia':'Australia','Turkey':'Türkiye','Türkiye':'Türkiye',
-  'Germany':'Germany','Curacao':'Curaçao','Curaçao':'Curaçao',
-  'Netherlands':'Netherlands','Japan':'Japan','Ivory Coast':'Ivory Coast',
-  'Ecuador':'Ecuador','Sweden':'Sweden','Tunisia':'Tunisia','Spain':'Spain',
-  'Cabo Verde':'Cabo Verde','Cape Verde':'Cabo Verde','Belgium':'Belgium',
-  'Egypt':'Egypt','Saudi Arabia':'Saudi Arabia','Uruguay':'Uruguay',
-  'Iran':'Iran','New Zealand':'New Zealand','France':'France','Senegal':'Senegal',
-  'Iraq':'Iraq','Norway':'Norway','Argentina':'Argentina','Algeria':'Algeria',
-  'England':'England','Panama':'Panama','Ghana':'Ghana','Croatia':'Croatia',
-  'Portugal':'Portugal','Colombia':'Colombia','Uzbekistan':'Uzbekistan',
-  'Congo':'Congo','DR Congo':'Congo','Austria':'Austria','Jordan':'Jordan'
-};
-
-function wcAdmMatchKey(f){ return f[0].replace(/-/g,'')+'_'+f[1].replace(':','')+'_'+f[2].replace(/\s/g,''); }
-
-function wcAutoSync(cb){
-  fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var matches = (data.matches||[]).filter(function(m){ return m.score && m.score.ft; });
-      var pending = []; var synced = 0;
-      var FX = window.FIXTURES || [];
-      matches.forEach(function(m){
-        var t1 = WC_TEAM_MAP[m.team1]||m.team1;
-        var t2 = WC_TEAM_MAP[m.team2]||m.team2;
-        var fixture = FX.find(function(f){ return f[2]===t1 && f[3]===t2; });
-        if (!fixture) return;
-        var key = wcAdmMatchKey(fixture);
-        // Overwrite only if no manual score (auto:false means manual)
-        if (!ADM_WC_SCORES[key] || ADM_WC_SCORES[key].auto !== false) {
-          var payload = {h:m.score.ft[0], a:m.score.ft[1], auto:true};
-          pending.push(fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores/'+key+'.json',{
-            method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
-          }).then(function(){ ADM_WC_SCORES[key]=payload; synced++; }));
-        }
-      });
-      Promise.all(pending).then(function(){ if(cb) cb(synced); });
-    })
-    .catch(function(){ if(cb) cb(0); });
-}
-
-function wcScoreLoadAndRender(){
-  document.getElementById('sc-list').innerHTML='<div style="color:#555;padding:16px;text-align:center;">লোড হচ্ছে...</div>';
-  fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores.json')
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      ADM_WC_SCORES = data && typeof data==='object' ? data : {};
-      var btn = document.getElementById('sc-sync-btn');
-      if(btn) btn.textContent='🔄 Syncing...';
-      wcAutoSync(function(synced){
-        if(btn) btn.textContent = synced>0 ? '✅ '+synced+' synced' : '🌐 Auto Sync';
-        setTimeout(function(){ if(btn) btn.textContent='🌐 Auto Sync'; },3000);
-        wcScoreRenderList();
-      });
-    })
-    .catch(function(){ document.getElementById('sc-list').innerHTML='<div style="color:#e53935;padding:16px;text-align:center;">লোড সমস্যা। Firebase rules-এ wc-scores path allow করো।</div>'; });
-}
-
-window.wcScoreRenderList = function(){
-  var search=(document.getElementById('sc-search')||{}).value||'';
-  var filter=(document.getElementById('sc-filter')||{}).value||'pending';
-  var now=new Date();
-  var FX = window.FIXTURES || [];
-  var pastFixtures=FX.filter(function(f){ return (now-parseBST(f[0],f[1]))>105*60000; });
-  var filtered=pastFixtures.filter(function(f){
-    var key=wcAdmMatchKey(f); var hasSc=!!ADM_WC_SCORES[key];
-    var q=search.toLowerCase();
-    if(q && !f[2].toLowerCase().includes(q) && !f[3].toLowerCase().includes(q)) return false;
-    if(filter==='pending') return !hasSc;
-    if(filter==='done') return hasSc;
-    return true;
-  });
-  if(!filtered.length){
-    document.getElementById('sc-list').innerHTML='<div style="color:#555;padding:20px;text-align:center;">'+(filter==='pending'?'✅ সব ম্যাচের ফলাফল আছে!':'কোনো ম্যাচ নেই')+'</div>';
-    return;
-  }
-  var html=filtered.map(function(f){
-    var key=wcAdmMatchKey(f); var sc=ADM_WC_SCORES[key];
-    var parts=f[0].split('-');
-    var dObj=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
-    var dateStr=dObj.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    var autoTag=sc&&sc.auto?'<span style="font-size:10px;background:rgba(76,175,80,.15);color:#4caf50;padding:2px 8px;border-radius:8px;margin-left:6px;">🌐 auto</span>':'';
-    return '<div style="background:#111;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px 16px;">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">'
-        +'<div style="font-size:14px;font-weight:700;color:#f2f2ee;">'+f[2]+' <span style="color:#4caf50;">vs</span> '+f[3]+autoTag+'</div>'
-        +'<div style="font-size:11px;color:#555;">'+dateStr+' · GRP '+f[4]+'</div>'
-      +'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
-        +'<input type="number" min="0" max="99" id="sc-h-'+key+'" value="'+(sc?sc.h:'')+'" placeholder="'+f[2].split(' ')[0]+'" style="width:60px;background:#1c1c1c;border:1px solid rgba(76,175,80,.3);color:#fff;padding:8px;border-radius:8px;font-size:16px;font-weight:700;text-align:center;outline:none;"/>'
-        +'<span style="color:#555;font-weight:700;font-size:18px;">–</span>'
-        +'<input type="number" min="0" max="99" id="sc-a-'+key+'" value="'+(sc?sc.a:'')+'" placeholder="'+f[3].split(' ')[0]+'" style="width:60px;background:#1c1c1c;border:1px solid rgba(76,175,80,.3);color:#fff;padding:8px;border-radius:8px;font-size:16px;font-weight:700;text-align:center;outline:none;"/>'
-        +'<button onclick="wcSaveScore(\''+key+'\')" style="background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);color:#4caf50;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">💾 Save</button>'
-        +(sc?'<button onclick="wcDeleteScore(\''+key+'\')" style="background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);color:#ef5350;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;">✕</button>':'')
-      +'</div></div>';
-  }).join('');
-  document.getElementById('sc-list').innerHTML=html;
-};
-
-window.wcSaveScore=function(key){
-  var h=document.getElementById('sc-h-'+key), a=document.getElementById('sc-a-'+key);
-  if(!h||!a||h.value===''||a.value===''){ alert('দুইটা স্কোরই দিতে হবে!'); return; }
-  var payload={h:parseInt(h.value),a:parseInt(a.value),auto:false};
-  fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores/'+key+'.json',{
-    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
-  }).then(function(){ ADM_WC_SCORES[key]=payload; wcScoreRenderList(); }).catch(function(){ alert('Save হয়নি!'); });
-};
-
-window.wcDeleteScore=function(key){
-  if(!confirm('এই স্কোর মুছে দেবো?')) return;
-  fetch('https://aesthetic-sau-default-rtdb.firebaseio.com/wc-scores/'+key+'.json',{method:'DELETE'})
-    .then(function(){ delete ADM_WC_SCORES[key]; wcScoreRenderList(); }).catch(function(){ alert('মুছতে পারিনি!'); });
-};
 
 // ── PHOTO LIKES ADMIN ──
 var PL_DATA = {}; // { firebaseKey: count }
@@ -3735,18 +3547,21 @@ function toggleMenu() {
 <!-- Firebase SDK for live presence -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set, remove, onDisconnect, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set, remove, onDisconnect, serverTimestamp, increment, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-  const FIREBASE_CONFIG = { databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com" };
+  const FIREBASE_CONFIG = {
+    databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com"
+  };
+
   const app = initializeApp(FIREBASE_CONFIG, 'visitors');
   const db = getDatabase(app);
 
-  // ── Tab-unique SID (sessionStorage = per tab, not shared across tabs) ──
-  function getTabSid() {
-    let sid = sessionStorage.getItem('sau_tab_sid');
+  // ── Unique session ID ──
+  function getSessionId() {
+    let sid = sessionStorage.getItem('sau_sid');
     if (!sid) {
-      sid = 'tab_' + Math.random().toString(36).slice(2) + '_' + Date.now().toString(36);
-      sessionStorage.setItem('sau_tab_sid', sid);
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('sau_sid', sid);
     }
     return sid;
   }
@@ -3758,120 +3573,523 @@ function toggleMenu() {
   }
 
   // ── LIVE PRESENCE ──
-  const sid = getTabSid();
+  const sid = getSessionId();
   const presenceRef = ref(db, 'presence/' + sid);
   const presenceRootRef = ref(db, 'presence');
 
-  async function writePresence() {
-    await set(presenceRef, { t: Date.now() });
-    await onDisconnect(presenceRef).remove();
-  }
-  writePresence();
+  // Write presence, remove on disconnect
+  set(presenceRef, { t: Date.now() });
+  onDisconnect(presenceRef).remove();
 
-  // Heartbeat every 30s — refreshes onDisconnect & keeps entry alive
-  setInterval(() => { writePresence(); }, 30000);
-
-  // Remove stale entries older than 90s (cleanup)
-  function cleanStale(snap) {
-    if (!snap.exists()) return;
-    const now = Date.now();
-    const val = snap.val();
-    Object.keys(val).forEach(k => {
-      if (val[k] && val[k].t && (now - val[k].t) > 90000) {
-        remove(ref(db, 'presence/' + k));
-      }
-    });
-  }
-
-  // Listen to presence count
+  // ── Sync to admin panel stats ──
   onValue(presenceRootRef, (snap) => {
-    cleanStale(snap);
     const count = snap.exists() ? Object.keys(snap.val()).length : 1;
     const el = document.getElementById('live-visitor-count');
+    const dot = document.getElementById('live-visitor-dot');
     const adm = document.getElementById('stat-live-visitors');
     if (el) el.textContent = count;
+    if (dot) dot.style.opacity = '1';
     if (adm) adm.textContent = count;
   });
 
-  // Remove on tab close
-  window.addEventListener('beforeunload', () => remove(presenceRef));
+  // Heartbeat — keep presence alive every 90s
+  setInterval(() => {
+    set(presenceRef, { t: Date.now() }).catch(() => {});
+  }, 90000);
 
-  // ── DAILY VISITOR COUNT — every page load counts ──
+  // ── DAILY VISITOR COUNT ──
   const todayKey = bstDateKey();
   const dailyRef = ref(db, 'daily-visits/' + todayKey);
-  runTransaction(dailyRef, (c) => (c || 0) + 1);
 
-  const DAILY_OFFSET = 15;
+  // Check if already counted this session today
+  const seenKey = 'sau_seen_' + todayKey;
+  if (!sessionStorage.getItem(seenKey)) {
+    sessionStorage.setItem(seenKey, '1');
+    runTransaction(dailyRef, (current) => (current || 0) + 1);
+  }
+
+  // Listen for daily count
+  const DAILY_OFFSET = 15; // Default base visitors added to real count
   onValue(dailyRef, (snap) => {
-    const count = (snap.exists() ? snap.val() : 0) + DAILY_OFFSET;
+    const count = snap.exists() ? snap.val() : 0;
+    const display = count + DAILY_OFFSET;
     const el = document.getElementById('daily-visitor-count');
     const adm = document.getElementById('stat-daily-visitors');
-    if (adm) adm.textContent = count;
+    if (adm) adm.textContent = display;
     if (el) {
+      // Animate count up if first load
       if (el.textContent === '—') {
-        let s = 0; const step = Math.ceil(count / 40);
-        const t = setInterval(() => { s = Math.min(s + step, count); el.textContent = s; if (s >= count) clearInterval(t); }, 30);
-      } else { el.textContent = count; }
+        let start = 0;
+        const duration = 1200;
+        const step = Math.ceil(display / (duration / 30));
+        const timer = setInterval(() => {
+          start = Math.min(start + step, display);
+          el.textContent = start;
+          if (start >= display) clearInterval(timer);
+        }, 30);
+      } else {
+        el.textContent = display;
+      }
     }
   });
-
-  // ── TOTAL VISITOR COUNT — every page load ──
-  const TOTAL_OFFSET = 5000;
+  // ── TOTAL (CUMULATIVE) VISITOR COUNT ──
+  const TOTAL_OFFSET = 5000; // Base count before Firebase tracking started
   const totalRef = ref(db, 'total-visits');
-  runTransaction(totalRef, (c) => (c || 0) + 1);
+
+  // Increment total count once per session (reuse daily seenKey logic)
+  const totalSeenKey = 'sau_total_seen';
+  if (!sessionStorage.getItem(totalSeenKey)) {
+    sessionStorage.setItem(totalSeenKey, '1');
+    runTransaction(totalRef, (current) => (current || 0) + 1);
+  }
+
+  // Listen and display total
   onValue(totalRef, (snap) => {
-    const display = (snap.exists() ? snap.val() : 0) + TOTAL_OFFSET;
+    const real = snap.exists() ? snap.val() : 0;
+    const display = real + TOTAL_OFFSET;
     const el = document.getElementById('total-visit-count');
-    if (el) el.textContent = display.toLocaleString();
+    if (el) el.textContent = display.toLocaleString('en-BD');
   });
 </script>
 
-<!-- PRE-ORDER MODAL -->
-<div id="preorder-modal" style="display:none;position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px">
-  <div style="position:absolute;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px)" onclick="closePreOrder()"></div>
-  <div class="preorder-box">
-    <button onclick="closePreOrder()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,.08);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:13px;cursor:pointer">✕</button>
-    <div style="font-size:40px;margin-bottom:12px">🎒</div>
-    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:6px">Zipper Bag Pre-Order</div>
-    <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:24px;font-family:'Noto Serif Bengali',serif">আপনার তথ্য দিন — আমরা যোগাযোগ করব!</div>
+<!-- GAME ENGINE SCRIPT -->
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue, set, remove, push, onDisconnect, runTransaction, get, off } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-    <div id="po-form">
-      <div class="po-field">
-        <label>আপনার নাম *</label>
-        <input type="text" id="po-name" placeholder="Full Name"/>
-      </div>
-      <div class="po-field">
-        <label>মোবাইল নম্বর *</label>
-        <input type="tel" id="po-phone" placeholder="01XXXXXXXXX"/>
-      </div>
-      <div class="po-field">
-        <label>Gmail *</label>
-        <input type="email" id="po-email" placeholder="yourname@gmail.com"/>
-      </div>
-      <div class="po-field">
-        <label>Faculty</label>
-        <select id="po-faculty">
-          <option value="">Select Faculty (optional)</option>
-          <option>Agriculture</option>
-          <option>Fisheries</option>
-          <option>Veterinary, Animal and Biomedical Sciences</option>
-          <option>Agricultural Economics & Business Studies</option>
-          <option>Agricultural Engineering & Technology</option>
-          <option>Biotechnology & Genetic Engineering</option>
-        </select>
-      </div>
-      <button onclick="submitPreOrder()" class="product-order-btn" style="width:100%;justify-content:center;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;cursor:pointer;margin-top:8px" id="po-btn">
-        ✅ Pre-Order নিশ্চিত করুন
-      </button>
+// Reuse existing Firebase app or create a new one
+const FIREBASE_CONFIG = { databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com" };
+const app = getApps().find(a => a.name === 'visitors') || initializeApp(FIREBASE_CONFIG, 'game-engine');
+const db = getDatabase(app);
+
+// ── Session ID (same as presence) ──
+function getSid() {
+  let sid = sessionStorage.getItem('sau_sid');
+  if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('sau_sid', sid); }
+  return sid;
+}
+const MY_SID = getSid();
+
+// ── Visitor number ──
+function getVisitorNum() {
+  let n = sessionStorage.getItem('sau_vnum');
+  if (!n) { n = Math.floor(Math.random() * 9000) + 1000; sessionStorage.setItem('sau_vnum', n); }
+  return n;
+}
+const MY_NUM = getVisitorNum();
+const MY_NAME = 'Visitor #' + MY_NUM;
+
+// ── State ──
+let currentGameId = null;
+let currentGameType = null;
+let myRole = null; // 'host' or 'guest'
+let activeRequestId = null;
+let notifyListenerOff = null;
+let gameListenerOff = null;
+let pendingAcceptReqId = null;
+
+// ── Live visitor count sync for float widget ──
+const presenceRootRef = ref(db, 'presence');
+onValue(presenceRootRef, (snap) => {
+  const c = snap.exists() ? Object.keys(snap.val()).length : 1;
+  const el = document.getElementById('gf-live-count');
+  if (el) el.textContent = c;
+});
+
+// ── Show floating widget after 4s ──
+setTimeout(() => {
+  const el = document.getElementById('game-float');
+  if (el) { el.style.display = 'block'; el.style.animation = 'gfSlide .4s ease'; }
+}, 4000);
+
+// ── Close float ──
+window.closeGameFloat = function() {
+  const el = document.getElementById('game-float');
+  if (el) el.style.display = 'none';
+};
+
+// ── Listen for incoming game requests (not my own) ──
+function listenForRequests() {
+  const reqRef = ref(db, 'game-requests');
+  onValue(reqRef, (snap) => {
+    if (!snap.exists()) return;
+    const all = snap.val();
+    const now = Date.now();
+    Object.entries(all).forEach(([rid, req]) => {
+      if (!req || req.fromSid === MY_SID) return;
+      if (req.status !== 'waiting') return;
+      if (now - req.ts > 30000) return; // ignore if older than 30s
+      showIncomingNotify(rid, req);
+    });
+  });
+}
+
+let shownNotifyIds = new Set();
+
+function showIncomingNotify(rid, req) {
+  if (shownNotifyIds.has(rid)) return;
+  shownNotifyIds.add(rid);
+  const gameNames = { ttt: 'Tic Tac Toe', rps: 'Rock Paper Scissors' };
+  const el = document.getElementById('game-notify');
+  const msg = document.getElementById('gn-msg');
+  const btn = document.getElementById('gn-accept');
+  if (!el || !msg || !btn) return;
+  msg.textContent = req.fromName + ' আপনাকে ' + (gameNames[req.gameType] || req.gameType) + ' খেলার জন্য request করেছেন!';
+  btn.onclick = () => acceptRequest(rid, req);
+  el.style.display = 'block';
+  pendingAcceptReqId = rid;
+  // Auto-dismiss after 20s
+  setTimeout(() => {
+    if (el.style.display !== 'none') dismissNotify();
+  }, 20000);
+}
+
+window.dismissNotify = function() {
+  const el = document.getElementById('game-notify');
+  if (el) el.style.display = 'none';
+};
+
+async function acceptRequest(rid, req) {
+  dismissNotify();
+  // Try to claim the request via transaction
+  const reqRef = ref(db, 'game-requests/' + rid + '/status');
+  let claimed = false;
+  await runTransaction(reqRef, (current) => {
+    if (current === 'waiting') { claimed = true; return 'matched'; }
+    return current; // abort
+  }).then(res => { claimed = res.committed; }).catch(() => {});
+
+  if (!claimed) {
+    showToast('আরেকজন আগেই join করেছেন! নতুন request-এর জন্য অপেক্ষা করুন।');
+    return;
+  }
+
+  // Write guest info into request
+  await set(ref(db, 'game-requests/' + rid + '/guestSid'), MY_SID);
+  await set(ref(db, 'game-requests/' + rid + '/guestName'), MY_NAME);
+
+  // Create or join game room
+  const gameId = rid; // use request id as game id
+  currentGameId = gameId;
+  currentGameType = req.gameType;
+  myRole = 'guest';
+
+  // Initialize game in Firebase
+  const initBoard = req.gameType === 'ttt' ? Array(9).fill('') : {};
+  await set(ref(db, 'game-rooms/' + gameId), {
+    type: req.gameType,
+    host: req.fromSid,
+    hostName: req.fromName,
+    guest: MY_SID,
+    guestName: MY_NAME,
+    board: initBoard,
+    turn: req.fromSid, // host goes first
+    status: 'playing',
+    ts: Date.now()
+  });
+
+  openGameRoom(gameId, req.gameType);
+}
+
+// ── Open game lobby (send request) ──
+window.openGameLobby = function(gameType) {
+  closeGameFloat();
+  // Close modal if already open with different content
+  const modal = document.getElementById('game-modal');
+  const gmBody = document.getElementById('gm-body');
+  const gmTitle = document.getElementById('gm-title');
+  if (!modal || !gmBody || !gmTitle) return;
+
+  const names = { ttt: '⭕ Tic Tac Toe', rps: '✂️ Rock Paper Scissors' };
+  gmTitle.textContent = names[gameType] || gameType;
+
+  gmBody.innerHTML = `
+    <div style="text-align:center;padding:10px 0 20px;">
+      <div style="font-size:48px;margin-bottom:16px;">${gameType === 'ttt' ? '⭕' : '✂️'}</div>
+      <p style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.7;">সব live visitors-কে একটা game request পাঠানো হবে।<br>যে আগে Accept করবেন তার সাথে game শুরু হবে!</p>
+      <button onclick="sendGameRequest('${gameType}')" style="background:#4caf50;border:none;color:#000;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:all .2s;" onmouseover="this.style.background='#6abf5e'" onmouseout="this.style.background='#4caf50'">🎮 Request পাঠান</button>
+    </div>`;
+
+  modal.style.display = 'flex';
+};
+
+window.sendGameRequest = async function(gameType) {
+  const gmBody = document.getElementById('gm-body');
+  gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;"><div style="font-size:40px;margin-bottom:16px;animation:gfSlide .5s ease;">⏳</div><p style="color:rgba(255,255,255,.7);font-size:14px;margin-bottom:8px;font-weight:600;">Request পাঠানো হচ্ছে...</p><p style="color:rgba(255,255,255,.4);font-size:12px;line-height:1.7;">যে কেউ accept করলে game শুরু হবে।<br>অন্য কেউ request পাঠালে আপনিও join করতে পারবেন!</p><div id="req-timer" style="margin-top:20px;font-size:28px;font-weight:700;color:#4caf50;font-family:'Inter',sans-serif;">30</div><p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;">সেকেন্ড বাকি</p><button onclick="cancelRequest()" style="margin-top:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);padding:8px 24px;border-radius:8px;font-size:12px;cursor:pointer;">Cancel</button></div>`;
+
+  // Push request to Firebase
+  const reqRef = ref(db, 'game-requests');
+  const newReq = await push(reqRef, {
+    fromSid: MY_SID,
+    fromName: MY_NAME,
+    gameType: gameType,
+    status: 'waiting',
+    ts: Date.now()
+  });
+  activeRequestId = newReq.key;
+  currentGameType = gameType;
+  myRole = 'host';
+
+  // Countdown timer
+  let secs = 30;
+  const timerEl = document.getElementById('req-timer');
+  const countdown = setInterval(() => {
+    secs--;
+    if (timerEl) timerEl.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(countdown);
+      cancelRequest(true);
+    }
+  }, 1000);
+
+  // Listen for someone accepting
+  const thisReqRef = ref(db, 'game-requests/' + activeRequestId);
+  onValue(thisReqRef, async (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.val();
+    if (data.status === 'matched' && data.guestSid) {
+      clearInterval(countdown);
+      off(thisReqRef);
+      currentGameId = activeRequestId;
+      // Show matched animation
+      if (gmBody) gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;"><div style="font-size:48px;margin-bottom:12px;">🎉</div><p style="color:#4caf50;font-size:16px;font-weight:700;margin-bottom:4px;">${data.guestName} join করেছেন!</p><p style="color:rgba(255,255,255,.5);font-size:12px;">Game শুরু হচ্ছে...</p></div>`;
+      setTimeout(() => openGameRoom(currentGameId, gameType), 1200);
+    }
+  });
+};
+
+window.cancelRequest = async function(auto = false) {
+  if (activeRequestId) {
+    await remove(ref(db, 'game-requests/' + activeRequestId)).catch(() => {});
+    activeRequestId = null;
+  }
+  if (!auto) closeGameModal();
+};
+
+// ── Open game room ──
+function openGameRoom(gameId, gameType) {
+  const modal = document.getElementById('game-modal');
+  const gmBody = document.getElementById('gm-body');
+  const gmTitle = document.getElementById('gm-title');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  gmTitle.textContent = gameType === 'ttt' ? '⭕ Tic Tac Toe' : '✂️ Rock Paper Scissors';
+
+  if (gameType === 'ttt') renderTTT(gameId);
+  else if (gameType === 'rps') renderRPS(gameId);
+}
+
+// ═══════════════════════════════════════
+// TIC TAC TOE
+// ═══════════════════════════════════════
+function renderTTT(gameId) {
+  const gmBody = document.getElementById('gm-body');
+  gmBody.innerHTML = `
+    <div id="ttt-status" style="text-align:center;font-size:13px;color:rgba(255,255,255,.6);margin-bottom:16px;font-weight:600;min-height:20px;">লোড হচ্ছে...</div>
+    <div id="ttt-info" style="display:flex;justify-content:space-between;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,.5);"></div>
+    <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 auto 20px;max-width:290px;"></div>
+    <div id="ttt-result" style="display:none;text-align:center;padding:16px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:12px;margin-bottom:16px;"></div>
+    <button onclick="playAgainTTT('${gameId}')" id="ttt-again" style="display:none;width:100%;background:#4caf50;border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">🔄 আবার খেলুন</button>`;
+
+  const gameRef = ref(db, 'game-rooms/' + gameId);
+  if (gameListenerOff) gameListenerOff();
+  gameListenerOff = () => off(gameRef);
+
+  onValue(gameRef, (snap) => {
+    if (!snap.exists()) {
+      gmBody.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.4);padding:40px 0;">Game শেষ হয়ে গেছে।</p>';
+      return;
+    }
+    const g = snap.val();
+    const board = g.board || Array(9).fill('');
+    const isMyTurn = g.turn === MY_SID;
+    const amHost = g.host === MY_SID;
+    const mySymbol = amHost ? 'X' : 'O';
+    const oppSymbol = amHost ? 'O' : 'X';
+    const oppName = amHost ? g.guestName : g.hostName;
+
+    // Info bar
+    const info = document.getElementById('ttt-info');
+    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${mySymbol} (${MY_NAME})</b></span><span>প্রতিপক্ষ: <b style="color:#f2f2ee">${oppSymbol} (${oppName || '...'})</b></span>`;
+
+    // Status
+    const statusEl = document.getElementById('ttt-status');
+    const winner = checkWinnerTTT(board);
+    if (winner) {
+      const winnerSid = winner === mySymbol ? MY_SID : (amHost ? g.guest : g.host);
+      const resultEl = document.getElementById('ttt-result');
+      const againBtn = document.getElementById('ttt-again');
+      if (statusEl) statusEl.textContent = winnerSid === MY_SID ? '🎉 আপনি জিতেছেন!' : '😔 আপনি হেরেছেন!';
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = `<div style="font-size:28px;margin-bottom:8px">${winnerSid === MY_SID ? '🏆' : '😢'}</div><div style="font-size:16px;font-weight:700;color:${winnerSid === MY_SID ? '#4caf50' : '#f2f2ee'}">${winnerSid === MY_SID ? 'আপনি জিতেছেন!' : (amHost ? g.guestName : g.hostName) + ' জিতেছেন!'}</div>`; }
+      if (againBtn) againBtn.style.display = 'block';
+    } else if (!board.includes('')) {
+      if (statusEl) statusEl.textContent = '🤝 ড্র! কেউ জিতেনি।';
+      const resultEl = document.getElementById('ttt-result');
+      const againBtn = document.getElementById('ttt-again');
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<div style="font-size:28px;margin-bottom:8px">🤝</div><div style="font-size:16px;font-weight:700;color:#f2f2ee">ড্র!</div>'; }
+      if (againBtn) againBtn.style.display = 'block';
+    } else {
+      if (statusEl) statusEl.textContent = isMyTurn ? '👆 আপনার পালা!' : `⏳ ${oppName || 'প্রতিপক্ষ'}-এর পালা...`;
+    }
+
+    // Board
+    const boardEl = document.getElementById('ttt-board');
+    if (!boardEl) return;
+    boardEl.innerHTML = '';
+    board.forEach((cell, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'ttt-cell';
+      btn.textContent = cell;
+      btn.style.color = cell === 'X' ? '#4caf50' : '#f87171';
+      if (cell) btn.setAttribute('data-filled', '1');
+      if (!cell && isMyTurn && !winner && board.includes('')) {
+        btn.onclick = () => makeTTTMove(gameId, board, i, mySymbol, amHost ? g.guest : g.host);
+      }
+      boardEl.appendChild(btn);
+    });
+  });
+}
+
+function checkWinnerTTT(b) {
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (const [a,c,d] of lines) { if (b[a] && b[a]===b[c] && b[a]===b[d]) return b[a]; }
+  return null;
+}
+
+async function makeTTTMove(gameId, board, idx, symbol, oppSid) {
+  const newBoard = [...board];
+  newBoard[idx] = symbol;
+  await set(ref(db, 'game-rooms/' + gameId + '/board'), newBoard);
+  await set(ref(db, 'game-rooms/' + gameId + '/turn'), oppSid);
+}
+
+window.playAgainTTT = async function(gameId) {
+  const gameRef = ref(db, 'game-rooms/' + gameId);
+  const snap = await get(gameRef);
+  if (!snap.exists()) return;
+  const g = snap.val();
+  await set(ref(db, 'game-rooms/' + gameId + '/board'), Array(9).fill(''));
+  await set(ref(db, 'game-rooms/' + gameId + '/turn'), g.guest); // guest goes first next
+  await set(ref(db, 'game-rooms/' + gameId + '/status'), 'playing');
+  document.getElementById('ttt-result').style.display = 'none';
+  document.getElementById('ttt-again').style.display = 'none';
+};
+
+// ═══════════════════════════════════════
+// ROCK PAPER SCISSORS
+// ═══════════════════════════════════════
+function renderRPS(gameId) {
+  const gmBody = document.getElementById('gm-body');
+  gmBody.innerHTML = `
+    <div id="rps-status" style="text-align:center;font-size:13px;color:rgba(255,255,255,.6);margin-bottom:16px;font-weight:600;">লোড হচ্ছে...</div>
+    <div id="rps-info" style="display:flex;justify-content:space-between;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,.5);"></div>
+    <div id="rps-choices" style="display:flex;gap:10px;margin-bottom:20px;">
+      <button class="rps-btn" onclick="makeRPSChoice('${gameId}','rock')">🪨<span style="font-size:11px;font-weight:600;">Rock</span></button>
+      <button class="rps-btn" onclick="makeRPSChoice('${gameId}','paper')">📄<span style="font-size:11px;font-weight:600;">Paper</span></button>
+      <button class="rps-btn" onclick="makeRPSChoice('${gameId}','scissors')">✂️<span style="font-size:11px;font-weight:600;">Scissors</span></button>
     </div>
+    <div id="rps-result" style="display:none;text-align:center;padding:16px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:12px;margin-bottom:16px;"></div>
+    <button onclick="playAgainRPS('${gameId}')" id="rps-again" style="display:none;width:100%;background:#4caf50;border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">🔄 আবার খেলুন</button>`;
 
-    <div id="po-success" style="display:none;text-align:center;padding:20px 0">
-      <div style="font-size:52px;margin-bottom:16px">🎉</div>
-      <div style="font-size:20px;font-weight:700;color:#a78bfa;margin-bottom:10px">Pre-Order সম্পন্ন!</div>
-      <div style="font-size:14px;color:rgba(255,255,255,.6);font-family:'Noto Serif Bengali',serif;line-height:1.9">আপনার pre-order সফলভাবে নথিভুক্ত হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব!</div>
-    </div>
-  </div>
-</div>
+  const gameRef = ref(db, 'game-rooms/' + gameId);
+  if (gameListenerOff) gameListenerOff();
+  gameListenerOff = () => off(gameRef);
 
-</body>
+  onValue(gameRef, (snap) => {
+    if (!snap.exists()) return;
+    const g = snap.val();
+    const amHost = g.host === MY_SID;
+    const myKey = amHost ? 'hostChoice' : 'guestChoice';
+    const oppKey = amHost ? 'guestChoice' : 'hostChoice';
+    const oppName = amHost ? (g.guestName || '...') : (g.hostName || '...');
+    const myChoice = g[myKey];
+    const oppChoice = g[oppKey];
+
+    const info = document.getElementById('rps-info');
+    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${MY_NAME}</b></span><span>প্রতিপক্ষ: <b style="color:#f2f2ee">${oppName}</b></span>`;
+
+    const statusEl = document.getElementById('rps-status');
+    const choiceBtns = document.querySelectorAll('.rps-btn');
+    const resultEl = document.getElementById('rps-result');
+    const againBtn = document.getElementById('rps-again');
+
+    if (myChoice && oppChoice) {
+      // Both chose, show result
+      const emoji = { rock: '🪨', paper: '📄', scissors: '✂️' };
+      const result = getRPSResult(myChoice, oppChoice);
+      let msg, color;
+      if (result === 'win') { msg = '🏆 আপনি জিতেছেন!'; color = '#4caf50'; }
+      else if (result === 'lose') { msg = '😔 আপনি হেরেছেন!'; color = '#f87171'; }
+      else { msg = '🤝 ড্র!'; color = '#f2f2ee'; }
+      if (statusEl) statusEl.textContent = 'ফলাফল দেখুন:';
+      if (resultEl) {
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;gap:24px;margin-bottom:12px;"><div style="text-align:center"><div style="font-size:36px">${emoji[myChoice]}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">আপনি</div></div><div style="font-size:20px;color:rgba(255,255,255,.3)">VS</div><div style="text-align:center"><div style="font-size:36px">${emoji[oppChoice]}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${oppName}</div></div></div><div style="font-size:18px;font-weight:700;color:${color}">${msg}</div>`;
+      }
+      if (againBtn) againBtn.style.display = 'block';
+      choiceBtns.forEach(b => b.disabled = true);
+    } else if (myChoice) {
+      if (statusEl) statusEl.textContent = `⏳ ${oppName}-এর জন্য অপেক্ষা করছি...`;
+      choiceBtns.forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
+    } else {
+      if (statusEl) statusEl.textContent = '👆 আপনার choice বেছে নিন!';
+    }
+  });
+}
+
+function getRPSResult(mine, opp) {
+  if (mine === opp) return 'draw';
+  if ((mine==='rock'&&opp==='scissors')||(mine==='scissors'&&opp==='paper')||(mine==='paper'&&opp==='rock')) return 'win';
+  return 'lose';
+}
+
+window.makeRPSChoice = async function(gameId, choice) {
+  const snap = await get(ref(db, 'game-rooms/' + gameId));
+  if (!snap.exists()) return;
+  const g = snap.val();
+  const amHost = g.host === MY_SID;
+  const myKey = amHost ? 'hostChoice' : 'guestChoice';
+  if (g[myKey]) return; // already chose
+  await set(ref(db, 'game-rooms/' + gameId + '/' + myKey), choice);
+  // highlight chosen btn
+  document.querySelectorAll('.rps-btn').forEach(b => b.classList.remove('chosen'));
+  const map = { rock: 0, paper: 1, scissors: 2 };
+  const btns = document.querySelectorAll('.rps-btn');
+  if (btns[map[choice]]) btns[map[choice]].classList.add('chosen');
+};
+
+window.playAgainRPS = async function(gameId) {
+  const gameRef = ref(db, 'game-rooms/' + gameId);
+  await set(ref(db, 'game-rooms/' + gameId + '/hostChoice'), null);
+  await set(ref(db, 'game-rooms/' + gameId + '/guestChoice'), null);
+  document.getElementById('rps-result').style.display = 'none';
+  document.getElementById('rps-again').style.display = 'none';
+  document.querySelectorAll('.rps-btn').forEach(b => { b.disabled = false; b.style.opacity = '1'; b.classList.remove('chosen'); });
+};
+
+// ── Close modal ──
+window.closeGameModal = function() {
+  const modal = document.getElementById('game-modal');
+  if (modal) modal.style.display = 'none';
+  if (gameListenerOff) { gameListenerOff(); gameListenerOff = null; }
+  if (activeRequestId) { cancelRequest(true); }
+};
+
+// ── Toast helper ──
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.97);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:10px 20px;border-radius:10px;font-size:13px;z-index:99999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ── Start listening for incoming requests ──
+listenForRequests();
+
+// ── Cleanup on close ──
+window.addEventListener('beforeunload', () => {
+  if (activeRequestId) remove(ref(db, 'game-requests/' + activeRequestId)).catch(() => {});
+});
+</script>
 </html>
