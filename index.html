@@ -1107,7 +1107,7 @@ html[data-mode="light"] body::before{display:none}
 <!-- VISITOR BAR -->
 <div id="visitor-bar" style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);padding:8px 20px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;">
   <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.5px;">
-    <span style="width:7px;height:7px;border-radius:50%;background:#4caf50;box-shadow:0 0 6px #4caf50;display:inline-block;animation:vbpulse 1.8s infinite;flex-shrink:0;"></span>
+    <span id="live-visitor-dot" style="width:7px;height:7px;border-radius:50%;background:#4caf50;box-shadow:0 0 6px #4caf50;display:inline-block;animation:vbpulse 1.8s infinite;flex-shrink:0;"></span>
     Live Visitor <span id="live-visitor-count" style="color:#fff;font-size:13px;font-weight:700;min-width:18px;text-align:center;">—</span>
   </span>
   <span style="width:1px;height:14px;background:rgba(255,255,255,.12);display:inline-block;"></span>
@@ -3544,204 +3544,148 @@ function toggleMenu() {
 })();
 </script>
 
-<!-- Firebase SDK for live presence -->
+<!-- Firebase: Presence + Visits + Games + Chat -->
 <script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set, remove, onDisconnect, serverTimestamp, increment, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue, set, remove, push, onDisconnect, runTransaction, get, off, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-  const FIREBASE_CONFIG = {
-    databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com"
-  };
-
-  const app = initializeApp(FIREBASE_CONFIG, 'visitors');
-  const db = getDatabase(app);
-
-  // ── Unique session ID ──
-  function getSessionId() {
-    let sid = sessionStorage.getItem('sau_sid');
-    if (!sid) {
-      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      sessionStorage.setItem('sau_sid', sid);
-    }
-    return sid;
-  }
-
-  // ── BST date key ──
-  function bstDateKey() {
-    const bst = new Date(Date.now() + 6 * 3600000);
-    return bst.toISOString().slice(0, 10).replace(/-/g, '');
-  }
-
-  // ── LIVE PRESENCE ──
-  const sid = getSessionId();
-  const presenceRef = ref(db, 'presence/' + sid);
-  const presenceRootRef = ref(db, 'presence');
-
-  // Write presence, remove on disconnect
-  set(presenceRef, { t: Date.now() });
-  onDisconnect(presenceRef).remove();
-
-  // ── Sync to admin panel stats ──
-  onValue(presenceRootRef, (snap) => {
-    const count = snap.exists() ? Object.keys(snap.val()).length : 1;
-    const el = document.getElementById('live-visitor-count');
-    const dot = document.getElementById('live-visitor-dot');
-    const adm = document.getElementById('stat-live-visitors');
-    if (el) el.textContent = count;
-    if (dot) dot.style.opacity = '1';
-    if (adm) adm.textContent = count;
-  });
-
-  // Heartbeat — keep presence alive every 90s
-  setInterval(() => {
-    set(presenceRef, { t: Date.now() }).catch(() => {});
-  }, 90000);
-
-  // ── DAILY VISITOR COUNT ──
-  const todayKey = bstDateKey();
-  const dailyRef = ref(db, 'daily-visits/' + todayKey);
-
-  // Check if already counted this session today
-  const seenKey = 'sau_seen_' + todayKey;
-  if (!sessionStorage.getItem(seenKey)) {
-    sessionStorage.setItem(seenKey, '1');
-    runTransaction(dailyRef, (current) => (current || 0) + 1);
-  }
-
-  // Listen for daily count
-  const DAILY_OFFSET = 15; // Default base visitors added to real count
-  onValue(dailyRef, (snap) => {
-    const count = snap.exists() ? snap.val() : 0;
-    const display = count + DAILY_OFFSET;
-    const el = document.getElementById('daily-visitor-count');
-    const adm = document.getElementById('stat-daily-visitors');
-    if (adm) adm.textContent = display;
-    if (el) {
-      // Animate count up if first load
-      if (el.textContent === '—') {
-        let start = 0;
-        const duration = 1200;
-        const step = Math.ceil(display / (duration / 30));
-        const timer = setInterval(() => {
-          start = Math.min(start + step, display);
-          el.textContent = start;
-          if (start >= display) clearInterval(timer);
-        }, 30);
-      } else {
-        el.textContent = display;
-      }
-    }
-  });
-  // ── TOTAL (CUMULATIVE) VISITOR COUNT ──
-  const TOTAL_OFFSET = 5000; // Base count before Firebase tracking started
-  const totalRef = ref(db, 'total-visits');
-
-  // Increment total count once per session (reuse daily seenKey logic)
-  const totalSeenKey = 'sau_total_seen';
-  if (!sessionStorage.getItem(totalSeenKey)) {
-    sessionStorage.setItem(totalSeenKey, '1');
-    runTransaction(totalRef, (current) => (current || 0) + 1);
-  }
-
-  // Listen and display total
-  onValue(totalRef, (snap) => {
-    const real = snap.exists() ? snap.val() : 0;
-    const display = real + TOTAL_OFFSET;
-    const el = document.getElementById('total-visit-count');
-    if (el) el.textContent = display.toLocaleString('en-BD');
-  });
-</script>
-
-<!-- GAME ENGINE SCRIPT -->
-<script type="module">
-import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, onValue, set, remove, push, onDisconnect, runTransaction, get, off } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
-// Reuse existing Firebase app or create a new one
 const FIREBASE_CONFIG = { databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com" };
-const app = getApps().find(a => a.name === 'visitors') || initializeApp(FIREBASE_CONFIG, 'game-engine');
+const app = initializeApp(FIREBASE_CONFIG, 'sau-main');
 const db = getDatabase(app);
 
-// ── Session ID (same as presence) ──
+// ── Session ID ──
 function getSid() {
   let sid = sessionStorage.getItem('sau_sid');
   if (!sid) { sid = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('sau_sid', sid); }
   return sid;
 }
-const MY_SID = getSid();
-
-// ── Visitor number ──
 function getVisitorNum() {
   let n = sessionStorage.getItem('sau_vnum');
   if (!n) { n = Math.floor(Math.random() * 9000) + 1000; sessionStorage.setItem('sau_vnum', n); }
   return n;
 }
+function bstDateKey() {
+  const bst = new Date(Date.now() + 6 * 3600000);
+  return bst.toISOString().slice(0, 10).replace(/-/g, '');
+}
+
+const MY_SID = getSid();
 const MY_NUM = getVisitorNum();
 const MY_NAME = 'Visitor #' + MY_NUM;
 
-// ── State ──
-let currentGameId = null;
-let currentGameType = null;
-let myRole = null; // 'host' or 'guest'
-let activeRequestId = null;
-let notifyListenerOff = null;
-let gameListenerOff = null;
-let pendingAcceptReqId = null;
-
-// ── Live visitor count sync for float widget ──
+// ══════════════════════════════════════════
+// LIVE PRESENCE
+// ══════════════════════════════════════════
+const presenceRef = ref(db, 'presence/' + MY_SID);
 const presenceRootRef = ref(db, 'presence');
+
+set(presenceRef, { t: Date.now() });
+onDisconnect(presenceRef).remove();
+
 onValue(presenceRootRef, (snap) => {
-  const c = snap.exists() ? Object.keys(snap.val()).length : 1;
-  const el = document.getElementById('gf-live-count');
-  if (el) el.textContent = c;
+  const count = snap.exists() ? Object.keys(snap.val()).length : 1;
+  const el = document.getElementById('live-visitor-count');
+  const dot = document.getElementById('live-visitor-dot');
+  const adm = document.getElementById('stat-live-visitors');
+  const gfEl = document.getElementById('gf-live-count');
+  if (el) el.textContent = count;
+  if (dot) dot.style.opacity = '1';
+  if (adm) adm.textContent = count;
+  if (gfEl) gfEl.textContent = count;
 });
 
-// ── Show floating widget after 4s ──
+setInterval(() => { set(presenceRef, { t: Date.now() }).catch(() => {}); }, 90000);
+
+// ══════════════════════════════════════════
+// DAILY VISITOR COUNT
+// ══════════════════════════════════════════
+const todayKey = bstDateKey();
+const dailyRef = ref(db, 'daily-visits/' + todayKey);
+const seenKey = 'sau_seen_' + todayKey;
+if (!sessionStorage.getItem(seenKey)) {
+  sessionStorage.setItem(seenKey, '1');
+  runTransaction(dailyRef, (current) => (current || 0) + 1);
+}
+const DAILY_OFFSET = 15;
+onValue(dailyRef, (snap) => {
+  const count = snap.exists() ? snap.val() : 0;
+  const display = count + DAILY_OFFSET;
+  const el = document.getElementById('daily-visitor-count');
+  const adm = document.getElementById('stat-daily-visitors');
+  if (adm) adm.textContent = display;
+  if (el) {
+    if (el.textContent === '—') {
+      let start = 0; const step = Math.ceil(display / 40);
+      const timer = setInterval(() => { start = Math.min(start + step, display); el.textContent = start; if (start >= display) clearInterval(timer); }, 30);
+    } else { el.textContent = display; }
+  }
+});
+
+// ══════════════════════════════════════════
+// TOTAL VISITOR COUNT
+// ══════════════════════════════════════════
+const TOTAL_OFFSET = 5000;
+const totalRef = ref(db, 'total-visits');
+const totalSeenKey = 'sau_total_seen';
+if (!sessionStorage.getItem(totalSeenKey)) {
+  sessionStorage.setItem(totalSeenKey, '1');
+  runTransaction(totalRef, (current) => (current || 0) + 1);
+}
+onValue(totalRef, (snap) => {
+  const real = snap.exists() ? snap.val() : 0;
+  const display = real + TOTAL_OFFSET;
+  const el = document.getElementById('total-visit-count');
+  if (el) el.textContent = display.toLocaleString('en-BD');
+});
+
+// ══════════════════════════════════════════
+// GAME ENGINE
+// ══════════════════════════════════════════
+let currentGameId = null;
+let currentGameType = null;
+let myRole = null;
+let activeRequestId = null;
+let gameListenerOff = null;
+let shownNotifyIds = new Set();
+
+// Show floating widget after 4s
 setTimeout(() => {
   const el = document.getElementById('game-float');
-  if (el) { el.style.display = 'block'; el.style.animation = 'gfSlide .4s ease'; }
+  if (el) el.style.display = 'block';
 }, 4000);
 
-// ── Close float ──
 window.closeGameFloat = function() {
   const el = document.getElementById('game-float');
   if (el) el.style.display = 'none';
 };
 
-// ── Listen for incoming game requests (not my own) ──
+// ── Listen for incoming game requests ──
 function listenForRequests() {
   const reqRef = ref(db, 'game-requests');
   onValue(reqRef, (snap) => {
     if (!snap.exists()) return;
-    const all = snap.val();
     const now = Date.now();
-    Object.entries(all).forEach(([rid, req]) => {
+    Object.entries(snap.val()).forEach(([rid, req]) => {
       if (!req || req.fromSid === MY_SID) return;
       if (req.status !== 'waiting') return;
-      if (now - req.ts > 30000) return; // ignore if older than 30s
+      if (now - req.ts > 30000) return;
       showIncomingNotify(rid, req);
     });
   });
 }
 
-let shownNotifyIds = new Set();
-
 function showIncomingNotify(rid, req) {
   if (shownNotifyIds.has(rid)) return;
   shownNotifyIds.add(rid);
-  const gameNames = { ttt: 'Tic Tac Toe', rps: 'Rock Paper Scissors' };
+  const names = { ttt: 'Tic Tac Toe', rps: 'Rock Paper Scissors' };
   const el = document.getElementById('game-notify');
   const msg = document.getElementById('gn-msg');
   const btn = document.getElementById('gn-accept');
   if (!el || !msg || !btn) return;
-  msg.textContent = req.fromName + ' আপনাকে ' + (gameNames[req.gameType] || req.gameType) + ' খেলার জন্য request করেছেন!';
+  msg.textContent = req.fromName + ' আপনাকে ' + (names[req.gameType] || req.gameType) + ' খেলার request করেছেন!';
   btn.onclick = () => acceptRequest(rid, req);
   el.style.display = 'block';
-  pendingAcceptReqId = rid;
-  // Auto-dismiss after 20s
-  setTimeout(() => {
-    if (el.style.display !== 'none') dismissNotify();
-  }, 20000);
+  setTimeout(() => { if (el.style.display !== 'none') dismissNotify(); }, 20000);
 }
 
 window.dismissNotify = function() {
@@ -3751,107 +3695,74 @@ window.dismissNotify = function() {
 
 async function acceptRequest(rid, req) {
   dismissNotify();
-  // Try to claim the request via transaction
-  const reqRef = ref(db, 'game-requests/' + rid + '/status');
   let claimed = false;
-  await runTransaction(reqRef, (current) => {
+  const reqStatusRef = ref(db, 'game-requests/' + rid + '/status');
+  await runTransaction(reqStatusRef, (current) => {
     if (current === 'waiting') { claimed = true; return 'matched'; }
-    return current; // abort
+    return current;
   }).then(res => { claimed = res.committed; }).catch(() => {});
-
-  if (!claimed) {
-    showToast('আরেকজন আগেই join করেছেন! নতুন request-এর জন্য অপেক্ষা করুন।');
-    return;
-  }
-
-  // Write guest info into request
+  if (!claimed) { showToast('আরেকজন আগেই join করেছেন!'); return; }
   await set(ref(db, 'game-requests/' + rid + '/guestSid'), MY_SID);
   await set(ref(db, 'game-requests/' + rid + '/guestName'), MY_NAME);
-
-  // Create or join game room
-  const gameId = rid; // use request id as game id
-  currentGameId = gameId;
+  currentGameId = rid;
   currentGameType = req.gameType;
   myRole = 'guest';
-
-  // Initialize game in Firebase
   const initBoard = req.gameType === 'ttt' ? Array(9).fill('') : {};
-  await set(ref(db, 'game-rooms/' + gameId), {
-    type: req.gameType,
-    host: req.fromSid,
-    hostName: req.fromName,
-    guest: MY_SID,
-    guestName: MY_NAME,
-    board: initBoard,
-    turn: req.fromSid, // host goes first
-    status: 'playing',
-    ts: Date.now()
+  await set(ref(db, 'game-rooms/' + rid), {
+    type: req.gameType, host: req.fromSid, hostName: req.fromName,
+    guest: MY_SID, guestName: MY_NAME,
+    board: initBoard, turn: req.fromSid, status: 'playing', ts: Date.now()
   });
-
-  openGameRoom(gameId, req.gameType);
+  openGameRoom(rid, req.gameType);
 }
 
-// ── Open game lobby (send request) ──
 window.openGameLobby = function(gameType) {
   closeGameFloat();
-  // Close modal if already open with different content
   const modal = document.getElementById('game-modal');
   const gmBody = document.getElementById('gm-body');
   const gmTitle = document.getElementById('gm-title');
-  if (!modal || !gmBody || !gmTitle) return;
-
+  if (!modal) return;
   const names = { ttt: '⭕ Tic Tac Toe', rps: '✂️ Rock Paper Scissors' };
-  gmTitle.textContent = names[gameType] || gameType;
-
+  gmTitle.textContent = names[gameType];
   gmBody.innerHTML = `
     <div style="text-align:center;padding:10px 0 20px;">
-      <div style="font-size:48px;margin-bottom:16px;">${gameType === 'ttt' ? '⭕' : '✂️'}</div>
-      <p style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.7;">সব live visitors-কে একটা game request পাঠানো হবে।<br>যে আগে Accept করবেন তার সাথে game শুরু হবে!</p>
-      <button onclick="sendGameRequest('${gameType}')" style="background:#4caf50;border:none;color:#000;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:all .2s;" onmouseover="this.style.background='#6abf5e'" onmouseout="this.style.background='#4caf50'">🎮 Request পাঠান</button>
+      <div style="font-size:52px;margin-bottom:16px;">${gameType === 'ttt' ? '⭕' : '✂️'}</div>
+      <p style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.8;">সব live visitors-কে একটা game request পাঠানো হবে।<br>যে আগে Accept করবেন তার সাথে game শুরু হবে!</p>
+      <button onclick="sendGameRequest('${gameType}')" style="background:#4caf50;border:none;color:#000;padding:14px 40px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;width:100%;">🎮 Request পাঠান</button>
     </div>`;
-
   modal.style.display = 'flex';
 };
 
 window.sendGameRequest = async function(gameType) {
   const gmBody = document.getElementById('gm-body');
-  gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;"><div style="font-size:40px;margin-bottom:16px;animation:gfSlide .5s ease;">⏳</div><p style="color:rgba(255,255,255,.7);font-size:14px;margin-bottom:8px;font-weight:600;">Request পাঠানো হচ্ছে...</p><p style="color:rgba(255,255,255,.4);font-size:12px;line-height:1.7;">যে কেউ accept করলে game শুরু হবে।<br>অন্য কেউ request পাঠালে আপনিও join করতে পারবেন!</p><div id="req-timer" style="margin-top:20px;font-size:28px;font-weight:700;color:#4caf50;font-family:'Inter',sans-serif;">30</div><p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;">সেকেন্ড বাকি</p><button onclick="cancelRequest()" style="margin-top:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);padding:8px 24px;border-radius:8px;font-size:12px;cursor:pointer;">Cancel</button></div>`;
-
-  // Push request to Firebase
+  gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;">
+    <div style="font-size:40px;margin-bottom:16px;">⏳</div>
+    <p style="color:rgba(255,255,255,.7);font-size:14px;margin-bottom:6px;font-weight:600;">Matching হচ্ছে...</p>
+    <p style="color:rgba(255,255,255,.4);font-size:12px;line-height:1.7;">যে কেউ accept করলে game শুরু হবে।</p>
+    <div id="req-timer" style="margin-top:20px;font-size:32px;font-weight:700;color:#4caf50;">30</div>
+    <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;">সেকেন্ড বাকি</p>
+    <button onclick="cancelRequest()" style="margin-top:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);padding:8px 24px;border-radius:8px;font-size:12px;cursor:pointer;">Cancel</button>
+  </div>`;
   const reqRef = ref(db, 'game-requests');
-  const newReq = await push(reqRef, {
-    fromSid: MY_SID,
-    fromName: MY_NAME,
-    gameType: gameType,
-    status: 'waiting',
-    ts: Date.now()
-  });
+  const newReq = await push(reqRef, { fromSid: MY_SID, fromName: MY_NAME, gameType, status: 'waiting', ts: Date.now() });
   activeRequestId = newReq.key;
   currentGameType = gameType;
   myRole = 'host';
-
-  // Countdown timer
   let secs = 30;
   const timerEl = document.getElementById('req-timer');
   const countdown = setInterval(() => {
     secs--;
     if (timerEl) timerEl.textContent = secs;
-    if (secs <= 0) {
-      clearInterval(countdown);
-      cancelRequest(true);
-    }
+    if (secs <= 0) { clearInterval(countdown); cancelRequest(true); }
   }, 1000);
-
-  // Listen for someone accepting
   const thisReqRef = ref(db, 'game-requests/' + activeRequestId);
-  onValue(thisReqRef, async (snap) => {
+  onValue(thisReqRef, (snap) => {
     if (!snap.exists()) return;
     const data = snap.val();
     if (data.status === 'matched' && data.guestSid) {
       clearInterval(countdown);
       off(thisReqRef);
       currentGameId = activeRequestId;
-      // Show matched animation
       if (gmBody) gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;"><div style="font-size:48px;margin-bottom:12px;">🎉</div><p style="color:#4caf50;font-size:16px;font-weight:700;margin-bottom:4px;">${data.guestName} join করেছেন!</p><p style="color:rgba(255,255,255,.5);font-size:12px;">Game শুরু হচ্ছে...</p></div>`;
       setTimeout(() => openGameRoom(currentGameId, gameType), 1200);
     }
@@ -3859,80 +3770,57 @@ window.sendGameRequest = async function(gameType) {
 };
 
 window.cancelRequest = async function(auto = false) {
-  if (activeRequestId) {
-    await remove(ref(db, 'game-requests/' + activeRequestId)).catch(() => {});
-    activeRequestId = null;
-  }
+  if (activeRequestId) { await remove(ref(db, 'game-requests/' + activeRequestId)).catch(() => {}); activeRequestId = null; }
   if (!auto) closeGameModal();
 };
 
-// ── Open game room ──
 function openGameRoom(gameId, gameType) {
   const modal = document.getElementById('game-modal');
-  const gmBody = document.getElementById('gm-body');
   const gmTitle = document.getElementById('gm-title');
   if (!modal) return;
   modal.style.display = 'flex';
-  gmTitle.textContent = gameType === 'ttt' ? '⭕ Tic Tac Toe' : '✂️ Rock Paper Scissors';
-
+  if (gmTitle) gmTitle.textContent = gameType === 'ttt' ? '⭕ Tic Tac Toe' : '✂️ Rock Paper Scissors';
   if (gameType === 'ttt') renderTTT(gameId);
   else if (gameType === 'rps') renderRPS(gameId);
 }
 
-// ═══════════════════════════════════════
-// TIC TAC TOE
-// ═══════════════════════════════════════
+// ══ TIC TAC TOE ══
 function renderTTT(gameId) {
   const gmBody = document.getElementById('gm-body');
   gmBody.innerHTML = `
-    <div id="ttt-status" style="text-align:center;font-size:13px;color:rgba(255,255,255,.6);margin-bottom:16px;font-weight:600;min-height:20px;">লোড হচ্ছে...</div>
-    <div id="ttt-info" style="display:flex;justify-content:space-between;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,.5);"></div>
-    <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 auto 20px;max-width:290px;"></div>
-    <div id="ttt-result" style="display:none;text-align:center;padding:16px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:12px;margin-bottom:16px;"></div>
-    <button onclick="playAgainTTT('${gameId}')" id="ttt-again" style="display:none;width:100%;background:#4caf50;border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">🔄 আবার খেলুন</button>`;
-
+    <div id="ttt-status" style="text-align:center;font-size:13px;color:rgba(255,255,255,.6);margin-bottom:14px;font-weight:600;min-height:20px;">লোড হচ্ছে...</div>
+    <div id="ttt-info" style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:12px;color:rgba(255,255,255,.45);padding:0 2px;"></div>
+    <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 auto 16px;max-width:290px;"></div>
+    <div id="ttt-result" style="display:none;text-align:center;padding:14px;background:rgba(76,175,80,.07);border:1px solid rgba(76,175,80,.2);border-radius:12px;margin-bottom:14px;"></div>
+    <button onclick="playAgainTTT('${gameId}')" id="ttt-again" style="display:none;width:100%;background:#4caf50;border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;">🔄 আবার খেলুন</button>
+    <div id="game-chat-area" data-gameid="${gameId}"></div>`;
+  renderChatArea(gameId);
   const gameRef = ref(db, 'game-rooms/' + gameId);
   if (gameListenerOff) gameListenerOff();
   gameListenerOff = () => off(gameRef);
-
   onValue(gameRef, (snap) => {
-    if (!snap.exists()) {
-      gmBody.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.4);padding:40px 0;">Game শেষ হয়ে গেছে।</p>';
-      return;
-    }
+    if (!snap.exists()) { gmBody.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.4);padding:40px 0;">Game শেষ হয়ে গেছে।</p>'; return; }
     const g = snap.val();
     const board = g.board || Array(9).fill('');
     const isMyTurn = g.turn === MY_SID;
     const amHost = g.host === MY_SID;
     const mySymbol = amHost ? 'X' : 'O';
-    const oppSymbol = amHost ? 'O' : 'X';
-    const oppName = amHost ? g.guestName : g.hostName;
-
-    // Info bar
+    const oppName = amHost ? (g.guestName || '...') : (g.hostName || '...');
+    const oppSid = amHost ? g.guest : g.host;
     const info = document.getElementById('ttt-info');
-    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${mySymbol} (${MY_NAME})</b></span><span>প্রতিপক্ষ: <b style="color:#f2f2ee">${oppSymbol} (${oppName || '...'})</b></span>`;
-
-    // Status
+    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${mySymbol} · ${MY_NAME}</b></span><span>vs <b style="color:#f2f2ee">${oppName}</b></span>`;
     const statusEl = document.getElementById('ttt-status');
     const winner = checkWinnerTTT(board);
-    if (winner) {
-      const winnerSid = winner === mySymbol ? MY_SID : (amHost ? g.guest : g.host);
+    if (winner || !board.includes('')) {
+      const winnerSid = winner ? (winner === mySymbol ? MY_SID : oppSid) : null;
+      if (statusEl) statusEl.textContent = !winner ? '🤝 ড্র!' : (winnerSid === MY_SID ? '🎉 আপনি জিতেছেন!' : '😔 হেরেছেন!');
       const resultEl = document.getElementById('ttt-result');
       const againBtn = document.getElementById('ttt-again');
-      if (statusEl) statusEl.textContent = winnerSid === MY_SID ? '🎉 আপনি জিতেছেন!' : '😔 আপনি হেরেছেন!';
-      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = `<div style="font-size:28px;margin-bottom:8px">${winnerSid === MY_SID ? '🏆' : '😢'}</div><div style="font-size:16px;font-weight:700;color:${winnerSid === MY_SID ? '#4caf50' : '#f2f2ee'}">${winnerSid === MY_SID ? 'আপনি জিতেছেন!' : (amHost ? g.guestName : g.hostName) + ' জিতেছেন!'}</div>`; }
-      if (againBtn) againBtn.style.display = 'block';
-    } else if (!board.includes('')) {
-      if (statusEl) statusEl.textContent = '🤝 ড্র! কেউ জিতেনি।';
-      const resultEl = document.getElementById('ttt-result');
-      const againBtn = document.getElementById('ttt-again');
-      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<div style="font-size:28px;margin-bottom:8px">🤝</div><div style="font-size:16px;font-weight:700;color:#f2f2ee">ড্র!</div>'; }
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = `<div style="font-size:28px;margin-bottom:6px">${!winner ? '🤝' : winnerSid === MY_SID ? '🏆' : '😢'}</div><div style="font-size:15px;font-weight:700;color:${!winner ? '#f2f2ee' : winnerSid === MY_SID ? '#4caf50' : '#f87171'}">${!winner ? 'ড্র!' : winnerSid === MY_SID ? 'আপনি জিতেছেন!' : oppName + ' জিতেছেন!'}</div>`; }
       if (againBtn) againBtn.style.display = 'block';
     } else {
-      if (statusEl) statusEl.textContent = isMyTurn ? '👆 আপনার পালা!' : `⏳ ${oppName || 'প্রতিপক্ষ'}-এর পালা...`;
+      if (statusEl) statusEl.textContent = isMyTurn ? '👆 আপনার পালা!' : `⏳ ${oppName}-এর পালা...`;
     }
-
-    // Board
     const boardEl = document.getElementById('ttt-board');
     if (!boardEl) return;
     boardEl.innerHTML = '';
@@ -3942,9 +3830,8 @@ function renderTTT(gameId) {
       btn.textContent = cell;
       btn.style.color = cell === 'X' ? '#4caf50' : '#f87171';
       if (cell) btn.setAttribute('data-filled', '1');
-      if (!cell && isMyTurn && !winner && board.includes('')) {
-        btn.onclick = () => makeTTTMove(gameId, board, i, mySymbol, amHost ? g.guest : g.host);
-      }
+      if (!cell && isMyTurn && !winner && board.includes(''))
+        btn.onclick = () => makeTTTMove(gameId, board, i, mySymbol, oppSid);
       boardEl.appendChild(btn);
     });
   });
@@ -3955,46 +3842,39 @@ function checkWinnerTTT(b) {
   for (const [a,c,d] of lines) { if (b[a] && b[a]===b[c] && b[a]===b[d]) return b[a]; }
   return null;
 }
-
 async function makeTTTMove(gameId, board, idx, symbol, oppSid) {
-  const newBoard = [...board];
-  newBoard[idx] = symbol;
+  const newBoard = [...board]; newBoard[idx] = symbol;
   await set(ref(db, 'game-rooms/' + gameId + '/board'), newBoard);
   await set(ref(db, 'game-rooms/' + gameId + '/turn'), oppSid);
 }
-
 window.playAgainTTT = async function(gameId) {
-  const gameRef = ref(db, 'game-rooms/' + gameId);
-  const snap = await get(gameRef);
+  const snap = await get(ref(db, 'game-rooms/' + gameId));
   if (!snap.exists()) return;
   const g = snap.val();
   await set(ref(db, 'game-rooms/' + gameId + '/board'), Array(9).fill(''));
-  await set(ref(db, 'game-rooms/' + gameId + '/turn'), g.guest); // guest goes first next
-  await set(ref(db, 'game-rooms/' + gameId + '/status'), 'playing');
+  await set(ref(db, 'game-rooms/' + gameId + '/turn'), g.guest);
   document.getElementById('ttt-result').style.display = 'none';
   document.getElementById('ttt-again').style.display = 'none';
 };
 
-// ═══════════════════════════════════════
-// ROCK PAPER SCISSORS
-// ═══════════════════════════════════════
+// ══ ROCK PAPER SCISSORS ══
 function renderRPS(gameId) {
   const gmBody = document.getElementById('gm-body');
   gmBody.innerHTML = `
-    <div id="rps-status" style="text-align:center;font-size:13px;color:rgba(255,255,255,.6);margin-bottom:16px;font-weight:600;">লোড হচ্ছে...</div>
-    <div id="rps-info" style="display:flex;justify-content:space-between;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,.5);"></div>
-    <div id="rps-choices" style="display:flex;gap:10px;margin-bottom:20px;">
+    <div id="rps-status" style="text-align:center;font-size:13px;color:rgba(255,255,255,.6);margin-bottom:14px;font-weight:600;">👆 আপনার choice বেছে নিন!</div>
+    <div id="rps-info" style="display:flex;justify-content:space-between;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,.45);padding:0 2px;"></div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
       <button class="rps-btn" onclick="makeRPSChoice('${gameId}','rock')">🪨<span style="font-size:11px;font-weight:600;">Rock</span></button>
       <button class="rps-btn" onclick="makeRPSChoice('${gameId}','paper')">📄<span style="font-size:11px;font-weight:600;">Paper</span></button>
       <button class="rps-btn" onclick="makeRPSChoice('${gameId}','scissors')">✂️<span style="font-size:11px;font-weight:600;">Scissors</span></button>
     </div>
-    <div id="rps-result" style="display:none;text-align:center;padding:16px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:12px;margin-bottom:16px;"></div>
-    <button onclick="playAgainRPS('${gameId}')" id="rps-again" style="display:none;width:100%;background:#4caf50;border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">🔄 আবার খেলুন</button>`;
-
+    <div id="rps-result" style="display:none;text-align:center;padding:14px;background:rgba(76,175,80,.07);border:1px solid rgba(76,175,80,.2);border-radius:12px;margin-bottom:14px;"></div>
+    <button onclick="playAgainRPS('${gameId}')" id="rps-again" style="display:none;width:100%;background:#4caf50;border:none;color:#000;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;">🔄 আবার খেলুন</button>
+    <div id="game-chat-area" data-gameid="${gameId}"></div>`;
+  renderChatArea(gameId);
   const gameRef = ref(db, 'game-rooms/' + gameId);
   if (gameListenerOff) gameListenerOff();
   gameListenerOff = () => off(gameRef);
-
   onValue(gameRef, (snap) => {
     if (!snap.exists()) return;
     const g = snap.val();
@@ -4004,90 +3884,121 @@ function renderRPS(gameId) {
     const oppName = amHost ? (g.guestName || '...') : (g.hostName || '...');
     const myChoice = g[myKey];
     const oppChoice = g[oppKey];
-
     const info = document.getElementById('rps-info');
-    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${MY_NAME}</b></span><span>প্রতিপক্ষ: <b style="color:#f2f2ee">${oppName}</b></span>`;
-
+    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${MY_NAME}</b></span><span>vs <b style="color:#f2f2ee">${oppName}</b></span>`;
     const statusEl = document.getElementById('rps-status');
-    const choiceBtns = document.querySelectorAll('.rps-btn');
+    const btns = document.querySelectorAll('.rps-btn');
     const resultEl = document.getElementById('rps-result');
     const againBtn = document.getElementById('rps-again');
-
     if (myChoice && oppChoice) {
-      // Both chose, show result
       const emoji = { rock: '🪨', paper: '📄', scissors: '✂️' };
-      const result = getRPSResult(myChoice, oppChoice);
-      let msg, color;
-      if (result === 'win') { msg = '🏆 আপনি জিতেছেন!'; color = '#4caf50'; }
-      else if (result === 'lose') { msg = '😔 আপনি হেরেছেন!'; color = '#f87171'; }
-      else { msg = '🤝 ড্র!'; color = '#f2f2ee'; }
-      if (statusEl) statusEl.textContent = 'ফলাফল দেখুন:';
-      if (resultEl) {
-        resultEl.style.display = 'block';
-        resultEl.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;gap:24px;margin-bottom:12px;"><div style="text-align:center"><div style="font-size:36px">${emoji[myChoice]}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">আপনি</div></div><div style="font-size:20px;color:rgba(255,255,255,.3)">VS</div><div style="text-align:center"><div style="font-size:36px">${emoji[oppChoice]}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${oppName}</div></div></div><div style="font-size:18px;font-weight:700;color:${color}">${msg}</div>`;
-      }
+      const res = getRPSResult(myChoice, oppChoice);
+      const msg = res==='win' ? '🏆 আপনি জিতেছেন!' : res==='lose' ? '😔 আপনি হেরেছেন!' : '🤝 ড্র!';
+      const col = res==='win' ? '#4caf50' : res==='lose' ? '#f87171' : '#f2f2ee';
+      if (statusEl) statusEl.textContent = 'ফলাফল:';
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = `<div style="display:flex;justify-content:center;align-items:center;gap:24px;margin-bottom:12px;"><div style="text-align:center"><div style="font-size:38px">${emoji[myChoice]}</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">আপনি</div></div><div style="font-size:18px;color:rgba(255,255,255,.25)">VS</div><div style="text-align:center"><div style="font-size:38px">${emoji[oppChoice]}</div><div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">${oppName}</div></div></div><div style="font-size:18px;font-weight:700;color:${col}">${msg}</div>`; }
       if (againBtn) againBtn.style.display = 'block';
-      choiceBtns.forEach(b => b.disabled = true);
+      btns.forEach(b => b.disabled = true);
     } else if (myChoice) {
       if (statusEl) statusEl.textContent = `⏳ ${oppName}-এর জন্য অপেক্ষা করছি...`;
-      choiceBtns.forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
-    } else {
-      if (statusEl) statusEl.textContent = '👆 আপনার choice বেছে নিন!';
+      btns.forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
     }
   });
 }
-
 function getRPSResult(mine, opp) {
   if (mine === opp) return 'draw';
   if ((mine==='rock'&&opp==='scissors')||(mine==='scissors'&&opp==='paper')||(mine==='paper'&&opp==='rock')) return 'win';
   return 'lose';
 }
-
 window.makeRPSChoice = async function(gameId, choice) {
   const snap = await get(ref(db, 'game-rooms/' + gameId));
   if (!snap.exists()) return;
-  const g = snap.val();
-  const amHost = g.host === MY_SID;
+  const g = snap.val(); const amHost = g.host === MY_SID;
   const myKey = amHost ? 'hostChoice' : 'guestChoice';
-  if (g[myKey]) return; // already chose
+  if (g[myKey]) return;
   await set(ref(db, 'game-rooms/' + gameId + '/' + myKey), choice);
-  // highlight chosen btn
-  document.querySelectorAll('.rps-btn').forEach(b => b.classList.remove('chosen'));
-  const map = { rock: 0, paper: 1, scissors: 2 };
-  const btns = document.querySelectorAll('.rps-btn');
-  if (btns[map[choice]]) btns[map[choice]].classList.add('chosen');
+  document.querySelectorAll('.rps-btn').forEach((b,i) => { const map={rock:0,paper:1,scissors:2}; b.classList.toggle('chosen', i===map[choice]); });
 };
-
 window.playAgainRPS = async function(gameId) {
-  const gameRef = ref(db, 'game-rooms/' + gameId);
   await set(ref(db, 'game-rooms/' + gameId + '/hostChoice'), null);
   await set(ref(db, 'game-rooms/' + gameId + '/guestChoice'), null);
   document.getElementById('rps-result').style.display = 'none';
   document.getElementById('rps-again').style.display = 'none';
-  document.querySelectorAll('.rps-btn').forEach(b => { b.disabled = false; b.style.opacity = '1'; b.classList.remove('chosen'); });
+  document.querySelectorAll('.rps-btn').forEach(b => { b.disabled=false; b.style.opacity='1'; b.classList.remove('chosen'); });
 };
 
-// ── Close modal ──
+// ══════════════════════════════════════════
+// IN-GAME CHAT
+// ══════════════════════════════════════════
+function renderChatArea(gameId) {
+  const area = document.getElementById('game-chat-area');
+  if (!area) return;
+  area.innerHTML = `
+    <div style="border-top:1px solid rgba(255,255,255,.08);margin-top:8px;padding-top:14px;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">💬 Game Chat</div>
+      <div id="chat-messages" style="height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:10px;padding-right:4px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input id="chat-input" type="text" placeholder="Message লিখুন..." maxlength="120"
+          style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;color:#f2f2ee;font-size:13px;outline:none;font-family:inherit;"
+          onkeydown="if(event.key==='Enter')sendChatMsg('${gameId}')"
+          onfocus="this.style.borderColor='rgba(76,175,80,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        <button onclick="sendChatMsg('${gameId}')" style="background:#4caf50;border:none;color:#000;padding:8px 14px;border-radius:8px;font-size:18px;cursor:pointer;font-weight:700;line-height:1;">&#10148;</button>
+      </div>
+    </div>`;
+  // Listen for chat messages
+  const chatRef = ref(db, 'game-chat/' + gameId);
+  onValue(chatRef, (snap) => {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!snap.exists()) { container.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,.25);text-align:center;margin-top:20px;">এখনো কোনো message নেই</div>'; return; }
+    const msgs = snap.val();
+    Object.values(msgs).sort((a,b) => a.ts - b.ts).forEach(msg => {
+      const isMe = msg.sid === MY_SID;
+      const div = document.createElement('div');
+      div.style.cssText = `display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};`;
+      div.innerHTML = `
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:2px;${isMe?'text-align:right':''}">${isMe?'আপনি':msg.name}</div>
+        <div style="background:${isMe?'rgba(76,175,80,.2)':'rgba(255,255,255,.07)'};border:1px solid ${isMe?'rgba(76,175,80,.3)':'rgba(255,255,255,.1)'};border-radius:${isMe?'12px 12px 2px 12px':'12px 12px 12px 2px'};padding:7px 11px;font-size:13px;color:#f2f2ee;max-width:220px;word-break:break-word;line-height:1.5;">${escHtml(msg.text)}</div>`;
+      container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+window.sendChatMsg = async function(gameId) {
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  const chatRef = ref(db, 'game-chat/' + gameId);
+  await push(chatRef, { sid: MY_SID, name: MY_NAME, text, ts: Date.now() });
+};
+
+// ── Modal close ──
 window.closeGameModal = function() {
   const modal = document.getElementById('game-modal');
   if (modal) modal.style.display = 'none';
   if (gameListenerOff) { gameListenerOff(); gameListenerOff = null; }
-  if (activeRequestId) { cancelRequest(true); }
+  if (activeRequestId) cancelRequest(true);
 };
 
-// ── Toast helper ──
+// ── Toast ──
 function showToast(msg) {
   const t = document.createElement('div');
   t.textContent = msg;
-  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.97);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:10px 20px;border-radius:10px;font-size:13px;z-index:99999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,.97);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:10px 20px;border-radius:10px;font-size:13px;z-index:99999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.6);';
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }
 
-// ── Start listening for incoming requests ──
 listenForRequests();
 
-// ── Cleanup on close ──
 window.addEventListener('beforeunload', () => {
   if (activeRequestId) remove(ref(db, 'game-requests/' + activeRequestId)).catch(() => {});
 });
