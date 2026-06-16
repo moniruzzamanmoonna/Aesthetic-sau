@@ -828,6 +828,7 @@ html[data-mode="light"] body::before{display:none}
       <div class="adm-stat"><div class="adm-stat-num" id="stat-photo-likes">—</div><div class="adm-stat-lbl">📷 মোট Photo Likes</div></div>
       <div class="adm-stat"><div class="adm-stat-num" id="stat-live-visitors">—</div><div class="adm-stat-lbl">🟢 এখন Active</div></div>
       <div class="adm-stat"><div class="adm-stat-num" id="stat-daily-visitors">—</div><div class="adm-stat-lbl">📅 আজ Visited</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="stat-games-played">—</div><div class="adm-stat-lbl">🎮 Games Played</div></div>
     </div>
     <input type="text" class="adm-search" id="adm-search" placeholder="🔍 নাম বা Faculty দিয়ে খুঁজুন..." oninput="filterTable()"/>
     <div class="adm-table-wrap">
@@ -1120,6 +1121,7 @@ html[data-mode="light"] body::before{display:none}
 <!-- GAME SECTION (below visitor bar) -->
 <div id="game-section" style="background:rgba(10,10,10,.95);border-bottom:1px solid rgba(76,175,80,.15);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
   <span style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">🎮 Live Games</span>
+  <span style="font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.5px;">(<span id="total-games-count">—</span> games played)</span>
   <button onclick="openGameLobby('ttt')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#4caf50';this.style.color='#4caf50'" onmouseout="this.style.borderColor='rgba(76,175,80,.25)';this.style.color='rgba(255,255,255,.7)'">&#9898; Tic Tac Toe</button>
   <button onclick="openGameLobby('rps')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#4caf50';this.style.color='#4caf50'" onmouseout="this.style.borderColor='rgba(76,175,80,.25)';this.style.color='rgba(255,255,255,.7)'">&#9986; Rock Paper Scissors</button>
 </div>
@@ -1371,37 +1373,57 @@ html[data-mode="light"] body::before{display:none}
   }
 
   function renderMatches() {
-    const today = todayBST();
-    const now = new Date();
-    const list = document.getElementById('wc-matches-list');
-    const label = document.getElementById('wc-match-day-label');
+    var now = new Date();
+    // BST = UTC+6
+    var bstNow = new Date(now.getTime() + 6*3600000);
+    var list = document.getElementById('wc-matches-list');
+    var label = document.getElementById('wc-match-day-label');
 
-    let todayMatches = FIXTURES.filter(function(f){ return f[0] === today; });
-    var useLabel = '⚽ আজকের ম্যাচ (BST)';
-    var matches = todayMatches;
-
-    if (todayMatches.length === 0) {
-      var upcoming = FIXTURES.filter(function(f){ return f[0] > today; });
-      if (upcoming.length > 0) {
-        var nextDate = upcoming[0][0];
-        matches = FIXTURES.filter(function(f){ return f[0] === nextDate; });
-        var parts = nextDate.split('-');
-        var dObj = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
-        useLabel = '📅 পরবর্তী ম্যাচ — ' + dObj.toLocaleDateString('bn-BD', {day:'numeric',month:'long'}) + ' (BST)';
-      } else {
-        list.innerHTML = '<div style="color:#555;font-size:14px;text-align:center;padding:16px;">গ্রুপ পর্ব শেষ! ⚽ Knockout Stage-এর জন্য অপেক্ষা করুন।</div>';
-        label.textContent = '🏆 Group Stage শেষ';
-        return;
-      }
+    // Convert each fixture to a UTC timestamp for comparison
+    function fixtureMs(f) {
+      var parts = f[0].split('-');
+      var timeParts = f[1].split(':');
+      // f[1] is BST time, convert to UTC
+      return Date.UTC(Number(parts[0]), Number(parts[1])-1, Number(parts[2]),
+                      Number(timeParts[0]) - 6, Number(timeParts[1]));
     }
 
-    label.textContent = useLabel;
-    list.innerHTML = matches.map(function(f) {
-      var matchTime = parseBST(f[0], f[1]);
-      var diff = now - matchTime;
+    // Filter: match hasn't finished yet (match end = start + 105min)
+    var upcoming = FIXTURES.filter(function(f){
+      return fixtureMs(f) + 105*60000 > now.getTime();
+    });
+
+    // Sort by time
+    upcoming.sort(function(a,b){ return fixtureMs(a) - fixtureMs(b); });
+
+    // Take next 3
+    var next3 = upcoming.slice(0, 3);
+
+    if (next3.length === 0) {
+      list.innerHTML = '<div style="color:#555;font-size:14px;text-align:center;padding:16px;">গ্রুপ পর্ব শেষ! ⚽ Knockout Stage-এর জন্য অপেক্ষা করুন।</div>';
+      label.textContent = '🏆 Group Stage শেষ';
+      return;
+    }
+
+    label.textContent = '📅 Upcoming Matches (BST)';
+    list.innerHTML = next3.map(function(f) {
+      var fMs = fixtureMs(f);
+      var diff = now.getTime() - fMs;
       var isLive = diff >= 0 && diff < 105*60000;
-      var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:8px;font-weight:700;letter-spacing:1px;animation:lp 1.6s infinite">🔴 LIVE</span>' : '';
-      return '<div class="wc-match-row"><div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div><div class="wc-match-group">GRP ' + f[4] + '</div><div class="wc-match-time">' + formatTime12(f[1]) + '</div></div>';
+      // Date label in BST
+      var bstMatch = new Date(fMs + 6*3600000);
+      var todayStr = bstNow.toISOString().slice(0,10);
+      var matchStr = bstMatch.toISOString().slice(0,10);
+      var isToday = todayStr === matchStr;
+      var dateLabel = isToday
+        ? '🔵 আজ'
+        : bstMatch.toLocaleDateString('bn-BD', {day:'numeric', month:'short', timeZone:'UTC'});
+      var liveTag = isLive ? '<span style="font-size:10px;background:#e53935;color:#fff;padding:2px 8px;border-radius:10px;margin-left:6px;font-weight:700;letter-spacing:1px;animation:lp 1.6s infinite">🔴 LIVE</span>' : '';
+      return '<div class="wc-match-row">'
+        + '<div class="wc-match-teams">' + f[2] + ' <span style="color:#4caf50;font-weight:400;">vs</span> ' + f[3] + liveTag + '</div>'
+        + '<div class="wc-match-group" style="font-size:10px;color:rgba(255,255,255,.45);">' + dateLabel + ' · GRP ' + f[4] + '</div>'
+        + '<div class="wc-match-time">' + formatTime12(f[1]) + '</div>'
+        + '</div>';
     }).join('');
   }
 
@@ -3579,20 +3601,20 @@ const MY_NAME = 'Visitor #' + MY_NUM;
 const presenceRef = ref(db, 'presence/' + MY_SID);
 const presenceRootRef = ref(db, 'presence');
 
-set(presenceRef, { t: Date.now() });
-onDisconnect(presenceRef).remove();
-
-onValue(presenceRootRef, (snap) => {
-  const count = snap.exists() ? Object.keys(snap.val()).length : 1;
-  const el = document.getElementById('live-visitor-count');
-  const dot = document.getElementById('live-visitor-dot');
-  const adm = document.getElementById('stat-live-visitors');
-  const gfEl = document.getElementById('gf-live-count');
-  if (el) el.textContent = count;
-  if (dot) dot.style.opacity = '1';
-  if (adm) adm.textContent = count;
-  if (gfEl) gfEl.textContent = count;
+set(presenceRef, { t: Date.now() }).then(() => {
+  onValue(presenceRootRef, (snap) => {
+    const count = snap.exists() ? Object.keys(snap.val()).length : 1;
+    const el = document.getElementById('live-visitor-count');
+    const dot = document.getElementById('live-visitor-dot');
+    const adm = document.getElementById('stat-live-visitors');
+    const gfEl = document.getElementById('gf-live-count');
+    if (el) el.textContent = count;
+    if (dot) { dot.style.opacity = '1'; dot.style.background = '#4caf50'; }
+    if (adm) adm.textContent = count;
+    if (gfEl) gfEl.textContent = count;
+  });
 });
+onDisconnect(presenceRef).remove();
 
 setInterval(() => { set(presenceRef, { t: Date.now() }).catch(() => {}); }, 90000);
 
@@ -3713,6 +3735,7 @@ async function acceptRequest(rid, req) {
     guest: MY_SID, guestName: MY_NAME,
     board: initBoard, turn: req.fromSid, status: 'playing', ts: Date.now()
   });
+  runTransaction(ref(db, 'total-games'), (cur) => (cur || 0) + 1);
   openGameRoom(rid, req.gameType);
 }
 
@@ -3996,6 +4019,15 @@ function showToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }
+
+// Listen to total games played
+onValue(ref(db, 'total-games'), (snap) => {
+  const n = snap.exists() ? snap.val() : 0;
+  const el = document.getElementById('total-games-count');
+  const adm = document.getElementById('stat-games-played');
+  if (el) el.textContent = n;
+  if (adm) adm.textContent = n;
+});
 
 listenForRequests();
 
