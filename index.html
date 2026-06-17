@@ -1859,6 +1859,32 @@ html[data-mode="light"] body::before{display:none}
 .cwm-dot:hover { border-color: rgba(255,255,255,.3); color: #fff; background: rgba(255,255,255,.08); }
 .cwm-dot.cwm-dot-on { background: rgba(76,175,80,.15); border-color: #4caf50; color: #fff; transform: scale(1.15); box-shadow: 0 0 12px rgba(76,175,80,.25); }
 
+/* Caption button & overlay */
+.cwm-info-btn {
+  position: absolute; top: 12px; right: 12px; z-index: 5;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(255,255,255,.3);
+  color: #fff; font-size: 14px; font-weight: 700; font-style: italic;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .2s; font-family: Georgia, serif; line-height: 1;
+}
+.cwm-info-btn:hover, .cwm-info-btn.cwm-cap-active {
+  background: rgba(76,175,80,.8); border-color: #4caf50;
+}
+.cwm-caption-overlay {
+  position: absolute; inset: 0; z-index: 4;
+  background: rgba(0,0,0,.82); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 28px; text-align: center;
+  font-size: 14px; color: rgba(255,255,255,.85); line-height: 1.8;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s ease;
+}
+.cwm-caption-overlay.cwm-cap-open {
+  opacity: 1; pointer-events: all;
+}
+
 /* Inner photo slider (multiple photos per winner) */
 .cw-inner-slider { position: relative; width: 100%; height: 100%; overflow: hidden; }
 .cwin-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease; }
@@ -2446,11 +2472,11 @@ function renderWinners() {
   }
 
   var rankMeta = {
-    1: { emoji:'🥇', label:'১ম পুরস্কার',  sub:'Champion',       cls:'rank-1', grad:'linear-gradient(135deg,rgba(245,200,66,.18),rgba(245,200,66,.04))' },
-    2: { emoji:'🥈', label:'২য় পুরস্কার',  sub:'যৌথভাবে',        cls:'rank-2', grad:'linear-gradient(135deg,rgba(176,190,197,.12),rgba(176,190,197,.03))' },
-    3: { emoji:'🥉', label:'৩য় পুরস্কার',  sub:'যৌথভাবে',        cls:'rank-3', grad:'linear-gradient(135deg,rgba(205,127,50,.14),rgba(205,127,50,.03))' },
-    4: { emoji:'🏅', label:'৪র্থ পুরস্কার', sub:'',              cls:'rank-4', grad:'linear-gradient(135deg,rgba(76,175,80,.1),rgba(76,175,80,.02))' },
-    5: { emoji:'🏅', label:'৫ম পুরস্কার',  sub:'',              cls:'rank-5', grad:'linear-gradient(135deg,rgba(76,175,80,.1),rgba(76,175,80,.02))' }
+    1: { emoji:'🥇', label:'1st Prize',  sub:'Champion',    cls:'rank-1', grad:'linear-gradient(135deg,rgba(245,200,66,.18),rgba(245,200,66,.04))' },
+    2: { emoji:'🥈', label:'2nd Prize',  sub:'Joint',       cls:'rank-2', grad:'linear-gradient(135deg,rgba(176,190,197,.12),rgba(176,190,197,.03))' },
+    3: { emoji:'🥉', label:'3rd Prize',  sub:'Joint',       cls:'rank-3', grad:'linear-gradient(135deg,rgba(205,127,50,.14),rgba(205,127,50,.03))' },
+    4: { emoji:'🏅', label:'4th Prize',  sub:'',            cls:'rank-4', grad:'linear-gradient(135deg,rgba(76,175,80,.1),rgba(76,175,80,.02))' },
+    5: { emoji:'🏅', label:'5th Prize',  sub:'',            cls:'rank-5', grad:'linear-gradient(135deg,rgba(76,175,80,.1),rgba(76,175,80,.02))' }
   };
 
   // Build one slide per winner
@@ -2458,6 +2484,12 @@ function renderWinners() {
     var meta = rankMeta[w.rank] || rankMeta[5];
     var photos = (w.photos || '').split(',').map(function(p){ return p.trim(); }).filter(Boolean);
     if (!photos.length) photos = [''];
+    var caption = w.caption || '';
+    var captionBtn = caption
+      ? '<button class="cwm-info-btn" onclick="cwmToggleCaption(this)" title="View caption">i</button>'
+        + '<div class="cwm-caption-overlay">'+caption+'</div>'
+      : '';
+
     var photoHtml = photos.length > 1
       ? '<div class="cw-inner-slider" id="cwin-'+idx+'" data-cur="0" data-total="'+photos.length+'">'
           + photos.map(function(p, pi) {
@@ -2475,7 +2507,7 @@ function renderWinners() {
           : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>');
 
     return '<div class="cwm-slide" data-idx="'+idx+'">'
-      + '<div class="cwm-photo">' + photoHtml + '</div>'
+      + '<div class="cwm-photo">' + photoHtml + captionBtn + '</div>'
       + '<div class="cwm-info" style="background:'+meta.grad+';">'
       + '  <div class="cwm-badge">'+meta.emoji+' '+meta.label+(meta.sub ? ' · '+meta.sub : '')+'</div>'
       + '  <div class="cwm-name">'+w.name+'</div>'
@@ -2524,6 +2556,40 @@ window.cwinGo = function(slideIdx, photoIdx) {
   el.querySelectorAll('.cwin-dot').forEach(function(d,i){ d.classList.toggle('cwin-dot-on', i===photoIdx); });
 };
 
+window.cwmToggleCaption = function(btn) {
+  var photo = btn.closest('.cwm-photo');
+  if (!photo) return;
+  var overlay = photo.querySelector('.cwm-caption-overlay');
+  if (!overlay) return;
+  var isOpen = overlay.classList.contains('cwm-cap-open');
+  // Close all others first
+  document.querySelectorAll('.cwm-caption-overlay.cwm-cap-open').forEach(function(o){ o.classList.remove('cwm-cap-open'); });
+  document.querySelectorAll('.cwm-info-btn.cwm-cap-active').forEach(function(b){ b.classList.remove('cwm-cap-active'); });
+  if (!isOpen) {
+    overlay.classList.add('cwm-cap-open');
+    btn.classList.add('cwm-cap-active');
+  }
+};
+
+window.cwmToggleCaption = function(btn) {
+  var overlay = btn.nextElementSibling;
+  if (!overlay) return;
+  var isOpen = overlay.classList.toggle('cwm-caption-visible');
+  btn.classList.toggle('cwm-info-btn-active', isOpen);
+  // Close on outside click
+  if (isOpen) {
+    setTimeout(function() {
+      document.addEventListener('click', function handler(e) {
+        if (!overlay.contains(e.target) && e.target !== btn) {
+          overlay.classList.remove('cwm-caption-visible');
+          btn.classList.remove('cwm-info-btn-active');
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 10);
+  }
+};
+
 // ══════════════════════════════════════════
 // WINNERS ADMIN PANEL LOAD
 // ══════════════════════════════════════════
@@ -2531,16 +2597,18 @@ function loadWinnersAdmin() {
   var list = document.getElementById('le-winners-list');
   if (!list) return;
   var winners = SITE_CONFIG.winners || [];
-  var rankLabels = {1:'🥇 ১ম', 2:'🥈 ২য়', 3:'🥉 ৩য়', 4:'🏅 ৪র্থ', 5:'🏅 ৫ম'};
+  var rankLabels = {1:'🥇 1st Prize', 2:'🥈 2nd Prize', 3:'🥉 3rd Prize', 4:'🏅 4th Prize', 5:'🏅 5th Prize'};
+  var iStyle = 'width:100%;background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;margin-bottom:8px;';
   var html = winners.map(function(w, i) {
     return '<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:12px;">'
-      + '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:10px;">'+(rankLabels[w.rank]||w.rank+'ম')+' পুরস্কার'+(w.joint?' (যৌথ)':'')+'</div>'
+      + '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:10px;">'+(rankLabels[w.rank]||w.rank+'th Prize')+(w.joint?' (Joint)':'')+'</div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
-      + '<input id="le-win-name-'+i+'" value="'+w.name+'" placeholder="নাম" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-win-name-'+i+'" value="'+w.name+'" placeholder="Name" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
       + '<input id="le-win-faculty-'+i+'" value="'+w.faculty+'" placeholder="Faculty" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
       + '</div>'
-      + '<input id="le-win-session-'+i+'" value="'+w.session+'" placeholder="Session (যেমন: 2021-22)" style="width:100%;background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;margin-bottom:8px;">'
-      + '<input id="le-win-photos-'+i+'" value="'+(w.photos||'')+'" placeholder="Photo URL (একাধিক হলে comma দিয়ে আলাদা করো)" style="width:100%;background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">'
+      + '<input id="le-win-session-'+i+'" value="'+w.session+'" placeholder="Session (e.g. 2021-22)" style="'+iStyle+'">'
+      + '<input id="le-win-photos-'+i+'" value="'+(w.photos||'')+'" placeholder="Photo URL (multiple: comma separated)" style="'+iStyle+'">'
+      + '<textarea id="le-win-caption-'+i+'" placeholder="Photo caption (optional)" style="'+iStyle+'height:64px;resize:vertical;font-family:inherit;">'+( w.caption||'')+'</textarea>'
       + '</div>';
   }).join('');
   list.innerHTML = html;
@@ -3352,12 +3420,14 @@ function leSave(type) {
       var fc = document.getElementById('le-win-faculty-'+i);
       var ss = document.getElementById('le-win-session-'+i);
       var ph = document.getElementById('le-win-photos-'+i);
+      var cp = document.getElementById('le-win-caption-'+i);
       if (nm) winners.push({
         rank: w.rank, joint: w.joint,
         name: nm.value.trim(),
         faculty: fc ? fc.value.trim() : '',
         session: ss ? ss.value.trim() : '',
-        photos: ph ? ph.value.trim() : ''
+        photos: ph ? ph.value.trim() : '',
+        caption: cp ? cp.value.trim() : ''
       });
     });
     SITE_CONFIG.winners = winners;
@@ -3442,6 +3512,8 @@ function leDeletePanel(idx) {
 // ── ADMIN TABS (old switchTab replaced above) ──
 
 function loadSiteEditorValues() {
+  // Winners admin
+  loadWinnersAdmin();
   // Contest
   var ct = document.querySelector('#contest .sec-ti');
   if (ct) document.getElementById('se-contest-title').value = ct.textContent;
