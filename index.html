@@ -784,6 +784,23 @@ html[data-mode] input,html[data-mode] textarea,html[data-mode] select{background
 html[data-mode="light"] body::before{display:none}
 </style>
 
+
+<style>
+#fcount {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+.fc-strip {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+.fc-strip span {
+  display: block;
+  line-height: 1;
+}
+</style>
 </head>
 <body>
 <!-- ADMIN GATE -->
@@ -989,6 +1006,14 @@ html[data-mode="light"] body::before{display:none}
         <button class="site-save-btn" onclick="applyPrizeEdits()">✅ Prize আপডেট করো</button>
       </div>
 
+      <!-- Contest Winners Section -->
+      <div class="site-editor-card">
+        <div class="site-editor-section-title">🏆 Contest Winners</div>
+        <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px;line-height:1.7;">প্রতিটা winner-এর নাম, faculty, session আর photo URL দাও। একাধিক photo দিতে চাইলে comma দিয়ে আলাদা করো।</p>
+        <div id="le-winners-list"></div>
+        <button class="site-save-btn" onclick="leSave('winners')" style="margin-top:12px;">⚡ Save & Update</button>
+      </div>
+
       <!-- Birthday Section -->
       <div class="site-editor-card">
         <div class="site-editor-section-title">🎂 Birthday Mate Section</div>
@@ -1090,7 +1115,7 @@ html[data-mode="light"] body::before{display:none}
   <p class="h-sub">&#x9EB;&#x9E6; &#x98F;&#x995;&#x9B0;&#x9C7;&#x9B0; &#x9AD;&#x9BE;&#x9B2;&#x9CB;&#x9AC;&#x9BE;&#x9B8;&#x9BE;, &#x9B8;&#x9BF;&#x9B2;&#x9C7;&#x99F; &#x995;&#x9C3;&#x9B7;&#x9BF; &#x9AC;&#x9BF;&#x9B6;&#x9CD;&#x9AC;&#x9AC;&#x9BF;&#x9A6;&#x9CD;&#x9AF;&#x9BE;&#x9B2;&#x9AF;&#x9BC;&#x9C7; &#x986;&#x9AA;&#x9A8;&#x9BE;&#x995;&#x9C7; &#x9B8;&#x9CD;&#x9AC;&#x9BE;&#x997;&#x9A4;&#x9AE;</p>
   <div class="stats-bar">
     <div class="stat-item">
-      <div class="stat-num" id="fcount">0</div>
+      <div class="stat-num" id="fcount" style="overflow:hidden;position:relative;"></div>
       <div class="stat-lbl">Followers</div>
       <div class="live-dot">Live Count</div>
     </div>
@@ -1663,36 +1688,196 @@ html[data-mode="light"] body::before{display:none}
 
 
 <!-- PHOTO CONTEST -->
-<section id="contest" class="sec-dark">
+<style>
+/* ── CONTEST WINNERS ── */
+.cw-section { padding: 80px 0; background: #080808; }
+.cw-header { text-align: center; margin-bottom: 56px; }
+.cw-eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #4caf50; font-weight: 700; margin-bottom: 10px; }
+.cw-title { font-family: 'Playfair Display', serif; font-size: clamp(28px,5vw,48px); font-weight: 900; color: #fff; line-height: 1.15; }
+.cw-title span { color: #4caf50; }
+
+/* ── FIRST PRIZE — HERO ── */
+.cw-first { position: relative; margin-bottom: 48px; }
+.cw-first-inner { background: linear-gradient(135deg, #0a1f0a, #0f2e0f, #0a1a0a); border: 1px solid rgba(76,175,80,.3); border-radius: 24px; overflow: hidden; display: flex; align-items: stretch; gap: 0; min-height: 420px; }
+.cw-first-photo-wrap { position: relative; flex: 1.1; min-width: 0; overflow: hidden; }
+.cw-first-photo-wrap img.cw-photo { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s ease; }
+.cw-first-photo-wrap:hover img.cw-photo { transform: scale(1.04); }
+.cw-first-photo-wrap .cw-photo-placeholder { width: 100%; height: 100%; min-height: 380px; background: linear-gradient(135deg,rgba(76,175,80,.08),rgba(76,175,80,.03)); display: flex; align-items: center; justify-content: center; font-size: 72px; }
+.cw-photo-badge { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,215,0,.3); border-radius: 10px; padding: 6px 14px; font-size: 11px; font-weight: 700; color: #ffd700; letter-spacing: 1.5px; text-transform: uppercase; }
+.cw-first-info { flex: 1; padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; }
+.cw-rank-badge-big { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, rgba(255,215,0,.12), rgba(255,215,0,.04)); border: 1px solid rgba(255,215,0,.25); border-radius: 30px; padding: 8px 20px; width: fit-content; margin-bottom: 24px; }
+.cw-rank-badge-big .emoji { font-size: 24px; }
+.cw-rank-badge-big .label { font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #ffd700; }
+.cw-winner-name-big { font-family: 'Playfair Display', serif; font-size: clamp(22px, 3vw, 36px); font-weight: 900; color: #fff; margin-bottom: 8px; line-height: 1.2; }
+.cw-winner-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(76,175,80,.4); margin-bottom: 16px; background: rgba(76,175,80,.1); }
+.cw-winner-avatar-placeholder { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg,#1a3a1a,#0f2a0f); border: 2px solid rgba(76,175,80,.3); display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px; }
+.cw-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.cw-meta-tag { background: rgba(76,175,80,.1); border: 1px solid rgba(76,175,80,.2); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: rgba(255,255,255,.65); font-weight: 500; }
+.cw-auto-slide-dots { display: flex; gap: 6px; margin-top: 20px; }
+.cw-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.2); transition: all .3s; cursor: pointer; }
+.cw-dot.active { background: #4caf50; width: 20px; border-radius: 3px; }
+
+/* ── PHOTO SLIDESHOW ── */
+.cw-slideshow { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.cw-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
+.cw-slide.active { opacity: 1; }
+
+/* ── LOWER RANKS ── */
+.cw-lower-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+.cw-rank-card { background: #0d0d0d; border: 1px solid rgba(255,255,255,.07); border-radius: 20px; overflow: hidden; transition: border-color .3s, transform .3s; }
+.cw-rank-card:hover { border-color: rgba(76,175,80,.3); transform: translateY(-3px); }
+.cw-card-photos { position: relative; display: flex; gap: 0; }
+.cw-card-photo { flex: 1; aspect-ratio: 4/3; overflow: hidden; }
+.cw-card-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; display: block; }
+.cw-card-photo:hover img { transform: scale(1.05); }
+.cw-card-photo-placeholder { width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg,rgba(76,175,80,.06),rgba(76,175,80,.02)); display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.cw-card-divider { width: 1px; background: rgba(255,255,255,.06); flex-shrink: 0; }
+.cw-card-body { padding: 20px 22px 22px; }
+.cw-card-rank-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.cw-card-rank-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,.6); letter-spacing: 1px; }
+.cw-joint-tag { font-size: 10px; color: #4caf50; font-weight: 600; letter-spacing: .5px; background: rgba(76,175,80,.1); border: 1px solid rgba(76,175,80,.2); border-radius: 10px; padding: 3px 10px; }
+.cw-card-winners { display: flex; flex-direction: column; gap: 12px; }
+.cw-card-winner-row { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.05); }
+.cw-card-winner-row:last-child { padding-bottom: 0; border-bottom: none; }
+.cw-mini-av { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: rgba(76,175,80,.1); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.cw-mini-av img { width: 100%; height: 100%; object-fit: cover; }
+.cw-mini-name { font-size: 14px; font-weight: 700; color: #f2f2ee; margin-bottom: 2px; }
+.cw-mini-meta { font-size: 11px; color: rgba(255,255,255,.4); }
+
+/* SINGLE ROW for 4th & 5th */
+.cw-single-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.cw-single-card { background: #0d0d0d; border: 1px solid rgba(255,255,255,.07); border-radius: 20px; overflow: hidden; display: flex; align-items: center; gap: 0; transition: border-color .3s; }
+.cw-single-card:hover { border-color: rgba(76,175,80,.25); }
+.cw-single-photo { width: 120px; height: 120px; flex-shrink: 0; overflow: hidden; }
+.cw-single-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cw-single-photo-ph { width: 120px; height: 120px; background: rgba(76,175,80,.05); display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0; }
+.cw-single-body { padding: 16px 20px; flex: 1; }
+
+@media(max-width:700px){
+  .cw-first-inner { flex-direction: column; }
+  .cw-first-photo-wrap { min-height: 260px; }
+  .cw-first-info { padding: 28px 24px; }
+  .cw-lower-grid { grid-template-columns: 1fr; }
+  .cw-single-grid { grid-template-columns: 1fr; }
+}
+
+/* SLIDESHOW AUTO TIMER */
+@keyframes cwProgress { from{width:0} to{width:100%} }
+.cw-progress-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: #4caf50; animation: cwProgress 5s linear; }
+</style>
+
+<section id="contest" class="cw-section">
 <div class="wrap">
-  <div class="sec-head rv">
-    <div><div class="sec-ey">📷 Community</div><h2 class="sec-ti">Photo Contest</h2></div>
-    <span class="sec-no">Aesthetic SAU — Campus Photography</span>
-  </div>
-  <div class="rv" style="background:linear-gradient(135deg,#0c280c,#163816);border:1px solid rgba(76,175,80,.25);border-radius:20px;padding:52px 48px;text-align:center">
-    <div style="font-size:64px;margin-bottom:20px">🏆</div>
-    <h3 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:900;margin-bottom:16px;line-height:1.2">ফটো কন্টেস্ট শেষ হয়েছে!</h3>
-    <p style="font-size:16px;color:rgba(255,255,255,.65);line-height:1.9;max-width:540px;margin:0 auto 28px;font-family:'Noto Serif Bengali',serif">অংশগ্রহণকারী সকলকে আন্তরিক ধন্যবাদ। ফলাফল অতিশীঘ্রই প্রকাশ পাবে — আপডেট পেতে আমাদের Facebook পেজে চোখ রাখুন!</p>
-    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
-      <div style="background:rgba(0,0,0,.3);border:1px solid rgba(76,175,80,.2);border-radius:14px;padding:18px 28px;text-align:center">
-        <div style="font-size:28px;margin-bottom:6px">📸</div>
-        <div style="font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Submissions Closed</div>
+  <div class="cw-header rv" style="margin-bottom:48px;">
+    <div>
+      <div class="cw-eyebrow" style="display:inline-flex;align-items:center;gap:8px;">
+        <span style="width:6px;height:6px;background:#4caf50;border-radius:50%;display:inline-block;animation:lp 1.6s infinite;"></span>
+        📷 Photo Contest 2026 — Results
       </div>
-      <div style="background:rgba(0,0,0,.3);border:1px solid rgba(76,175,80,.2);border-radius:14px;padding:18px 28px;text-align:center">
-        <div style="font-size:28px;margin-bottom:6px">⏳</div>
-        <div style="font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Result Coming Soon</div>
-      </div>
-      <div style="background:rgba(0,0,0,.3);border:1px solid rgba(76,175,80,.2);border-radius:14px;padding:18px 28px;text-align:center">
-        <div style="font-size:28px;margin-bottom:6px">🔔</div>
-        <div style="font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Stay Tuned</div>
-      </div>
+      <h2 class="cw-title" style="margin-top:8px;">কন্টেস্টের <span style="color:#4caf50;">বিজয়ীরা</span></h2>
+      <p style="font-size:14px;color:rgba(255,255,255,.4);margin-top:8px;font-style:italic;">Congratulations to all the winners!</p>
     </div>
-    <a href="https://www.facebook.com/AestheticSAU" target="_blank" style="display:inline-flex;align-items:center;gap:10px;margin-top:28px;background:var(--green);color:#000;padding:14px 32px;border-radius:12px;font-weight:700;font-size:15px;text-decoration:none">
-      📘 Facebook এ আপডেট দেখুন
-    </a>
+  </div>
+  <div id="cw-winners-wrap">
+    <div style="text-align:center;padding:60px;color:rgba(255,255,255,.3);">লোড হচ্ছে...</div>
   </div>
 </div>
 </section>
+
+<style>
+/* ── Winner Slider ── */
+.cw-section { background: linear-gradient(180deg, #080808 0%, #0a0f0a 100%); padding: 80px 0; }
+
+.cwm-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0d0d0d;
+  max-width: 700px;
+  margin: 0 auto 24px;
+}
+.cwm-track {
+  display: flex;
+  transition: transform .55s cubic-bezier(.77,0,.175,1);
+  will-change: transform;
+}
+.cwm-slide {
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.cwm-photo {
+  width: 100%;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  background: #111;
+  position: relative;
+}
+.cwm-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+.cwm-info {
+  padding: 24px 28px 28px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.cwm-badge {
+  font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,.4); margin-bottom: 10px;
+}
+.cwm-slide[data-idx] .cwm-badge { color: rgba(255,255,255,.45); }
+.cwm-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px; line-height: 1.2;
+}
+.cwm-meta { font-size: 13px; color: rgba(255,255,255,.45); }
+
+/* Nav buttons */
+.cwm-nav {
+  position: absolute; top: calc(37.5% - 20px);
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.8);
+  font-size: 16px; cursor: pointer; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.cwm-nav:hover { background: rgba(76,175,80,.3); border-color: rgba(76,175,80,.5); color: #fff; }
+.cwm-prev { left: 12px; }
+.cwm-next { right: 12px; }
+
+/* Emoji dots */
+.cwm-dots-wrap {
+  display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+  max-width: 700px; margin: 0 auto;
+}
+.cwm-dot {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.4); font-size: 18px;
+  width: 44px; height: 44px; border-radius: 50%;
+  cursor: pointer; transition: all .25s;
+  display: flex; align-items: center; justify-content: center;
+}
+.cwm-dot:hover { border-color: rgba(255,255,255,.3); color: #fff; background: rgba(255,255,255,.08); }
+.cwm-dot.cwm-dot-on { background: rgba(76,175,80,.15); border-color: #4caf50; color: #fff; transform: scale(1.15); box-shadow: 0 0 12px rgba(76,175,80,.25); }
+
+/* Inner photo slider (multiple photos per winner) */
+.cw-inner-slider { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.cwin-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease; }
+.cwin-slide.cwin-active { opacity: 1; }
+.cwin-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2; }
+.cwin-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.3); cursor: pointer; transition: background .2s; border: none; }
+.cwin-dot.cwin-dot-on { background: #fff; }
+
+/* Rank color accents on badge */
+.cwm-slide:nth-child(1) .cwm-badge { color: #f5c842; }
+.cwm-slide:nth-child(2) .cwm-badge,
+.cwm-slide:nth-child(3) .cwm-badge { color: #b0bec5; }
+.cwm-slide:nth-child(4) .cwm-badge,
+.cwm-slide:nth-child(5) .cwm-badge { color: #cd7f32; }
+
+/* ── Old Winner Cards (unused, kept for safety) ── */
+.cw-rank-block { display: none; }
+
+</style>
 
 <!-- PHOTO VOTING GALLERY -->
 <section id="voting" class="sec-dark">
@@ -2181,6 +2366,15 @@ var SITE_CONFIG = {
     {name:"Fan Name 01",img:""},{name:"Fan Name 02",img:""},{name:"Fan Name 03",img:""},
     {name:"Fan Name 04",img:""},{name:"Fan Name 05",img:""}
   ],
+  winners: [
+    {rank:1, joint:false, name:"Winner Name",   faculty:"Faculty Name", session:"20XX-XX", photos:""},
+    {rank:2, joint:true,  name:"Winner Name A", faculty:"Faculty Name", session:"20XX-XX", photos:""},
+    {rank:2, joint:true,  name:"Winner Name B", faculty:"Faculty Name", session:"20XX-XX", photos:""},
+    {rank:3, joint:true,  name:"Winner Name C", faculty:"Faculty Name", session:"20XX-XX", photos:""},
+    {rank:3, joint:true,  name:"Winner Name D", faculty:"Faculty Name", session:"20XX-XX", photos:""},
+    {rank:4, joint:false, name:"Winner Name E", faculty:"Faculty Name", session:"20XX-XX", photos:""},
+    {rank:5, joint:false, name:"Winner Name F", faculty:"Faculty Name", session:"20XX-XX", photos:""}
+  ],
   team: [
     {role:"Admin",     name:"Moniruzzaman Moonna",  bio:"Page Admin", img:""},
     {role:"Admin",     name:"Al Mehedi Emon",        bio:"Page Admin", img:""},
@@ -2202,6 +2396,7 @@ fetch(FIREBASE_URL + '/site-config.json')
       if (data.team && Array.isArray(data.team) && data.team.length) SITE_CONFIG.team = data.team;
       if (data.announcement) SITE_CONFIG.announcement = data.announcement;
       if (data.extraPanels && Array.isArray(data.extraPanels)) SITE_CONFIG.extraPanels = data.extraPanels;
+      if (data.winners && Array.isArray(data.winners) && data.winners.length) SITE_CONFIG.winners = data.winners;
     }
     // Announcement bar
     if (SITE_CONFIG.announcement && SITE_CONFIG.announcement.show && SITE_CONFIG.announcement.text) {
@@ -2218,6 +2413,7 @@ fetch(FIREBASE_URL + '/site-config.json')
     renderFans();
     renderTeam();
     renderExtraPanels();
+    renderWinners();
     setTimeout(function() {
       var fcEl = document.getElementById("fcount");
       if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
@@ -2227,6 +2423,7 @@ fetch(FIREBASE_URL + '/site-config.json')
     // Firebase fail হলে default data দিয়ে render
     renderFans();
     renderTeam();
+    renderWinners();
     setTimeout(function() {
       var fcEl = document.getElementById("fcount");
       if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
@@ -2234,8 +2431,127 @@ fetch(FIREBASE_URL + '/site-config.json')
   });
 
 // FANS এবং TEAM এখন SITE_CONFIG থেকে directly নেওয়া হয়
+// ══════════════════════════════════════════
+// WINNERS RENDER
+// ══════════════════════════════════════════
+var cwSliderTimers = {};
+
+function renderWinners() {
+  var wrap = document.getElementById('cw-winners-wrap');
+  if (!wrap) return;
+  var list = SITE_CONFIG.winners || [];
+  if (!list.length) {
+    wrap.innerHTML = '<div style="text-align:center;padding:60px;color:rgba(255,255,255,.3);">Winner data নেই।</div>';
+    return;
+  }
+
+  var rankMeta = {
+    1: { emoji:'🥇', label:'১ম পুরস্কার',  sub:'Champion',       cls:'rank-1', grad:'linear-gradient(135deg,rgba(245,200,66,.18),rgba(245,200,66,.04))' },
+    2: { emoji:'🥈', label:'২য় পুরস্কার',  sub:'যৌথভাবে',        cls:'rank-2', grad:'linear-gradient(135deg,rgba(176,190,197,.12),rgba(176,190,197,.03))' },
+    3: { emoji:'🥉', label:'৩য় পুরস্কার',  sub:'যৌথভাবে',        cls:'rank-3', grad:'linear-gradient(135deg,rgba(205,127,50,.14),rgba(205,127,50,.03))' },
+    4: { emoji:'🏅', label:'৪র্থ পুরস্কার', sub:'',              cls:'rank-4', grad:'linear-gradient(135deg,rgba(76,175,80,.1),rgba(76,175,80,.02))' },
+    5: { emoji:'🏅', label:'৫ম পুরস্কার',  sub:'',              cls:'rank-5', grad:'linear-gradient(135deg,rgba(76,175,80,.1),rgba(76,175,80,.02))' }
+  };
+
+  // Build one slide per winner
+  var slidesHtml = list.map(function(w, idx) {
+    var meta = rankMeta[w.rank] || rankMeta[5];
+    var photos = (w.photos || '').split(',').map(function(p){ return p.trim(); }).filter(Boolean);
+    if (!photos.length) photos = [''];
+    var photoHtml = photos.length > 1
+      ? '<div class="cw-inner-slider" id="cwin-'+idx+'" data-cur="0" data-total="'+photos.length+'">'
+          + photos.map(function(p, pi) {
+              return '<div class="cwin-slide'+(pi===0?' cwin-active':'')+'">'
+                + (p ? '<img src="'+p+'" loading="lazy" style="width:100%;height:100%;object-fit:cover;">'
+                     : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>')
+                + '</div>';
+            }).join('')
+          + '<div class="cwin-dots">'
+            + photos.map(function(_, pi){ return '<span class="cwin-dot'+(pi===0?' cwin-dot-on':'')+'" onclick="cwinGo('+idx+','+pi+')"></span>'; }).join('')
+          + '</div>'
+        + '</div>'
+      : (photos[0]
+          ? '<img src="'+photos[0]+'" loading="lazy" style="width:100%;height:100%;object-fit:cover;">'
+          : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>');
+
+    return '<div class="cwm-slide" data-idx="'+idx+'">'
+      + '<div class="cwm-photo">' + photoHtml + '</div>'
+      + '<div class="cwm-info" style="background:'+meta.grad+';">'
+      + '  <div class="cwm-badge">'+meta.emoji+' '+meta.label+(meta.sub ? ' · '+meta.sub : '')+'</div>'
+      + '  <div class="cwm-name">'+w.name+'</div>'
+      + '  <div class="cwm-meta">'+w.faculty+'<span style="opacity:.4;margin:0 6px;">·</span>Session '+w.session+'</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  var dotsHtml = list.map(function(w, idx) {
+    var meta = rankMeta[w.rank] || rankMeta[5];
+    return '<button class="cwm-dot'+(idx===0?' cwm-dot-on':'')+'" onclick="cwmGo('+idx+')" title="'+w.name+'">'+meta.emoji+'</button>';
+  }).join('');
+
+  wrap.innerHTML =
+    '<div class="cwm-wrap">'
+    + '<div class="cwm-track" id="cwm-track">'+slidesHtml+'</div>'
+    + '<button class="cwm-nav cwm-prev" onclick="cwmMove(-1)">&#10094;</button>'
+    + '<button class="cwm-nav cwm-next" onclick="cwmMove(1)">&#10095;</button>'
+    + '</div>'
+    + '<div class="cwm-dots-wrap" id="cwm-dots">'+dotsHtml+'</div>';
+
+  cwmCurrent = 0;
+  cwmTotal = list.length;
+  clearInterval(cwSliderTimers['main']);
+  cwSliderTimers['main'] = setInterval(function(){ cwmMove(1); }, 5000);
+}
+
+var cwmCurrent = 0, cwmTotal = 0;
+
+window.cwmGo = function(idx) {
+  cwmCurrent = idx;
+  var track = document.getElementById('cwm-track');
+  if (track) track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+  document.querySelectorAll('.cwm-dot').forEach(function(d, i){ d.classList.toggle('cwm-dot-on', i===idx); });
+};
+
+window.cwmMove = function(dir) {
+  cwmGo((cwmCurrent + dir + cwmTotal) % cwmTotal);
+};
+
+window.cwinGo = function(slideIdx, photoIdx) {
+  var el = document.getElementById('cwin-'+slideIdx);
+  if (!el) return;
+  el.setAttribute('data-cur', photoIdx);
+  el.querySelectorAll('.cwin-slide').forEach(function(s,i){ s.classList.toggle('cwin-active', i===photoIdx); });
+  el.querySelectorAll('.cwin-dot').forEach(function(d,i){ d.classList.toggle('cwin-dot-on', i===photoIdx); });
+};
+
+// ══════════════════════════════════════════
+// WINNERS ADMIN PANEL LOAD
+// ══════════════════════════════════════════
+function loadWinnersAdmin() {
+  var list = document.getElementById('le-winners-list');
+  if (!list) return;
+  var winners = SITE_CONFIG.winners || [];
+  var rankLabels = {1:'🥇 ১ম', 2:'🥈 ২য়', 3:'🥉 ৩য়', 4:'🏅 ৪র্থ', 5:'🏅 ৫ম'};
+  var html = winners.map(function(w, i) {
+    return '<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:12px;">'
+      + '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:10px;">'+(rankLabels[w.rank]||w.rank+'ম')+' পুরস্কার'+(w.joint?' (যৌথ)':'')+'</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
+      + '<input id="le-win-name-'+i+'" value="'+w.name+'" placeholder="নাম" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-win-faculty-'+i+'" value="'+w.faculty+'" placeholder="Faculty" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '</div>'
+      + '<input id="le-win-session-'+i+'" value="'+w.session+'" placeholder="Session (যেমন: 2021-22)" style="width:100%;background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;margin-bottom:8px;">'
+      + '<input id="le-win-photos-'+i+'" value="'+(w.photos||'')+'" placeholder="Photo URL (একাধিক হলে comma দিয়ে আলাদা করো)" style="width:100%;background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">'
+      + '</div>';
+  }).join('');
+  list.innerHTML = html;
+}
+
 
 function countUp(el, to, ms) {
+  if (el.id === 'fcount') {
+    rollerCountUp(el, to, ms);
+    return;
+  }
   var s = performance.now();
   (function run(now) {
     var p = Math.min((now - s) / ms, 1);
@@ -2244,6 +2560,55 @@ function countUp(el, to, ms) {
     if (p < 1) requestAnimationFrame(run);
     else el.textContent = to.toLocaleString();
   })(performance.now());
+}
+
+function rollerCountUp(el, to, ms) {
+  // Build a vertical strip: 0 → 1 → 2 → ... → to
+  // Then translate it upward so final number is visible
+  // Steps: show every ~50th number for perf, always include final
+  var steps = [];
+  var step = Math.max(1, Math.floor(to / 60));
+  for (var i = 0; i <= to; i += step) steps.push(i);
+  if (steps[steps.length - 1] !== to) steps.push(to);
+
+  // Get element height (use font-size as proxy)
+  var lineH = parseFloat(getComputedStyle(el).fontSize) * 1.15;
+  el.style.height = lineH + 'px';
+
+  // Build strip
+  var strip = document.createElement('div');
+  strip.className = 'fc-strip';
+  strip.style.transform = 'translateY(0)';
+
+  steps.forEach(function(n) {
+    var s = document.createElement('span');
+    s.textContent = n.toLocaleString();
+    s.style.height = lineH + 'px';
+    s.style.lineHeight = lineH + 'px';
+    strip.appendChild(s);
+  });
+
+  el.innerHTML = '';
+  el.appendChild(strip);
+
+  // Animate: scroll strip upward so last item is visible
+  var totalH = lineH * (steps.length - 1);
+  var startTime = null;
+  var ease = function(t) { return 1 - Math.pow(1 - t, 4); };
+
+  requestAnimationFrame(function tick(ts) {
+    if (!startTime) startTime = ts;
+    var p = Math.min((ts - startTime) / ms, 1);
+    var e = ease(p);
+    strip.style.transform = 'translateY(-' + (e * totalH) + 'px)';
+    if (p < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      // Settle: replace strip with plain text
+      el.style.height = '';
+      el.textContent = to.toLocaleString();
+    }
+  });
 }
 // Gallery lightbox
 document.getElementById("gallery-grid").addEventListener("click", function(e) {
@@ -2943,6 +3308,8 @@ function loadLiveEditorValues() {
       + '</div>';
   });
   document.getElementById('le-team-list').innerHTML = teamHtml;
+  // Winners
+  loadWinnersAdmin();
   // Extra panels
   renderLePanelsList();
 }
@@ -2977,6 +3344,25 @@ function leSave(type) {
     if (!bar) { bar = document.createElement('div'); bar.id='ann-bar'; bar.style.cssText='background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;text-align:center;padding:10px 20px;font-size:13px;font-weight:600;position:relative;z-index:100'; document.body.insertBefore(bar, document.body.children[2]); }
     bar.textContent = text;
     bar.style.display = show ? 'block' : 'none';
+  }
+  if (type === 'winners') {
+    var winners = [];
+    (SITE_CONFIG.winners || []).forEach(function(w, i) {
+      var nm = document.getElementById('le-win-name-'+i);
+      var fc = document.getElementById('le-win-faculty-'+i);
+      var ss = document.getElementById('le-win-session-'+i);
+      var ph = document.getElementById('le-win-photos-'+i);
+      if (nm) winners.push({
+        rank: w.rank, joint: w.joint,
+        name: nm.value.trim(),
+        faculty: fc ? fc.value.trim() : '',
+        session: ss ? ss.value.trim() : '',
+        photos: ph ? ph.value.trim() : ''
+      });
+    });
+    SITE_CONFIG.winners = winners;
+    update = {winners: winners};
+    renderWinners();
   }
   if (type === 'fans') {
     var fans = [];
