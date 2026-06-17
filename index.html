@@ -2485,68 +2485,152 @@ function renderWinners() {
     5: { emoji:'🏅', label:'5th Prize',  sub:'',            cls:'rank-5', grad:'linear-gradient(135deg,rgba(76,175,80,.1),rgba(76,175,80,.02))' }
   };
 
-  // Build one slide per winner
-  var slidesHtml = list.map(function(w, idx) {
+  // Build slides using DOM (avoids quote escaping issues)
+  var wrapDiv = document.createElement('div');
+  wrapDiv.className = 'cwm-wrap';
+
+  var track = document.createElement('div');
+  track.className = 'cwm-track';
+  track.id = 'cwm-track';
+
+  // Store captions for JS attachment after render
+  var captionData = [];
+
+  list.forEach(function(w, idx) {
     var meta = rankMeta[w.rank] || rankMeta[5];
     var photos = (w.photos || '').split(',').map(function(p){ return p.trim(); }).filter(Boolean);
     if (!photos.length) photos = [''];
-    var caption = w.caption || '';
-    var captionBtn = caption
-      ? '<button class="cwm-info-btn" onclick="cwmToggleCaption(this)" title="View caption">i</button>'
-        + '<div class="cwm-caption-overlay">'+caption+'</div>'
-      : '';
+    var caption = (w.caption || '').trim();
+    captionData.push(caption);
 
-    var photoHtml = photos.length > 1
-      ? '<div class="cw-inner-slider" id="cwin-'+idx+'" data-cur="0" data-total="'+photos.length+'">'
-          + photos.map(function(p, pi) {
-              return '<div class="cwin-slide'+(pi===0?' cwin-active':'')+'">'
-                + (p ? '<img src="'+p+'" loading="lazy" style="width:100%;height:100%;object-fit:cover;">'
-                     : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>')
-                + '</div>';
-            }).join('')
-          + '<div class="cwin-dots">'
-            + photos.map(function(_, pi){ return '<span class="cwin-dot'+(pi===0?' cwin-dot-on':'')+'" onclick="cwinGo('+idx+','+pi+')"></span>'; }).join('')
-          + '</div>'
-        + '</div>'
-      : (photos[0]
-          ? '<img src="'+photos[0]+'" loading="lazy" style="width:100%;height:100%;object-fit:cover;">'
-          : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>');
+    // Slide
+    var slide = document.createElement('div');
+    slide.className = 'cwm-slide';
+    slide.setAttribute('data-idx', idx);
 
-    var captionOverlay = caption
-      ? '<div class="cwm-caption-overlay" onclick="cwmCloseCaption(this)">'+caption+'<br><br><span style="font-size:11px;opacity:.5;letter-spacing:1px;">tap to close</span></div>'
-      : '';
-    var infoBtnHtml = caption
-      ? '<button class="cwm-info-btn" onclick="cwmToggleCaption(this)">i</button>'
-      : '';
-    return '<div class="cwm-slide" style="position:relative;" data-idx="'+idx+'">'
-      + '<div class="cwm-photo">' + photoHtml + '</div>'
-      + infoBtnHtml
-      + captionOverlay
-      + '<div class="cwm-info" style="background:'+meta.grad+';">'
-      + '  <div class="cwm-badge">'+meta.emoji+' '+meta.label+(meta.sub ? ' · '+meta.sub : '')+'</div>'
-      + '  <div class="cwm-name">'+w.name+'</div>'
-      + '  <div class="cwm-meta">'+w.faculty+'<span style="opacity:.4;margin:0 6px;">·</span>Session '+w.session+'</div>'
-      + '</div>'
-      + '</div>';
-  }).join('');
+    // Photo area
+    var photoDiv = document.createElement('div');
+    photoDiv.className = 'cwm-photo';
 
-  var dotsHtml = list.map(function(w, idx) {
+    if (photos.length > 1) {
+      var inner = document.createElement('div');
+      inner.className = 'cw-inner-slider';
+      inner.id = 'cwin-' + idx;
+      inner.setAttribute('data-cur', '0');
+      photos.forEach(function(p, pi) {
+        var s = document.createElement('div');
+        s.className = 'cwin-slide' + (pi === 0 ? ' cwin-active' : '');
+        if (p) { var img = document.createElement('img'); img.src = p; img.loading = 'lazy'; img.style.cssText = 'width:100%;height:100%;object-fit:cover;'; s.appendChild(img); }
+        else { s.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>'; }
+        inner.appendChild(s);
+        var dot = document.createElement('span');
+      });
+      var dotsDiv = document.createElement('div');
+      dotsDiv.className = 'cwin-dots';
+      photos.forEach(function(_, pi) {
+        var dot = document.createElement('span');
+        dot.className = 'cwin-dot' + (pi === 0 ? ' cwin-dot-on' : '');
+        (function(capturedPi){ dot.addEventListener('click', function(e){ e.stopPropagation(); cwinGo(idx, capturedPi); }); })(pi);
+        dotsDiv.appendChild(dot);
+      });
+      inner.appendChild(dotsDiv);
+      photoDiv.appendChild(inner);
+    } else {
+      if (photos[0]) {
+        var img = document.createElement('img');
+        img.src = photos[0]; img.loading = 'lazy';
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+        photoDiv.appendChild(img);
+      } else {
+        photoDiv.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>';
+      }
+    }
+
+    // Caption overlay (inside photoDiv so overflow:hidden works)
+    if (caption) {
+      var overlay = document.createElement('div');
+      overlay.className = 'cwm-caption-overlay';
+      overlay.textContent = caption;
+      var tapHint = document.createElement('span');
+      tapHint.style.cssText = 'display:block;margin-top:14px;font-size:11px;opacity:.45;letter-spacing:1.5px;text-transform:uppercase;';
+      tapHint.textContent = 'tap to close';
+      overlay.appendChild(tapHint);
+      overlay.addEventListener('click', function() {
+        overlay.classList.remove('cwm-cap-open');
+        var btn = photoDiv.querySelector('.cwm-info-btn');
+        if (btn) btn.classList.remove('cwm-cap-active');
+      });
+      photoDiv.appendChild(overlay);
+
+      // Info button (inside photoDiv)
+      var btn = document.createElement('button');
+      btn.className = 'cwm-info-btn';
+      btn.textContent = 'i';
+      btn.title = 'View caption';
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var isOpen = overlay.classList.contains('cwm-cap-open');
+        // close all
+        document.querySelectorAll('.cwm-caption-overlay.cwm-cap-open').forEach(function(o){ o.classList.remove('cwm-cap-open'); });
+        document.querySelectorAll('.cwm-info-btn.cwm-cap-active').forEach(function(b){ b.classList.remove('cwm-cap-active'); });
+        if (!isOpen) {
+          overlay.classList.add('cwm-cap-open');
+          btn.classList.add('cwm-cap-active');
+        }
+      });
+      photoDiv.appendChild(btn);
+    }
+
+    slide.appendChild(photoDiv);
+
+    // Info bar
+    var infoDiv = document.createElement('div');
+    infoDiv.className = 'cwm-info';
+    infoDiv.style.background = meta.grad;
+    infoDiv.innerHTML = '<div class="cwm-badge">' + meta.emoji + ' ' + meta.label + (meta.sub ? ' · ' + meta.sub : '') + '</div>'
+      + '<div class="cwm-name">' + w.name + '</div>'
+      + '<div class="cwm-meta">' + w.faculty + '<span style="opacity:.4;margin:0 6px;">·</span>Session ' + w.session + '</div>';
+    slide.appendChild(infoDiv);
+    track.appendChild(slide);
+  });
+
+  // Nav buttons
+  var prevBtn = document.createElement('button');
+  prevBtn.className = 'cwm-nav cwm-prev';
+  prevBtn.innerHTML = '&#10094;';
+  prevBtn.addEventListener('click', function(){ cwmMove(-1); });
+
+  var nextBtn = document.createElement('button');
+  nextBtn.className = 'cwm-nav cwm-next';
+  nextBtn.innerHTML = '&#10095;';
+  nextBtn.addEventListener('click', function(){ cwmMove(1); });
+
+  wrapDiv.appendChild(track);
+  wrapDiv.appendChild(prevBtn);
+  wrapDiv.appendChild(nextBtn);
+
+  // Emoji dots
+  var dotsWrap = document.createElement('div');
+  dotsWrap.className = 'cwm-dots-wrap';
+  dotsWrap.id = 'cwm-dots';
+  list.forEach(function(w, idx) {
     var meta = rankMeta[w.rank] || rankMeta[5];
-    return '<button class="cwm-dot'+(idx===0?' cwm-dot-on':'')+'" onclick="cwmGo('+idx+')" title="'+w.name+'">'+meta.emoji+'</button>';
-  }).join('');
+    var dot = document.createElement('button');
+    dot.className = 'cwm-dot' + (idx === 0 ? ' cwm-dot-on' : '');
+    dot.textContent = meta.emoji;
+    dot.title = w.name;
+    (function(i){ dot.addEventListener('click', function(){ cwmGo(i); }); })(idx);
+    dotsWrap.appendChild(dot);
+  });
 
-  wrap.innerHTML =
-    '<div class="cwm-wrap">'
-    + '<div class="cwm-track" id="cwm-track">'+slidesHtml+'</div>'
-    + '<button class="cwm-nav cwm-prev" onclick="cwmMove(-1)">&#10094;</button>'
-    + '<button class="cwm-nav cwm-next" onclick="cwmMove(1)">&#10095;</button>'
-    + '</div>'
-    + '<div class="cwm-dots-wrap" id="cwm-dots">'+dotsHtml+'</div>';
+  wrap.innerHTML = '';
+  wrap.appendChild(wrapDiv);
+  wrap.appendChild(dotsWrap);
 
   cwmCurrent = 0;
   cwmTotal = list.length;
   clearInterval(cwSliderTimers['main']);
-  cwSliderTimers['main'] = setInterval(function(){ cwmMove(1); }, 5000);
+  cwSliderTimers['main'] = setInterval(function(){ cwmMove(1); }, 8000);
 }
 
 var cwmCurrent = 0, cwmTotal = 0;
@@ -2572,7 +2656,7 @@ window.cwinGo = function(slideIdx, photoIdx) {
 
 window.cwmCloseCaption = function(overlay) {
   overlay.classList.remove('cwm-cap-open');
-  var btn = overlay.closest('.cwm-slide') && overlay.closest('.cwm-slide').querySelector('.cwm-info-btn');
+  var btn = overlay.closest('.cwm-photo') && overlay.closest('.cwm-photo').querySelector('.cwm-info-btn');
   if (btn) btn.classList.remove('cwm-cap-active');
 };
 
@@ -2593,7 +2677,7 @@ window.cwmToggleCaption = function(btn) {
 
 window.cwmCloseCaption = function(overlay) {
   overlay.classList.remove('cwm-cap-open');
-  var btn = overlay.closest('.cwm-slide') && overlay.closest('.cwm-slide').querySelector('.cwm-info-btn');
+  var btn = overlay.closest('.cwm-photo') && overlay.closest('.cwm-photo').querySelector('.cwm-info-btn');
   if (btn) btn.classList.remove('cwm-cap-active');
 };
 
