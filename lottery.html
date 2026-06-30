@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ব্রাজিল ২ - জাপান ১ প্রেডিকশন লটারি | Aesthetic SAU</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', 'Noto Sans Bengali', sans-serif;
+    background: linear-gradient(135deg,#0a2342,#1b4965,#0a2342);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:30px 16px;
+    color:#fff;
+  }
+  h1 {
+    text-align:center;
+    font-size:1.5rem;
+    margin-bottom:6px;
+    background:linear-gradient(90deg,#ffd700,#fff5b8,#ffd700);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .subtitle {
+    text-align:center;
+    color:#cfe8ff;
+    margin-bottom:20px;
+    font-size:0.92rem;
+    max-width:480px;
+  }
+  .stats {
+    display:flex;
+    gap:14px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .stat-box {
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:14px;
+    padding:12px 18px;
+    text-align:center;
+    min-width:120px;
+  }
+  .stat-box .num {
+    font-size:1.6rem;
+    font-weight:bold;
+    color:#ffd700;
+  }
+  .stat-box .label {
+    font-size:0.78rem;
+    color:#cfe8ff;
+  }
+  .card {
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:18px;
+    padding:24px;
+    width:100%;
+    max-width:500px;
+    backdrop-filter:blur(6px);
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+    text-align:center;
+  }
+  .reel {
+    background:#062032;
+    border-radius:12px;
+    padding:22px 16px;
+    min-height:90px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:20px;
+    border:2px dashed #ffd700;
+    word-break:break-word;
+  }
+  .reel .name {
+    font-size:1.3rem;
+    font-weight:bold;
+    color:#ffd700;
+  }
+  .reel .comment {
+    font-size:0.85rem;
+    color:#9fd8ff;
+    margin-top:6px;
+  }
+  .reel.spinning .name { color:#9fd8ff; }
+  .reel.spinning .comment { color:#6fb6e0; }
+  .winner-tag {
+    font-size:0.8rem;
+    color:#15b34f;
+    margin-top:6px;
+    font-weight:bold;
+  }
+  button {
+    background:linear-gradient(90deg,#0d8a3d,#15b34f);
+    color:#fff;
+    border:none;
+    padding:14px 28px;
+    border-radius:30px;
+    font-size:1.05rem;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(21,179,79,0.4);
+    transition:transform 0.15s;
+  }
+  button:hover { transform:translateY(-2px); }
+  button:disabled { opacity:0.6; cursor:not-allowed; }
+  .list-toggle {
+    margin-top:18px;
+    font-size:0.85rem;
+    color:#aee1ff;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+  .table-wrap {
+    text-align:left;
+    margin-top:14px;
+    max-height:320px;
+    overflow-y:auto;
+    display:none;
+    border-top:1px solid rgba(255,255,255,0.15);
+    padding-top:10px;
+  }
+  table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+  th, td { padding:6px 8px; border-bottom:1px solid rgba(255,255,255,0.08); text-align:left; vertical-align:top; }
+  th { color:#ffd700; position:sticky; top:0; background:#0a2342; }
+  tr.correct td { color:#9bffb0; }
+  tr.correct td:first-child::before { content:"✅ "; }
+  .legend { font-size:0.75rem; color:#aee1ff; margin-top:8px; }
+  .confetti {
+    position:fixed;
+    top:-10px;
+    width:8px;
+    height:8px;
+    z-index:999;
+    pointer-events:none;
+  }
+  footer {
+    margin-top:26px;
+    font-size:0.8rem;
+    color:#7fa8c9;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<h1>🏆 ব্রাজিল ২ - জাপান ১ প্রেডিকশন লটারি</h1>
+<p class="subtitle">"আজকের ব্রাজিল বনাম জাপান ম্যাচের সঠিক প্রেডিকশন করলে পাবেন আকর্ষণীয় পুরস্কার!" — পোস্টের কমেন্ট থেকে বাছাইকৃত বিজয়ী</p>
+
+<div class="stats">
+  <div class="stat-box">
+    <div class="num">146</div>
+    <div class="label">মোট কমেন্ট</div>
+  </div>
+  <div class="stat-box">
+    <div class="num">33</div>
+    <div class="label">সঠিক প্রেডিকশন (২-১)</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="reel" id="reel">
+    <div class="name">প্রস্তুত...</div>
+    <div class="comment">লটারি ড্র করতে বাটনে চাপ দিন</div>
+  </div>
+  <button id="drawBtn" onclick="startDraw()">🎲 লটারি ড্র করুন</button>
+  <div class="list-toggle" onclick="toggleList()">📋 সমস্ত অংশগ্রহণকারীর তালিকা দেখুন / লুকান</div>
+  <div class="table-wrap" id="tableWrap">
+    <table>
+      <thead><tr><th>#</th><th>নাম</th><th>কমেন্ট</th></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="legend">✅ চিহ্নিত নামগুলো সঠিক "Brazil 2 - Japan 1" প্রেডিকশনকারী (লটারির জন্য যোগ্য)</div>
+  </div>
+</div>
+
+<footer>Aesthetic SAU, Sylhet — World Cup 2026 Prediction Contest</footer>
+
+<script>
+// Full list of all comments extracted from the post (name, comment, isCorrect)
+const all = [
+["Md Masud Rana","Brazil....1 - Japan 0",false],
+["Alamgir Jahan Anik","Brazil 🇧🇷 = 2 | Japan 🇯🇵 = 1",true],
+["Lamia Tabassum","Brazil 3-1 Japan",false],
+["Sazzad Hosen Riad","Brazil 3-2 japan",false],
+["Muhsin Ahmed Hadi","Brazil 2-2 (Penalty/tiebreaker) Brazil 4-3 Japan",false],
+["Rimu Akter Laboni","Brasil -02 Japan -01",true],
+["Ahsan Habib Gilman","ব্রাজিল ০-১ জাপান",false],
+["Moshfekur Rahman","Brazil 5, Japan 1",false],
+["Sohan Hossen","Jap 3, Brazil 2",false],
+["Moumita Sarker Upoma","1-1",false],
+["Shamim Reza","Brazil-3 vs Japan-2, Brazil will be Win",false],
+["Rakib Al Hasan","Brazil 3, Zapan 0",false],
+["Anindita Ani","জাপান ১ - ব্রাজিল ০",false],
+["Ferdaus Hossain","Japan 3 - Brazil 2",false],
+["Dipto Saha","Brazil-3, Japan-1",false],
+["Md Rokonuzzaman","Brazil 2-0 japan",false],
+["Md Riazul Islam","Brasil 0-1 japan",false],
+["Sanjidur Islam","Brazil 3, Japan 2",false],
+["Md Badsha Fahad","Japan 2 - 1 Brazil",false],
+["Arif Hossen","Brazil 2 - japan 2, brazil win",false],
+["Asif Shahariar","Brazil-2, Japan-1/0",false],
+["Maisha Rahman Moon","Brazil 2 - 1 Japan",true],
+["Rahat Siddiki","Bra 3-0 Japan",false],
+["Rifat Hossen","Brazil 3 - japan 1",false],
+["Joynal Ahmed Joy","Brazil = 2, Japan = 1",true],
+["Nadim Mahmud","Japan 01 - 02 Brazil",true],
+["Sahadat Babu","0-0, 4-3 Japan",false],
+["Muhammad Noman","Brazil-01, Japan-01, Tie-breaker: Brazil win",false],
+["Atikur Rahman Rion","2-1 for brazil",true],
+["Prantik Debdulal","🇧🇷 2 - 🇯🇵 1",true],
+["Mursalin Ahmed Ahad","Japan 3 - brazil 2",false],
+["Shakline Mustaq","টাইব্রেকারে win by brazil",false],
+["Kazi Afsan Tursha","🇧🇷 3-1 🇯🇵",false],
+["Mofacchir Uddin Rafi","🇧🇷 2 - 🇯🇵 0",false],
+["Shayem Mahmud Shad","2-2",false],
+["Sourov Bhadra","আজকের প্রেডিকশন ব্রাজিল ৩ জাপান ১",false],
+["Mia Hossen","ব্রাজিল ৩ জাপান ২",false],
+["Ayatullah Siddiki","ব্রাজিল ২ - ০ জাপান",false],
+["Farhan Hasan","ব্রাজিল:০ জাপান",false],
+["Nurul Islam","brasil 4-2",false],
+["Abir Raihan Akash","Brazil 3 - japan 0",false],
+["SK Sutrodhor","ব্রাজিল ০ জাপান ২",false],
+["Bappy Shill","Brazil -2 Japan -1, Brazil match win",true],
+["MD Sadequl Islam","জাপান:02 ব্রাজিল:00",false],
+["Md. Mahodi Hasan Mahi","Brazil 2-1 Japan",true],
+["Hafizur Rahman","🇧🇷 3 - 🇯🇵 0",false],
+["Arif Uddin Majba","🇧🇷 (2) - 🇯🇵 (0)",false],
+["Ariful Islam Arif","ব্রাজিল 2 জাপান 1",true],
+["Toufik Ahmed","🇧🇷 3 — 🇯🇵 1",false],
+["Tanushree Datta","Brasil 2 - Japan 1",true],
+["Syeda Sanjida Zannat Usha","Brazil 3-1 Japan",false],
+["Santona Das","Brazil 2 - Japan 1",true],
+["Ahamed Hridoy","Brazil 3 - japan 1",false],
+["Robin Sarkar","Brazil 3 Japan 0",false],
+["Mir Sabbir","Brazil...2, Japan.0",false],
+["ফয়সাল আহমেদ ফাহিম","Brazil 3 - 2 Japan",false],
+["Asif Ahmed","Brazil 1 - Japan 1",false],
+["Mohammad Mehedi Hasan","Brazil 0 : Japan 1",false],
+["Sabir Ul Islam","Brazil 2 - Japan 1",true],
+["Shanzida Islam Hani","Brazil 0 - Japan 1",false],
+["Atiqur Rahman Alif","Japan 2, Brazil 1",false],
+["Sordar Fahad","Brazil 2-1 Japan",true],
+["MA Sum","Japan 2, Brazil 1",false],
+["MD Mustafizur Rahman Murad","Brazil - 3, Japan - 1",false],
+["কৃষিবিদ নওশাদ মোস্তাকীম","Brazil 3-1 Japan",false],
+["Shi Hab","Brazil 2-1 Japan",true],
+["Md Mahin Sarker","Brazil 2-1 japan",true],
+["Kazi Mohibul Haque Tipu","Brazil 2 - japan 0",false],
+["M. A. H. Kausar","Brazil 0-1 Japan",false],
+["Junayed Zaman","Brazil-3 Japan 0",false],
+["Fahim Ahmed","Brazil-2, japan-3",false],
+["Sakib Hasan","Brazil 2 : Japan 0",false],
+["Israt Mokarrama","Brazil 3 - Japan 1",false],
+["MD Solayman","Brazil 0 - Japan 1",false],
+["Nusrat Jahan Nimo","Brazil 2, Japan-1",true],
+["S. Shovon","brazil 3-1 Japan",false],
+["Zubayer Alam","Brazil 2, Japan 1",true],
+["Tanvir Reshat Swapno","Brazil 3-2 Japan",false],
+["Pushpita Chakrabarty","Brazil 2, Japan 0",false],
+["Iftekar Nishan","Brazil 🇧🇷 - 2, Japan 🇯🇵 - 0",false],
+["Tanjika Chowdhury Moumi","Brazil 2-1 Japan",true],
+["ハピプ ムア","Brazil 3-2 Japan",false],
+["Md TahSin Ahmed Sifat","Japan 3, brazil 2",false],
+["Sarafat Ali","Brazil 2-1 japan",true],
+["Sadat Sayef","Japan 3-0 Brazil",false],
+["Sami Chowdhury","Japan 2 - 1 Brazil",false],
+["Abdus Salam","Brazil 1, Japan 1",false],
+["Jihad Hossain","Japan 2 - Brazil 1",false],
+["Ariyan Sheikh","Brazil 3 - 1 Japan",false],
+["Jakirul Islam","Brazil 3-1 Japan",false],
+["Md Naimur Rahman","Brazil 1 - Japan 2",false],
+["Md. Sujon Islam","Brazil-3, Japan-1",false],
+["Tazmir Fahim Chowdhury","Brasil 3 Japan 1",false],
+["Abdus Samad","Japan 2 - 1 Brazil",false],
+["Jaber Hussain","Brazil 2 - 0 Japan",false],
+["Badhan Das","Brazil 1 Japan 3",false],
+["Shanto Paul","Brazil 1 - Japan 2",false],
+["Alomgir Sarkar","Brazil 2 - Japan 1",true],
+["Md Sakibul Siam","Brazil 3 - 2 Japan",false],
+["Soumik Mallik Joy","Brazil-3, Japan-1",false],
+["Ananna Das","Brazil 2 - Japan 1",true],
+["T W Khan Zihan","জাপান ২-১ ব্রাজিল",false],
+["Sayan Khan","Barzil 3, Japan 2",false],
+["Musabbir Ahmed","Brazil 2 - japan 1",true],
+["Iftekhar Ahmed","Japan 2, Bra 1",false],
+["Mohammad Asif","Brazil 2, Japan 1",true],
+["Md Hannan Sorker","brazil 1, japan 2",false],
+["Sabbir Hossain","Brazil...5, Japan..4",false],
+["Md Sadekul Islam","Japan 2, brazil 1",false],
+["Muhammad Moniruzzaman","Brazil 2 - Japan 1",true],
+["Mahmudul Hasan","Brasil 2 - Japan 1",true],
+["Md Fuad Hasan","Brazil 2 - 1 Japan",true],
+["Khondoker Motasim Arnoy","Barazil-03, Japan-01",false],
+["Shakila Akhter Lobana","Brazil 1, Japan 1",false],
+["Sajeeb Ahmed","Brasil 1 - 0 Japan",false],
+["Md Mizanur Rahman","ব্রাজিল ২-১ জাপান",true],
+["Homayun Kabir","brazil 3-1 japan",false],
+["Rayed Enam Abid","Brazil 3-2 Japan",false],
+["Hasant Ahsan","Brazil 3/1 japan",false],
+["Chinmoy Roy","Bra 3 - japan 2",false],
+["Istiak Ahmed","Bra -2, Jap -1",true],
+["Saidur Rahaman","Bra-3, Jap-1",false],
+["সাজার পুদিী","ব্রাজিল ৪-০ জাপান",false],
+["Shanto Paul","ব্রাজিল ০ - জাপান ২",false],
+["Md Hridoy Rana","Brazil 2, Japan 0",false],
+["Engr Shahid Ali","ব্রাজিল ২ জাপান ০",false],
+["Shaful Alam Rasel","Brazi.04, Japan:00",false],
+["Md Shakir Ahmed","Brazil 2 - japan 0",false],
+["Shafiqul Basir Mon","Tie breaker",false],
+["Sazzad Hossain Himel","🇧🇷 3 - 🇯🇵 1",false],
+["Badhon Kumar Saha","Brazil 2 vs japan 0",false],
+["Nafis Iqbal Nahid","bazil 1-2 japan",false],
+["Ashikuzzaman Moon","Brazil 2-1 Japan",true],
+["Maruf Hosen","Bra 2-1 Japan",true],
+["Naznus Sakib Nibir","Bra 2 - 1 Jap",true],
+["MD Rubel Rana","Brasil 2 - Japan-1",true],
+["DI PA","Brazil 2 - 1 Japan",true]
+];
+
+const correctList = all.filter(p => p[2]);
+
+document.getElementById('tableBody').innerHTML = all.map((p,i) =>
+  `<tr class="${p[2] ? 'correct':''}"><td>${i+1}</td><td>${p[0]}</td><td>${p[1]}</td></tr>`
+).join('');
+
+let listVisible = false;
+function toggleList(){
+  listVisible = !listVisible;
+  document.getElementById('tableWrap').style.display = listVisible ? 'block' : 'none';
+}
+
+let drawing = false;
+function startDraw(){
+  if(drawing) return;
+  drawing = true;
+  const btn = document.getElementById('drawBtn');
+  const reel = document.getElementById('reel');
+  btn.disabled = true;
+  reel.classList.add('spinning');
+
+  let ticks = 0;
+  const maxTicks = 32;
+  const interval = setInterval(() => {
+    const r = all[Math.floor(Math.random() * all.length)];
+    reel.innerHTML = `<div class="name">${r[0]}</div><div class="comment">${r[1]}</div>`;
+    ticks++;
+    if(ticks >= maxTicks){
+      clearInterval(interval);
+      const winner = correctList[Math.floor(Math.random() * correctList.length)];
+      reel.innerHTML = `<div class="name">🎉 ${winner[0]} 🎉</div><div class="comment">${winner[1]}</div><div class="winner-tag">বিজয়ী — সঠিক প্রেডিকশনকারী</div>`;
+      reel.classList.remove('spinning');
+      btn.disabled = false;
+      drawing = false;
+      launchConfetti();
+    }
+  }, 80);
+}
+
+function launchConfetti(){
+  const colors = ['#ffd700','#15b34f','#1b4965','#ffffff','#ff5050'];
+  for(let i=0;i<60;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    document.body.appendChild(c);
+    const duration = 2500 + Math.random()*1500;
+    const rotate = Math.random()*360;
+    c.animate([
+      { transform: `translateY(0) rotate(0deg)`, opacity:1 },
+      { transform: `translateY(100vh) rotate(${rotate}deg)`, opacity:0.9 }
+    ], { duration: duration, easing:'ease-in' });
+    setTimeout(() => c.remove(), duration);
+  }
+}
+</script>
+</body>
+</html>
