@@ -7,9 +7,9 @@
 <link rel="icon" type="image/png" href="https://i.imgur.com/aRxuSTw.jpeg"/>
 <link rel="shortcut icon" type="image/png" href="https://i.imgur.com/aRxuSTw.jpeg"/>
 <link rel="apple-touch-icon" href="https://i.imgur.com/aRxuSTw.jpeg"/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
-:root{--black:#0a0a0a;--deep:#111;--card:#181818;--border:#252525;--green:#4caf50;--gl:#6abf5e;--gg:rgba(76,175,80,.13);--white:#f2f2ee;--muted:#777}
+:root{--black:#0a0a0a;--deep:#111;--card:#181818;--border:#252525;--green:#4caf50;--gl:#6abf5e;--gg:rgba(76,175,80,.13);--white:#f2f2ee;--muted:#8c8c8c}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;overflow-x:hidden}
@@ -801,6 +801,104 @@ html[data-mode="light"] body::before{display:none}
   line-height: 1;
 }
 </style>
+<style id="premium-refinement-v3">
+/* ============================================================
+   PREMIUM REFINEMENT LAYER v3
+   Builds on the existing token system (--theme-*, --accent, --grad-accent)
+   instead of fighting it, so the theme switcher + dark/light toggle
+   that already exist keep working unmodified.
+   ============================================================ */
+
+:root{
+  /* neutral scale — used for borders/dividers/secondary text so the
+     whole site shares one consistent gray ramp instead of one-off rgba() values */
+  --ink-1:#f5f6f4;--ink-2:#c9cdc7;--ink-3:#9aa19b;--ink-4:#6f766f;
+  --hairline:rgba(255,255,255,.07);--hairline-strong:rgba(255,255,255,.13);
+  /* elevation scale: every card uses one of these three, never an ad-hoc shadow */
+  --e1:0 1px 2px rgba(0,0,0,.5);
+  --e2:0 10px 28px -10px rgba(0,0,0,.55),0 2px 8px -2px rgba(0,0,0,.4);
+  --e3:0 24px 64px -16px rgba(0,0,0,.6),0 4px 16px -4px rgba(0,0,0,.45);
+  --radius-sm:10px;--radius-md:14px;--radius-lg:18px;
+  --container:1180px;
+}
+
+/* ---- 1. Section titles: restrained, not gradient-clipped ----
+   Gradient-clipped text on every heading reads like a 2021 template.
+   Premium references (Stripe/Linear/Vercel) keep headings solid and
+   high-contrast, saving color for one accent moment per section. */
+.sec-ti{background:none!important;-webkit-text-fill-color:initial;color:var(--ink-1)!important;-webkit-background-clip:initial;background-clip:initial}
+html[data-mode] .sec-ti{background:none!important;color:var(--theme-text)!important;-webkit-text-fill-color:initial}
+.sec-head{border-bottom:1px solid var(--hairline)}
+.sec-no{color:var(--ink-3)}
+
+/* ---- 2. Container rhythm: slightly wider, more consistent vertical pace ---- */
+.wrap{max-width:var(--container)}
+@media(min-width:769px){.wrap{padding:108px 40px}}
+
+/* ---- 3. Unified badge/tag system ----
+   .gc-cat, .tm-role, .product-tag, .ev-badge, .contest-pill-lbl were each
+   hand-tuned with slightly different tracking/padding. One shared rhythm
+   reads as a deliberate design system rather than several components. */
+.gc-cat,.tm-role,.product-tag,.ev-badge{
+  font-size:10.5px;font-weight:700;letter-spacing:1.4px;padding:4px 11px;border-radius:999px;
+}
+.product-tag,.ev-badge{letter-spacing:1.8px}
+
+/* ---- 4. Card elevation: one consistent shadow/radius scale ----
+   Replaces scattered hover transforms with a single calm lift + the
+   shared elevation tokens, so contest/gallery/event/team/fan cards
+   all feel like siblings instead of separately-styled blocks. */
+.gc-card,.how-card,.fan-card,.tm-card,.vg-card,.contest-pill,.cd-box{border-radius:var(--radius-md)}
+.ev-card,.chithi-box,.bday-card,.product-card{border-radius:var(--radius-lg);box-shadow:var(--e3)!important}
+.gc-card:hover,.how-card:hover,.fan-card:hover,.tm-card:hover,.vg-card:hover{
+  box-shadow:var(--e2)!important;transform:translateY(-4px)!important;
+}
+
+/* ---- 5. Passive image skeleton (zero JS) ----
+   A shimmering gradient sits on the image container; once the <img>
+   finishes decoding it paints over the shimmer automatically, so
+   slow connections see a premium loading state instead of blank gray. */
+.gc-img,.vg-img-wrap,.ev-gitem,.product-img-wrap{
+  background:linear-gradient(100deg,#161616 35%,#1f1f1f 50%,#161616 65%);
+  background-size:200% 100%;animation:skel-shimmer 1.8s ease-in-out infinite;
+}
+@keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.gc-img,.vg-img-wrap,.ev-gitem,.product-img-wrap{animation:none}}
+
+/* ---- 6. Forms & search inputs ----
+   One focus treatment and one resting border for every input/select on
+   the public site (birthday form, pre-order, admin search) so filling
+   anything out feels like the same product. */
+input,select,textarea{font-family:'Inter',sans-serif}
+input[type="text"]:not(.adm-search),input[type="search"],input[type="email"],input[type="tel"]{
+  border-radius:var(--radius-sm);
+}
+.bday-field input:focus,.bday-field select:focus,.po-field input:focus,.po-field select:focus,
+.adm-search:focus,.admin-gate-input:focus{
+  box-shadow:0 0 0 3px rgba(95,208,104,.18);
+}
+
+/* ---- 7. Button hierarchy ----
+   .btn-fill (primary) keeps the brand gradient; .btn-ghost (secondary)
+   gets a slightly stronger hairline + lift so it doesn't read as disabled
+   next to the primary action — a clearer "do this, or this instead" pairing. */
+.btn-ghost{border-color:var(--hairline-strong);font-weight:600;transition:all .25s var(--ease-out,ease)}
+.btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.04)}
+.btn-fill,.btn-ghost,.nav-fb,.nav-join,.nav-participate{letter-spacing:.2px}
+
+/* ---- 8. Light-mode contrast pass ----
+   The shimmer skeleton and hairlines need a lighter variant so the
+   experience holds up when someone toggles the existing light mode. */
+html[data-mode="light"] .gc-img,html[data-mode="light"] .vg-img-wrap,
+html[data-mode="light"] .ev-gitem,html[data-mode="light"] .product-img-wrap{
+  background:linear-gradient(100deg,#eceeec 35%,#f6f7f6 50%,#eceeec 65%);background-size:200% 100%;
+}
+html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
+
+/* ---- 9. Keyboard/mobile usability tightening ---- */
+.nav-mobile-menu a:focus-visible,.theme-swatch-btn:focus-visible,.theme-mode-toggle:focus-visible{outline-offset:2px}
+@media(max-width:480px){.wrap{padding:64px 18px}}
+</style>
 </head>
 <body>
 <!-- ADMIN GATE -->
@@ -1132,11 +1230,8 @@ html[data-mode="light"] body::before{display:none}
 
 <!-- VISITOR BAR -->
 <div id="visitor-bar" style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);padding:8px 20px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;">
-  <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.5px;">
-    <span id="live-visitor-dot" style="width:7px;height:7px;border-radius:50%;background:#4caf50;box-shadow:0 0 6px #4caf50;display:inline-block;animation:vbpulse 1.8s infinite;flex-shrink:0;"></span>
-    Live Visitor <span id="live-visitor-count" style="color:#fff;font-size:13px;font-weight:700;min-width:18px;text-align:center;">—</span>
-  </span>
-  <span style="width:1px;height:14px;background:rgba(255,255,255,.12);display:inline-block;"></span>
+  <span id="live-visitor-dot" style="display:none"></span>
+  <span id="live-visitor-count" style="display:none"></span>
   <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.5px;">
     📅 Today's Total Visit <span id="daily-visitor-count" style="color:#fff;font-size:13px;font-weight:700;min-width:18px;text-align:center;">—</span>
   </span>
@@ -1146,25 +1241,36 @@ html[data-mode="light"] body::before{display:none}
 <!-- GAME SECTION (below visitor bar) -->
 <div id="game-section" style="background:rgba(10,10,10,.95);border-bottom:1px solid rgba(76,175,80,.15);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
   <span style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">🎮 Live Games</span>
-  <span style="font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.5px;">(<span id="total-games-count">—</span> games played)</span>
+  <span id="total-games-count" style="display:none"></span>
   <button onclick="openGameLobby('ttt')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#4caf50';this.style.color='#4caf50'" onmouseout="this.style.borderColor='rgba(76,175,80,.25)';this.style.color='rgba(255,255,255,.7)'">&#9898; Tic Tac Toe</button>
   <button onclick="openGameLobby('rps')" style="display:inline-flex;align-items:center;gap:6px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.25);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#4caf50';this.style.color='#4caf50'" onmouseout="this.style.borderColor='rgba(76,175,80,.25)';this.style.color='rgba(255,255,255,.7)'">&#9986; Rock Paper Scissors</button>
 </div>
 
-<!-- FLOATING GAME INVITE WIDGET -->
-<div id="game-float" style="display:none;position:fixed;bottom:24px;right:24px;z-index:8000;max-width:300px;background:rgba(15,15,15,.98);border:1px solid rgba(76,175,80,.35);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.7);overflow:hidden;">
-  <div style="background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.05));padding:12px 14px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(76,175,80,.12);">
-    <span style="font-size:12px;font-weight:700;color:#4caf50;letter-spacing:.5px;">🎮 Live Visitors-এর সাথে খেলুন</span>
-    <button onclick="closeGameFloat()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>
+<!-- FLOATING NEWS PORTAL PROMO (shows for 5s on page load) -->
+<div id="news-float" onclick="window.open('https://aesthetic-sau-news.web.app','_blank')" style="display:none;position:fixed;bottom:24px;right:24px;z-index:8000;max-width:300px;background:rgba(8,16,13,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(16,185,129,.35);border-radius:18px;box-shadow:0 24px 60px -16px rgba(16,185,129,.35),0 10px 34px rgba(0,0,0,.6);overflow:hidden;cursor:pointer;">
+  <div style="background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(16,185,129,.04));padding:13px 15px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(16,185,129,.15);">
+    <span style="font-size:12px;font-weight:700;color:#34d399;letter-spacing:.5px;">📰 Aesthetic SAU NEWS</span>
+    <button onclick="event.stopPropagation();closeNewsFloat()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:22px;height:22px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>
   </div>
-  <div style="padding:14px;">
-    <p style="font-size:12px;color:rgba(255,255,255,.55);margin-bottom:12px;line-height:1.6;">এখন <span id="gf-live-count" style="color:#4caf50;font-weight:700;">—</span> জন online আছেন। একটা game request পাঠান!</p>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button onclick="openGameLobby('ttt')" style="background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">&#9898; Tic Tac Toe খেলুন</button>
-      <button onclick="openGameLobby('rps')" style="background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.3);color:#f2f2ee;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">&#9986; Rock Paper Scissors খেলুন</button>
-    </div>
+  <div style="padding:14px 15px 16px;">
+    <p style="font-size:13px;color:#eaf7f0;margin-bottom:6px;font-weight:600;">আমাদের নতুন News Portal দেখুন! ✨</p>
+    <p style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.6;margin:0;">SAU campus-এর সর্বশেষ খবর, ইভেন্ট আর গল্প — এক জায়গায়। ক্লিক করে দেখুন!</p>
   </div>
+  <div id="news-float-bar" style="height:3px;background:linear-gradient(90deg,#10b981,#34d399);width:100%;transform-origin:left;"></div>
 </div>
+<style>
+@keyframes newsFloatShrink{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+#news-float-bar{animation:newsFloatShrink 5s linear forwards}
+</style>
+<script>
+(function(){
+  var el = document.getElementById('news-float');
+  if (!el) return;
+  window.closeNewsFloat = function(){ el.style.display = 'none'; };
+  el.style.display = 'block';
+  setTimeout(function(){ if (el) el.style.display = 'none'; }, 5000);
+})();
+</script>
 
 <!-- GAME MODAL -->
 <div id="game-modal" style="display:none;position:fixed;inset:0;z-index:9500;align-items:center;justify-content:center;padding:20px;">
@@ -1310,6 +1416,28 @@ html[data-mode="light"] body::before{display:none}
   </div>
 </div>
 </section>
+
+<section id="birthday" class="bday-sec">
+<div class="wrap">
+  <div class="sec-head rv">
+    <div>
+      <div class="sec-ey">🎂 Fun Feature</div>
+      <h2 class="sec-ti">Find Your Birthday Mate</h2>
+    </div>
+    <span class="sec-no">Who is your birthday twin on campus?</span>
+  </div>
+  <div class="bday-card rv">
+    <div class="bday-top">
+      <h3>Find Your <span>Birthday Mate</span></h3>
+      <p>Enter your name, faculty and date of birth — find your birthday twin on the SAU campus!</p>
+    </div>
+    <div class="bday-form" id="bd-form-wrap">
+      <!-- JS দিয়ে dynamically render হবে -->
+    </div>
+  </div>
+</div>
+</section>
+
 
 <style>
 /* ── Winner Slider ── */
@@ -1654,29 +1782,6 @@ html[data-mode="light"] body::before{display:none}
     </div>
   </div>
 
-</div>
-</section>
-
-
-
-<section id="birthday" class="bday-sec">
-<div class="wrap">
-  <div class="sec-head rv">
-    <div>
-      <div class="sec-ey">🎂 Fun Feature</div>
-      <h2 class="sec-ti">Find Your Birthday Mate</h2>
-    </div>
-    <span class="sec-no">Who is your birthday twin on campus?</span>
-  </div>
-  <div class="bday-card rv">
-    <div class="bday-top">
-      <h3>Find Your <span>Birthday Mate</span></h3>
-      <p>Enter your name, faculty and date of birth — find your birthday twin on the SAU campus!</p>
-    </div>
-    <div class="bday-form" id="bd-form-wrap">
-      <!-- JS দিয়ে dynamically render হবে -->
-    </div>
-  </div>
 </div>
 </section>
 
@@ -2370,8 +2475,10 @@ function renderTeam() {
       + '</div>'
       + '<div>'
       + '<span class="tm-role">' + m.role + '</span>'
-      + '<div class="tm-name tm-name-blur" onclick="this.classList.toggle(\'revealed\')">'
-      + '<div class="tm-blur-text">' + m.name + '</div>'
+      + '<div class="tm-name tm-name-blur">'
+      + '<span onclick="this.parentElement.classList.toggle(\'revealed\')" class="tm-blur-text" style="display:inline-flex;align-items:center;gap:7px;cursor:pointer">' + m.name
+      + (m.fb ? ' <a href="'+m.fb+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Facebook Profile" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(76,175,80,.15);flex-shrink:0"><svg width="11" height="11" viewBox="0 0 24 24" fill="#4caf50"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>' : '')
+      + '</span>'
       + '</div>'
       + '<div class="tm-bio">' + m.bio + '</div>'
       + '</div></div>';
@@ -3027,6 +3134,7 @@ function loadLiveEditorValues() {
       + '</select>'
       + '<input style="flex:2;min-width:120px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="নাম" value="'+m.name+'" id="le-tm-name-'+i+'"/>'
       + '<input style="flex:3;min-width:150px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Photo URL (optional)" value="'+(m.img||'')+'" id="le-tm-img-'+i+'"/>'
+      + '<input style="flex:3;min-width:150px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Facebook Profile URL (optional)" value="'+(m.fb||'')+'" id="le-tm-fb-'+i+'"/>'
       + '</div>';
   });
   document.getElementById('le-team-list').innerHTML = teamHtml;
@@ -3105,7 +3213,8 @@ function leSave(type) {
       var r = document.getElementById('le-tm-role-'+i);
       var n = document.getElementById('le-tm-name-'+i);
       var im = document.getElementById('le-tm-img-'+i);
-      if (n) team.push({role: r?r.value:'Admin', name: n.value.trim(), bio: r&&r.value==='Moderator'?'Page Moderator':'Page Admin', img: im?im.value.trim():''});
+      var fb = document.getElementById('le-tm-fb-'+i);
+      if (n) team.push({role: r?r.value:'Admin', name: n.value.trim(), bio: r&&r.value==='Moderator'?'Page Moderator':'Page Admin', img: im?im.value.trim():'', fb: fb?fb.value.trim():''});
     });
     SITE_CONFIG.team = team;
     update = {team: team};
@@ -3782,12 +3891,6 @@ let activeRequestId = null;
 let gameListenerOff = null;
 let shownNotifyIds = new Set();
 
-// Show floating widget after 4s
-setTimeout(() => {
-  const el = document.getElementById('game-float');
-  if (el) el.style.display = 'block';
-}, 4000);
-
 window.closeGameFloat = function() {
   const el = document.getElementById('game-float');
   if (el) el.style.display = 'none';
@@ -4147,4 +4250,284 @@ window.addEventListener('beforeunload', () => {
   if (activeRequestId) remove(ref(db, 'game-requests/' + activeRequestId)).catch(() => {});
 });
 </script>
+<style id="aurora-bento-redesign-v4">
+/* ================================================================
+   AESTHETIC SAU — DESIGN SYSTEM v4
+   Dark Emerald / Black · Aurora Mesh · Glassmorphism · Bento Grid
+   This stylesheet is intentionally the LAST style block in the
+   document so it wins the cascade and re-skins every existing
+   component without touching markup or JS hooks (ids/classes are
+   all preserved so Firebase/admin/game logic keeps working).
+   ================================================================ */
+
+/* ---------- 1. TOKENS ---------- */
+:root{
+  --void:#040807;
+  --bg-0:#060c09;
+  --bg-1:#0a1310;
+  --bg-2:#0e1a15;
+  --surface:rgba(255,255,255,.045);
+  --surface-strong:rgba(255,255,255,.085);
+  --surface-solid:#0d1714;
+  --line:rgba(255,255,255,.09);
+  --line-strong:rgba(255,255,255,.16);
+  --brand-300:#7af0c2;
+  --brand-400:#34d399;
+  --brand-500:#10b981;
+  --brand-600:#059669;
+  --brand-glow:rgba(16,185,129,.45);
+  --ink-1:#f4faf7;
+  --ink-2:#aebbb3;
+  --ink-3:#69796f;
+  --grad-brand:linear-gradient(135deg,#0ea374 0%,#34d399 55%,#7af0c2 100%);
+  --grad-aurora:
+    radial-gradient(900px 600px at 8% -10%, rgba(16,185,129,.30), transparent 60%),
+    radial-gradient(800px 500px at 95% 0%, rgba(122,240,194,.16), transparent 55%),
+    radial-gradient(1000px 700px at 50% 110%, rgba(5,150,105,.22), transparent 60%),
+    linear-gradient(180deg,#050a08 0%,#060c09 40%,#050908 100%);
+  --r-xs:10px; --r-sm:16px; --r-md:22px; --r-lg:28px; --r-xl:34px; --r-pill:999px;
+  --e-soft:0 2px 10px rgba(0,0,0,.45);
+  --e-card:0 22px 50px -18px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.04) inset;
+  --e-lift:0 30px 70px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(122,240,194,.18) inset, 0 0 40px -8px var(--brand-glow);
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font-display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --font-body:'Inter',ui-sans-serif,system-ui,sans-serif;
+}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+
+/* ---------- 2. BASE / AURORA BACKGROUND ---------- */
+html{background:var(--void)}
+body{
+  background:var(--grad-aurora) var(--void) fixed!important;
+  color:var(--ink-1)!important;
+  font-family:var(--font-body)!important;
+  letter-spacing:-.011em;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:none!important}
+::selection{background:rgba(16,185,129,.35);color:#fff}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--brand-600);border-radius:99px}
+
+section,footer,.team-sec,.product-sec,.bday-sec{background:transparent!important}
+.sec-dark{background:rgba(255,255,255,.015)!important;border-top:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important}
+
+/* a subtle fixed aurora layer that drifts very slowly behind everything */
+body::after{
+  content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(600px 400px at 15% 20%, rgba(16,185,129,.10), transparent 60%),
+    radial-gradient(700px 500px at 85% 75%, rgba(122,240,194,.07), transparent 60%);
+  animation:auroraDrift 26s ease-in-out infinite alternate;
+}
+@keyframes auroraDrift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(2%,-2%,0) scale(1.06)}}
+
+/* ---------- 3. TYPOGRAPHY ---------- */
+.h-title,.sec-ti,.cw-title,.ev-big,.ev-name,.product-name,.bday-top h3,.ch-left h3,.ch-right h4,
+.contest-hero h3,.bmp-title,.cwm-name,.cw-winner-name-big,.tm-name,.nav-brand,.adm-logo,.foot-uni h3,
+.admin-gate-title,.adm-edit-title{
+  font-family:var(--font-display)!important;
+  letter-spacing:-.02em!important;
+}
+.h-title{
+  font-weight:700!important;font-size:clamp(46px,8vw,108px)!important;line-height:.98!important;
+  background:linear-gradient(180deg,#ffffff 0%,#cfe9dd 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.h-title span{background:var(--grad-brand)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;filter:drop-shadow(0 0 28px var(--brand-glow))}
+.h-eyebrow{
+  font-family:var(--font-body)!important;font-weight:600!important;color:var(--brand-400)!important;
+  letter-spacing:.22em!important;font-size:11px!important;
+  display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(16,185,129,.3);
+  border-radius:var(--r-pill);background:rgba(16,185,129,.08);backdrop-filter:blur(10px);
+}
+.h-sub{color:var(--ink-2)!important;font-size:16px!important;max-width:460px!important}
+.sec-ti{background:none!important;-webkit-text-fill-color:initial;color:var(--ink-1)!important;font-weight:600!important;font-size:clamp(26px,4.2vw,44px)!important;letter-spacing:-.025em!important}
+.sec-ey{font-family:var(--font-body)!important;color:var(--brand-400)!important;font-weight:700!important;letter-spacing:.2em!important;font-size:11px!important;padding-left:0!important}
+.sec-ey::before{display:none}
+.sec-no{color:var(--ink-3)!important;font-size:13px!important}
+.cw-eyebrow{color:var(--brand-400)!important}
+p,.h-sub,.product-sub,.ev-desc,.ch-left p,.ch-right p,.contest-hero p,.bday-top p,.cw-rank-card .cw-mini-meta{color:var(--ink-2)}
+
+/* ---------- 4. CONTAINER / SECTION RHYTHM ---------- */
+.wrap{max-width:1200px!important}
+@media(min-width:900px){.wrap{padding:120px 40px!important}}
+.sec-head{border-bottom:1px solid var(--line)!important;align-items:flex-end!important;margin-bottom:56px!important}
+
+/* ---------- 5. NAVBAR — floating glass island ---------- */
+nav{
+  background:rgba(6,12,9,.55)!important;
+  backdrop-filter:blur(22px) saturate(160%)!important;-webkit-backdrop-filter:blur(22px) saturate(160%)!important;
+  border-bottom:1px solid var(--line)!important;
+  transition:background .35s var(--ease),border-color .35s var(--ease),box-shadow .35s var(--ease)!important;
+}
+nav.scrolled{background:rgba(6,12,9,.82)!important;box-shadow:0 12px 40px -14px rgba(0,0,0,.6)!important}
+.nav-brand{color:var(--ink-1)!important;font-weight:600!important;letter-spacing:-.01em!important}
+.nav-logo img{border-color:var(--brand-400)!important;box-shadow:0 0 0 3px rgba(16,185,129,.12)!important}
+.nav-links a{color:var(--ink-2)!important;font-weight:500!important;letter-spacing:.06em!important;font-size:11.5px!important}
+.nav-links a:hover{color:var(--brand-300)!important}
+.nav-links a::after{background:var(--brand-400)!important}
+.nav-participate,.nav-join{border-radius:var(--r-pill)!important;font-size:11px!important;letter-spacing:.08em!important;border-width:1px!important}
+.nav-participate{border-color:rgba(16,185,129,.4)!important;color:var(--brand-300)!important}
+.nav-participate:hover{background:var(--brand-500)!important;color:#04140d!important;border-color:var(--brand-500)!important}
+.nav-join{border-color:var(--line-strong)!important;color:var(--ink-2)!important}
+.nav-join:hover{border-color:var(--brand-400)!important;color:var(--brand-300)!important}
+.nav-fb{background:var(--grad-brand)!important;color:#04140d!important;font-weight:700!important;border-radius:var(--r-pill)!important;box-shadow:0 8px 24px -8px var(--brand-glow)!important}
+.nav-mobile-menu{background:rgba(6,12,9,.97)!important;backdrop-filter:blur(20px)!important;border-bottom:1px solid var(--line)!important}
+.nav-mobile-menu a{color:var(--ink-2)!important}
+.nav-mobile-menu a:hover{color:var(--brand-300)!important;background:rgba(16,185,129,.08)!important}
+.nav-mobile-btn span{background:var(--ink-1)!important}
+
+/* ---------- 6. HERO ---------- */
+.hero{padding-top:140px!important}
+.hero-glow{
+  width:900px!important;height:900px!important;
+  background:radial-gradient(circle,rgba(16,185,129,.20) 0%,rgba(122,240,194,.08) 45%,transparent 72%)!important;
+  filter:blur(40px)!important;
+}
+.logo-float img{
+  border-color:rgba(16,185,129,.55)!important;
+  box-shadow:0 0 0 1px rgba(122,240,194,.25),0 0 60px -8px var(--brand-glow),0 30px 80px -20px rgba(0,0,0,.7)!important;
+}
+.stats-bar{
+  display:flex!important;gap:0!important;margin-top:56px!important;
+  background:var(--surface)!important;backdrop-filter:blur(18px)!important;
+  border:1px solid var(--line)!important;border-radius:var(--r-lg)!important;
+  padding:22px 8px!important;box-shadow:var(--e-card)!important;
+}
+.stat-item{flex:1;padding:0 18px!important;border-right:1px solid var(--line)}
+.stat-item:last-child{border-right:none}
+.stat-div{display:none!important}
+.stat-num{font-family:var(--font-display)!important;background:linear-gradient(180deg,#fff,#bfe9d7)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.stat-num span{background:var(--grad-brand)!important;-webkit-background-clip:text!important;background-clip:text!important}
+.stat-lbl{color:var(--ink-3)!important;letter-spacing:.18em!important}
+.live-dot{color:var(--brand-400)!important}
+.live-dot::before{background:var(--brand-400)!important}
+.cta-bar{margin-top:40px!important}
+.btn-fill{
+  background:var(--grad-brand)!important;color:#04140d!important;font-weight:700!important;
+  border-radius:var(--r-pill)!important;padding:15px 32px!important;font-family:var(--font-body)!important;
+  box-shadow:0 14px 36px -12px var(--brand-glow)!important;letter-spacing:.01em!important;
+}
+.btn-fill:hover{transform:translateY(-3px) scale(1.02)!important;box-shadow:0 22px 50px -10px var(--brand-glow)!important}
+.btn-ghost{
+  border:1px solid var(--line-strong)!important;color:var(--ink-1)!important;border-radius:var(--r-pill)!important;
+  padding:15px 32px!important;background:var(--surface)!important;backdrop-filter:blur(10px)!important;font-weight:600!important;
+}
+.btn-ghost:hover{border-color:var(--brand-400)!important;color:var(--brand-300)!important;transform:translateY(-3px)!important}
+
+/* ---------- 7. GLASS CARD SYSTEM (shared by gallery/fans/team/events/contest) ---------- */
+.gc-card,.fan-card,.tm-card,.how-card,.contest-pill,.vg-card,.rule-item,
+.cw-rank-card,.cw-single-card,.cwm-wrap,.cd-box{
+  background:var(--surface)!important;
+  backdrop-filter:blur(16px) saturate(140%)!important;-webkit-backdrop-filter:blur(16px) saturate(140%)!important;
+  border:1px solid var(--line)!important;
+  border-radius:var(--r-md)!important;
+  box-shadow:var(--e-card)!important;
+  transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .4s var(--ease),background-color .4s var(--ease)!important;
+}
+.gc-card:hover,.fan-card:hover,.tm-card:hover,.how-card:hover,.vg-card:hover,
+.cw-rank-card:hover,.cw-single-card:hover{
+  transform:translateY(-6px)!important;
+  border-color:rgba(122,240,194,.4)!important;
+  box-shadow:var(--e-lift)!important;
+}
+.ev-card,.chithi-box,.bday-card,.product-card,.contest-hero,.deadline-banner,.cw-first-inner{
+  background:var(--surface)!important;backdrop-filter:blur(20px) saturate(140%)!important;
+  border:1px solid var(--line)!important;border-radius:var(--r-xl)!important;box-shadow:var(--e-card)!important;
+}
+.ev-left,.ch-left,.contest-hero,.bday-top,.cw-first-inner{background:linear-gradient(150deg,rgba(16,185,129,.14),rgba(5,150,105,.04))!important}
+.contest-hero::before{background:linear-gradient(120deg,transparent,rgba(122,240,194,.55),transparent)!important}
+
+/* gallery image shimmer-then-reveal skeleton (pure CSS, zero JS) */
+.gc-img,.vg-img-wrap,.ev-gitem,.product-img-wrap,.cw-first-photo-wrap,.cw-card-photo,.cwm-photo{
+  background:linear-gradient(100deg,#0b140f 35%,#13211a 50%,#0b140f 65%)!important;
+  background-size:200% 100%!important;animation:skelShimmer 1.9s ease-in-out infinite!important;
+}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.gc-card:hover .gc-img img{transform:scale(1.07)!important}
+
+.gc-title,.fan-name,.tm-name,.ev-name,.product-name,.cw-mini-name,.cwm-name{color:var(--ink-1)!important}
+.gc-credit,.fan-tag,.tm-bio,.ev-val,.cw-mini-meta{color:var(--ink-3)!important}
+.fan-av{background:var(--grad-brand)!important}
+.tm-av{background:linear-gradient(150deg,rgba(16,185,129,.22),rgba(5,150,105,.06))!important;border-color:var(--line)!important}
+
+/* ---------- 8. BENTO LAYOUTS ---------- */
+.how-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:14px!important}
+.how-card{padding:30px 22px!important}
+.how-step{background:rgba(16,185,129,.14)!important;border-color:rgba(122,240,194,.3)!important;color:var(--brand-300)!important;font-family:var(--font-display)!important}
+.contest-side{gap:12px!important}
+.contest-pill{padding:22px 30px!important}
+.contest-pill-lbl{color:var(--ink-3)!important}
+.fans-grid{display:grid!important;grid-template-columns:repeat(5,1fr)!important;gap:14px!important}
+.team-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:16px!important}
+
+/* gallery becomes a true masonry wall via CSS columns — no markup change needed */
+.gallery-grid{
+  display:block!important;column-count:3!important;column-gap:16px!important;
+}
+.gallery-grid .gc-card{display:inline-block!important;width:100%!important;margin:0 0 16px!important;break-inside:avoid!important}
+.gallery-grid .gc-card-teaser{display:inline-block!important;width:100%!important;margin:0 0 16px!important;break-inside:avoid!important}
+@media(max-width:900px){.gallery-grid{column-count:2!important}.how-grid{grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:560px){.gallery-grid{column-count:1!important}.fans-grid{grid-template-columns:repeat(3,1fr)!important}.team-grid{grid-template-columns:1fr!important}}
+
+/* ---------- 9. BADGES / TAGS — one unified pill language ---------- */
+.gc-cat,.tm-role,.product-tag,.ev-badge,.cw-rank-badge-big .label,.cw-card-rank-badge,
+.cwm-badge,.fan-rank,.vg-num,.contest-pill-lbl,.gc-teaser-btn{
+  font-family:var(--font-body)!important;font-weight:700!important;letter-spacing:.12em!important;
+  border-radius:var(--r-pill)!important;
+}
+.gc-cat{background:var(--grad-brand)!important;color:#04140d!important;box-shadow:0 6px 16px -4px var(--brand-glow)!important}
+.tm-role,.ev-badge{color:var(--brand-300)!important;border-color:rgba(122,240,194,.35)!important;background:rgba(16,185,129,.1)!important}
+.vg-num{background:rgba(6,12,9,.7)!important;backdrop-filter:blur(8px)!important;border-color:var(--line)!important}
+
+/* ---------- 10. BUTTONS (secondary actions across sections) ---------- */
+.participate-big-btn,.ch-btn,.product-order-btn,.gc-teaser-btn{
+  background:var(--grad-brand)!important;color:#04140d!important;font-weight:700!important;
+  border-radius:var(--r-pill)!important;box-shadow:0 14px 34px -12px var(--brand-glow)!important;
+}
+.participate-big-btn:hover,.ch-btn:hover{transform:translateY(-3px) scale(1.015)!important;filter:brightness(1.06)!important}
+
+/* ---------- 11. FORMS ---------- */
+input,select,textarea{font-family:var(--font-body)!important}
+.bday-field input,.bday-field select,.po-field input,.po-field select,
+.adm-search,.admin-gate-input,.site-editor-field input,.site-editor-field textarea,.site-editor-field select,
+.adm-edit-field input,.adm-edit-field select{
+  background:rgba(255,255,255,.04)!important;border:1px solid var(--line)!important;color:var(--ink-1)!important;
+  border-radius:var(--r-sm)!important;
+}
+.bday-field input:focus,.bday-field select:focus,.po-field input:focus,.po-field select:focus,
+.adm-search:focus,.admin-gate-input:focus{
+  border-color:var(--brand-400)!important;box-shadow:0 0 0 3px rgba(16,185,129,.18)!important;outline:none!important;
+}
+.bday-submit{background:var(--grad-brand)!important;color:#04140d!important;border-radius:var(--r-pill)!important}
+
+/* ---------- 12. FOOTER ---------- */
+footer{background:linear-gradient(180deg,transparent,rgba(16,185,129,.05))!important;border-top:1px solid var(--line)!important}
+.foot-top{border-bottom:1px solid var(--line)!important}
+.foot-logo-ring{border-color:var(--brand-400)!important;box-shadow:0 0 30px -6px var(--brand-glow)!important}
+.foot-uni h3{color:var(--ink-1)!important}
+.foot-uni p,.foot-copy{color:var(--ink-3)!important}
+.foot-links a{color:var(--ink-2)!important}
+.foot-links a:hover{color:var(--brand-300)!important}
+.foot-brand span{color:var(--ink-1)!important}
+.ftv-count{color:var(--brand-400)!important}
+
+/* ---------- 13. FOCUS / A11Y ---------- */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:none!important;box-shadow:0 0 0 2px var(--void),0 0 0 4px var(--brand-400)!important;border-radius:8px!important;
+}
+
+/* ---------- 14. SCROLL REVEAL POLISH (re-uses existing [data-reveal] system) ---------- */
+[data-reveal]{transition:opacity .9s var(--ease),transform .9s var(--ease)!important}
+
+/* ---------- 15. MOBILE ---------- */
+@media(max-width:768px){
+  .hero{padding-top:104px!important}
+  .stats-bar{flex-direction:row!important;padding:18px 6px!important}
+  .stat-item{padding:0 10px!important}
+  .wrap{padding:72px 18px!important}
+}
+</style>
+
 </html>
