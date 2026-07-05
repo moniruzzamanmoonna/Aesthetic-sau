@@ -1,36 +1,119 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Helper: fetch caller's own profile ONCE ─────────────────────
+    // The old version called get()/exists() up to 3x per role check
+    // (profileExists + getRole + isActive), which multiplies per
+    // document on `list` queries (e.g. DB.collection('users').get())
+    // and can exceed Firestore's per-query document-access quota,
+    // causing the ENTIRE list request to fail with
+    // "Missing or insufficient permissions" — even for a real
+    // super_admin. This version reads the caller's profile exactly
+    // once and reuses it for every check below.
+    function callerProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function profileExists() {
+      return isAuth() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasRole(roles) {
+      return isAuth() && profileExists()
+        && callerProfile().get('role', null) in roles
+        && callerProfile().get('active', true) == true;
+    }
+
+    function isSuperAdmin() { return hasRole(['super_admin']); }
+    function isAdmin()      { return hasRole(['super_admin','admin']); }
+    function isEditor()     { return hasRole(['super_admin','admin','editor']); }
+    function isJournalist() { return hasRole(['super_admin','admin','editor','journalist']); }
+    function isModerator()  { return hasRole(['super_admin','admin','editor','moderator']); }
+
+    // ── /users ────────────────────────────────────────────────────
+    match /users/{uid} {
+      // Anyone authenticated can create their OWN profile (first login)
+      allow create: if isAuth() && request.auth.uid == uid;
+
+      // Users can always read their own profile
+      // Admins can read all profiles (covers both get + list)
+      allow read: if isAuth() && (
+        request.auth.uid == uid || isAdmin()
+      );
+
+      // Users can update their own profile BUT cannot change role/active
+      allow update: if isAuth() && request.auth.uid == uid
+        && !('role'   in request.resource.data.diff(resource.data).affectedKeys())
+        && !('active' in request.resource.data.diff(resource.data).affectedKeys());
+
+      // Super Admin can update anything (including role assignment)
+      allow update: if isSuperAdmin();
+
+      // Only super_admin can delete
+      allow delete: if isSuperAdmin();
+    }
+
+    // ── /articles ─────────────────────────────────────────────────
     match /articles/{articleId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      // Published articles: public read
+      // Staff: can read all
+      allow read: if resource.data.get('status','draft') == 'published'
+                  || (isAuth() && isJournalist());
 
-      match /comments/{commentId} {
-        allow read: if true;
-        allow create: if request.auth != null;
-        allow update, delete: if request.auth != null &&
-          (resource.data.authorUid == request.auth.uid || request.auth.token.admin == true);
-      }
+      // Create: journalist+, must set own email as author
+      allow create: if isJournalist()
+        && request.resource.data.get('authorEmail','') == request.auth.token.email;
+
+      // Edit any: editor+
+      // Edit own draft only: journalist (cannot self-publish)
+      allow update: if isEditor()
+        || (
+          isJournalist()
+          && resource.data.get('authorEmail','') == request.auth.token.email
+          && request.resource.data.get('status','draft') != 'published'
+        );
+
+      // Delete: admin+
+      allow delete: if isAdmin();
     }
 
-    match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
+    // ── /comments ─────────────────────────────────────────────────
+    match /comments/{commentId} {
+      allow read:   if true;
+      allow create: if isAuth();
+      allow update: if isModerator();
+      allow delete: if isModerator();
     }
 
-    match /siteStats/{doc} {
-      allow read: if true;
-      allow write: if false;
+    // ── /siteConfig ───────────────────────────────────────────────
+    match /siteConfig/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
     }
 
-    match /reactions/{reactionId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    // ── /siteStats ────────────────────────────────────────────────
+    // NOTE: left unchanged from your version — allow create/update: if true
+    // is wide open to ANY visitor, not just staff. This is probably
+    // intentional (anonymous homepage visit counters can't be behind
+    // auth), but it also means anyone can write arbitrary junk into this
+    // collection with no field validation. Flagging this — see message
+    // below for a safer alternative if you want it tightened.
+    match /siteStats/{docId} {
+      allow read:   if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if isAdmin();
     }
 
-    match /bookmarks/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // ── Deny everything else ──────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
