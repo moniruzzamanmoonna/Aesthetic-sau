@@ -1112,6 +1112,25 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
         <button class="site-save-btn" onclick="leSave('winners')" style="margin-top:12px;">⚡ Save & Update</button>
       </div>
 
+      <!-- Top Content Gallery -->
+      <div class="site-editor-card" style="grid-column:1/-1">
+        <div class="site-editor-section-title">🖼️ Top Content Gallery</div>
+        <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px;line-height:1.7;">প্রতিটা ছবির Title, Category, Photo URL (Cloudinary link) আর Credit বসাও। Photo URL খালি রাখলে [photo] placeholder দেখাবে।</p>
+        <div id="le-gallery-list"></div>
+        <button class="site-save-btn" onclick="leSave('topGallery')" style="margin-top:12px;">⚡ Save & Update</button>
+      </div>
+
+      <!-- Footer / SAU Logo -->
+      <div class="site-editor-card">
+        <div class="site-editor-section-title">🏫 Footer SAU Logo</div>
+        <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px;line-height:1.7;">খালি রাখলে site-এর default SAU logo দেখাবে। বদলাতে চাইলে Cloudinary link দাও।</p>
+        <div class="site-editor-field">
+          <label>Logo URL (optional)</label>
+          <input type="text" id="le-footer-logo" placeholder="https://res.cloudinary.com/..."/>
+        </div>
+        <button class="site-save-btn" onclick="leSave('footerLogo')">⚡ Save & Update</button>
+      </div>
+
       <!-- Birthday Section -->
       <div class="site-editor-card">
         <div class="site-editor-section-title">🎂 Birthday Mate Section</div>
@@ -1792,92 +1811,7 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
     <div><div class="sec-ey">Our Campus</div><h2 class="sec-ti">Top Content</h2></div>
     <span class="sec-no">Published on our Facebook page</span>
   </div>
-  <div class="gallery-grid rv" id="gallery-grid">
-    <div class="gc-card rv" style="animation-delay:0.0s">
-      <div class="gc-img">
-        <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="The Pond Reflection" loading="lazy"/>
-        <div class="gc-overlay">
-          <span class="gc-cat">Architecture</span>
-        </div>
-      </div>
-      <div class="gc-body">
-        <div class="gc-title">The Pond Reflection</div>
-        <div class="gc-credit"><a href="https://wa.me/8801644159115" target="_blank">For Credit Please Contact Us</a></div>
-      </div>
-    </div>
-    <div class="gc-card rv" style="animation-delay:0.1s">
-      <div class="gc-img">
-        <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="Between the Buildings" loading="lazy"/>
-        <div class="gc-overlay">
-          <span class="gc-cat">Campus Life</span>
-        </div>
-      </div>
-      <div class="gc-body">
-        <div class="gc-title">Between the Buildings</div>
-        <div class="gc-credit">Injamam Sajid</div>
-      </div>
-    </div>
-    <div class="gc-card rv" style="animation-delay:0.2s">
-      <div class="gc-img">
-        <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="Golden Hour" loading="lazy"/>
-        <div class="gc-overlay">
-          <span class="gc-cat">Nature</span>
-        </div>
-      </div>
-      <div class="gc-body">
-        <div class="gc-title">Golden Hour</div>
-        <div class="gc-credit">Khandakar Mostakim Arnoy</div>
-      </div>
-    </div>
-    <div class="gc-card rv" style="animation-delay:0.30000000000000004s">
-      <div class="gc-img">
-        <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="Shaheed Minar — Daylight" loading="lazy"/>
-        <div class="gc-overlay">
-          <span class="gc-cat">Heritage</span>
-        </div>
-      </div>
-      <div class="gc-body">
-        <div class="gc-title">Shaheed Minar — Daylight</div>
-        <div class="gc-credit"><a href="https://wa.me/8801644159115" target="_blank">For Credit Please Contact Us</a></div>
-      </div>
-    </div>
-    <div class="gc-card rv" style="animation-delay:0.4s">
-      <div class="gc-img">
-        <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="Lakeside Faculty Building" loading="lazy"/>
-        <div class="gc-overlay">
-          <span class="gc-cat">Architecture</span>
-        </div>
-      </div>
-      <div class="gc-body">
-        <div class="gc-title">Lakeside Faculty Building</div>
-        <div class="gc-credit"><a href="https://wa.me/8801644159115" target="_blank">For Credit Please Contact Us</a></div>
-      </div>
-    </div>
-    <div class="gc-card rv" style="animation-delay:0.5s">
-      <div class="gc-img">
-        <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="Shaheed Minar — Night" loading="lazy"/>
-        <div class="gc-overlay">
-          <span class="gc-cat">Heritage</span>
-        </div>
-      </div>
-      <div class="gc-body">
-        <div class="gc-title">Shaheed Minar — Night</div>
-        <div class="gc-credit"><a href="https://wa.me/8801644159115" target="_blank">For Credit Please Contact Us</a></div>
-      </div>
-    </div>
-    <div class="gc-card rv" style="animation-delay:0.6000000000000001s">
-      <div class="gc-img">
-        <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="Campus Aerial View" loading="lazy"/>
-        <div class="gc-overlay">
-          <span class="gc-cat">Campus Life</span>
-        </div>
-      </div>
-      <div class="gc-body">
-        <div class="gc-title">Campus Aerial View</div>
-        <div class="gc-credit">Mahmudul Hasan Al Amin</div>
-      </div>
-    </div>
-  </div>
+  <div class="gallery-grid rv" id="gallery-grid"></div>
 
     <a href="https://forms.gle/AdqUi57p5uPKYNJS8" class="gc-card-teaser rv" target="_blank">
       <div class="gc-teaser-icon">&#128247;</div>
@@ -1993,7 +1927,7 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
 <div class="foot-wrap">
   <div class="foot-top">
     <div class="foot-logo-ring">
-      <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="Sylhet Agricultural University"/>
+      <img id="footer-logo-img" src="data:image/webp;base64,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" alt="Sylhet Agricultural University"/>
     </div>
     <div class="foot-uni">
       <h3>Sylhet Agricultural University</h3>
@@ -2048,7 +1982,17 @@ var SITE_CONFIG = {
     {role:"Moderator", name:"Mariya",                bio:"Page Moderator", img:""}
   ],
   announcement: {show: false, text: ""},
-  extraPanels: []
+  extraPanels: [],
+  footerLogoUrl: "",
+  topGallery: [
+    {title:"The Pond Reflection",        cat:"Architecture", credit:"For Credit Please Contact Us", creditLink:"https://wa.me/8801644159115", url:""},
+    {title:"Between the Buildings",      cat:"Campus Life",  credit:"Injamam Sajid", creditLink:"", url:""},
+    {title:"Golden Hour",                cat:"Nature",       credit:"Khandakar Mostakim Arnoy", creditLink:"", url:""},
+    {title:"Shaheed Minar — Daylight",   cat:"Heritage",     credit:"For Credit Please Contact Us", creditLink:"https://wa.me/8801644159115", url:""},
+    {title:"Lakeside Faculty Building",  cat:"Architecture", credit:"For Credit Please Contact Us", creditLink:"https://wa.me/8801644159115", url:""},
+    {title:"Shaheed Minar — Night",      cat:"Heritage",     credit:"For Credit Please Contact Us", creditLink:"https://wa.me/8801644159115", url:""},
+    {title:"Campus Aerial View",         cat:"Campus Life",  credit:"Mahmudul Hasan Al Amin", creditLink:"", url:""}
+  ]
 };
 
 // Firebase থেকে config load করো — সব render এখানেই হবে
@@ -2062,6 +2006,12 @@ fetch(FIREBASE_URL + '/site-config.json')
       if (data.announcement) SITE_CONFIG.announcement = data.announcement;
       if (data.extraPanels && Array.isArray(data.extraPanels)) SITE_CONFIG.extraPanels = data.extraPanels;
       if (data.winners && Array.isArray(data.winners) && data.winners.length) SITE_CONFIG.winners = data.winners;
+      if (data.topGallery && Array.isArray(data.topGallery) && data.topGallery.length) SITE_CONFIG.topGallery = data.topGallery;
+      if (data.footerLogoUrl) SITE_CONFIG.footerLogoUrl = data.footerLogoUrl;
+    }
+    if (SITE_CONFIG.footerLogoUrl) {
+      var flImg = document.getElementById('footer-logo-img');
+      if (flImg) flImg.src = SITE_CONFIG.footerLogoUrl;
     }
     // Announcement bar
     if (SITE_CONFIG.announcement && SITE_CONFIG.announcement.show && SITE_CONFIG.announcement.text) {
@@ -2079,6 +2029,7 @@ fetch(FIREBASE_URL + '/site-config.json')
     renderTeam();
     renderExtraPanels();
     renderWinners();
+    renderTopGallery();
     setTimeout(function() {
       var fcEl = document.getElementById("fcount");
       if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
@@ -2089,6 +2040,7 @@ fetch(FIREBASE_URL + '/site-config.json')
     renderFans();
     renderTeam();
     renderWinners();
+    renderTopGallery();
     setTimeout(function() {
       var fcEl = document.getElementById("fcount");
       if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
@@ -2502,6 +2454,37 @@ function renderExtraPanels() {
       + '</div></section>';
   });
   container.innerHTML = h;
+}
+
+var GALLERY_PLACEHOLDER = "data:image/svg+xml;utf8," + encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'>"
+  + "<rect width='100%' height='100%' fill='#e5e7eb'/>"
+  + "<text x='50%' y='50%' fill='#6b7280' font-family='sans-serif' font-size='20' text-anchor='middle' dominant-baseline='middle'>[photo]</text>"
+  + "</svg>"
+);
+
+function renderTopGallery() {
+  var g = document.getElementById("gallery-grid");
+  if (!g) return;
+  var items = SITE_CONFIG.topGallery || [];
+  var h = "";
+  items.forEach(function(item, i) {
+    var imgSrc = item.url ? item.url : GALLERY_PLACEHOLDER;
+    var creditHtml = item.creditLink
+      ? '<a href="' + item.creditLink + '" target="_blank">' + (item.credit || '') + '</a>'
+      : (item.credit || '');
+    h += '<div class="gc-card rv" style="animation-delay:' + (i * 0.1) + 's">'
+      + '<div class="gc-img">'
+      + '<img src="' + imgSrc + '" alt="' + (item.title || '') + '" loading="lazy"/>'
+      + '<div class="gc-overlay"><span class="gc-cat">' + (item.cat || '') + '</span></div>'
+      + '</div>'
+      + '<div class="gc-body">'
+      + '<div class="gc-title">' + (item.title || '') + '</div>'
+      + '<div class="gc-credit">' + creditHtml + '</div>'
+      + '</div></div>';
+  });
+  g.innerHTML = h;
+  g.querySelectorAll(".rv").forEach(function(el) { obs.observe(el); });
 }
 
 var obs = new IntersectionObserver(function(es) {
@@ -3141,8 +3124,34 @@ function loadLiveEditorValues() {
   document.getElementById('le-team-list').innerHTML = teamHtml;
   // Winners
   loadWinnersAdmin();
+  // Top Gallery
+  loadGalleryAdmin();
+  // Footer Logo
+  var flInput = document.getElementById('le-footer-logo');
+  if (flInput) flInput.value = SITE_CONFIG.footerLogoUrl || '';
   // Extra panels
   renderLePanelsList();
+}
+
+function loadGalleryAdmin() {
+  var list = document.getElementById('le-gallery-list');
+  if (!list) return;
+  var items = SITE_CONFIG.topGallery || [];
+  var iStyle = 'width:100%;background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;margin-bottom:8px;';
+  var html = items.map(function(item, i) {
+    return '<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:12px;">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
+      + '<input id="le-gal-title-'+i+'" value="'+(item.title||'')+'" placeholder="Title" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-gal-cat-'+i+'" value="'+(item.cat||'')+'" placeholder="Category (e.g. Architecture)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '</div>'
+      + '<input id="le-gal-url-'+i+'" value="'+(item.url||'')+'" placeholder="Photo URL (Cloudinary link)" style="'+iStyle+'">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      + '<input id="le-gal-credit-'+i+'" value="'+(item.credit||'')+'" placeholder="Credit text (e.g. Photographer name)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-gal-creditlink-'+i+'" value="'+(item.creditLink||'')+'" placeholder="Credit link (optional)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '</div>'
+      + '</div>';
+  }).join('');
+  list.innerHTML = html;
 }
 
 function renderLePanelsList() {
@@ -3220,6 +3229,33 @@ function leSave(type) {
     SITE_CONFIG.team = team;
     update = {team: team};
     renderTeam();
+  }
+  if (type === 'topGallery') {
+    var gallery = [];
+    (SITE_CONFIG.topGallery || []).forEach(function(item, i) {
+      var t = document.getElementById('le-gal-title-'+i);
+      var c = document.getElementById('le-gal-cat-'+i);
+      var u = document.getElementById('le-gal-url-'+i);
+      var cr = document.getElementById('le-gal-credit-'+i);
+      var cl = document.getElementById('le-gal-creditlink-'+i);
+      if (t) gallery.push({
+        title: t.value.trim(),
+        cat: c ? c.value.trim() : '',
+        url: u ? u.value.trim() : '',
+        credit: cr ? cr.value.trim() : '',
+        creditLink: cl ? cl.value.trim() : ''
+      });
+    });
+    SITE_CONFIG.topGallery = gallery;
+    update = {topGallery: gallery};
+    renderTopGallery();
+  }
+  if (type === 'footerLogo') {
+    var logoUrl = document.getElementById('le-footer-logo').value.trim();
+    SITE_CONFIG.footerLogoUrl = logoUrl;
+    update = {footerLogoUrl: logoUrl};
+    var flImg = document.getElementById('footer-logo-img');
+    if (flImg && logoUrl) flImg.src = logoUrl;
   }
   // Firebase এ save করো
   fetch(FIREBASE_URL + '/site-config.json', {
