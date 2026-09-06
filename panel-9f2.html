@@ -176,7 +176,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD5Ee8qZulCbxGPa3w7UdgEwYscfb8pxck",
@@ -189,16 +189,15 @@
     measurementId: "G-L3FF1NTLL1"
   };
 
-  let db = null;
-  try{
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    const auth = getAuth(app);
-    await new Promise(res=>{ signInAnonymously(auth).finally(res); });
-  } catch(e){ console.warn("Firebase not configured:", e); }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  window.__adminLogin = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  window.__adminLogout = () => signOut(auth);
+  window.__onAuthChange = (cb) => onAuthStateChanged(auth, cb);
 
   window.__fetchResponses = async () => {
-    if(!db) throw new Error("Firebase not configured");
     const q = query(collection(db, "sau_campus_rep_2026"), orderBy("submittedAt","desc"));
     const snap = await getDocs(q);
     return snap.docs.map(d=>({ id:d.id, ...d.data() }));
@@ -207,8 +206,9 @@
 
 <script>
 (function(){
-  // TODO: change this before sharing the admin link with anyone
-  const ADMIN_PASSWORD = "aesthetic26";
+  // TODO: this must match the admin account you create in
+  // Firebase Console → Authentication → Users (Email/Password provider)
+  const ADMIN_EMAIL = "aestheticsau3100@gmail.com";
 
   const gate = document.getElementById('gate');
   const dashboard = document.getElementById('dashboard');
@@ -218,22 +218,43 @@
   function unlock(){
     gate.classList.add('hidden');
     dashboard.classList.remove('hidden');
-    sessionStorage.setItem('sau_admin_ok','1');
     loadResponses();
   }
-  document.getElementById('pwSubmit').addEventListener('click', tryLogin);
-  pwInput.addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(); });
-  function tryLogin(){
-    if(pwInput.value === ADMIN_PASSWORD){ pwErr.classList.remove('show'); unlock(); }
-    else { pwErr.classList.add('show'); }
-  }
-  document.getElementById('logoutBtn').addEventListener('click', ()=>{
-    sessionStorage.removeItem('sau_admin_ok');
+  function lock(){
     dashboard.classList.add('hidden');
     gate.classList.remove('hidden');
-    pwInput.value=''; pwInput.focus();
+    pwInput.value = '';
+  }
+
+  window.__onAuthChange((user)=>{
+    if(user && user.email === ADMIN_EMAIL){ unlock(); }
+    else { lock(); }
   });
-  if(sessionStorage.getItem('sau_admin_ok') === '1') unlock();
+
+  document.getElementById('pwSubmit').addEventListener('click', tryLogin);
+  pwInput.addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(); });
+
+  async function tryLogin(){
+    pwErr.classList.remove('show');
+    const submitBtn = document.getElementById('pwSubmit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Checking...';
+    try{
+      await window.__adminLogin(ADMIN_EMAIL, pwInput.value);
+      // onAuthChange listener above calls unlock()
+    } catch(e){
+      console.error(e);
+      pwErr.textContent = 'ভুল password, আবার চেষ্টা করো।';
+      pwErr.classList.add('show');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enter';
+    }
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    window.__adminLogout();
+  });
 
   let allResponses = [];
 
@@ -274,7 +295,7 @@
         <div class="resp-photo">${photo}</div>
         <div class="resp-main">
           <div class="resp-name">${esc(r.fullName)||'(No name)'} ${r.nickName?`<span style="color:var(--slate); font-weight:400; font-size:13px;">· ${esc(r.nickName)}</span>`:''}</div>
-          <div class="resp-meta"><span>${esc(r.faculty)||'—'}</span> · ID ${esc(r.studentId)||'—'} · ${esc(r.levelSem)||'—'}</div>
+          <div class="resp-meta"><span>${esc(r.faculty)||'—'}</span> · ID ${esc(r.studentId)||'—'} · ${esc(r.levelSem)||'—'} · ${esc(r.hall)||'—'}</div>
         </div>
         <div class="resp-time">${fmtTime(r.submittedAt)}</div>
         <div class="chev">▶</div>
@@ -308,7 +329,7 @@
     const sort = document.getElementById('sortSelect').value;
     let list = allResponses.filter(r=>{
       if(!term) return true;
-      const hay = [r.fullName, r.nickName, r.studentId, r.faculty, ...(r.skills||[]), r.skillOther]
+      const hay = [r.fullName, r.nickName, r.studentId, r.faculty, r.hall, ...(r.skills||[]), r.skillOther]
         .filter(Boolean).join(' ').toLowerCase();
       return hay.includes(term);
     });
@@ -331,7 +352,7 @@
   document.getElementById('sortSelect').addEventListener('change', applyFilters);
 
   document.getElementById('exportBtn').addEventListener('click', ()=>{
-    const cols = ['fullName','nickName','studentId','faculty','levelSem','phone','fbLink',
+    const cols = ['fullName','nickName','studentId','faculty','levelSem','hall','phone','fbLink',
       'activeLevel','skills','skillOther','prevExp','prevExpText','whyJoin','contribute',
       'taskReport','taskIdea','timeCommit','willingCover','portfolioLink','whySelect',
       'agreeGuidelines','anythingElse','photoUrl'];
