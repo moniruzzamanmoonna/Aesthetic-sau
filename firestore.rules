@@ -111,6 +111,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── /sau_campus_rep_2026 (Campus Rep Program '26 applications) ──
+    match /sau_campus_rep_2026/{doc} {
+      allow create: if true;
+      allow read: if isAuth() && request.auth.token.email == 'aestheticsau3100@gmail.com';
+      allow update, delete: if false;
+    }
+
     // ── Deny everything else ──────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
