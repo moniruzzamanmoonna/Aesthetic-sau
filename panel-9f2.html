@@ -39,9 +39,18 @@
   .gate-card input{
     width:100%; background:var(--ink); border:1px solid var(--line); color:var(--paper);
     border-radius:9px; padding:12px 13px; font-size:15px; text-align:center;
-    letter-spacing:0.08em; outline:none; margin-bottom:12px;
+    letter-spacing:0.08em; outline:none;
   }
   .gate-card input:focus{ border-color:var(--brass); }
+  .pw-wrap{ position:relative; margin-bottom:12px; }
+  .pw-wrap input{ margin-bottom:0; padding-right:42px; }
+  .pw-toggle{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    width:30px; height:30px; border:none; background:transparent; cursor:pointer;
+    color:var(--slate); display:flex; align-items:center; justify-content:center;
+    border-radius:6px;
+  }
+  .pw-toggle:hover{ color:var(--paper); background:rgba(243,236,221,0.06); }
   .gate-err{ color:var(--stamp); font-size:12.5px; margin-bottom:10px; display:none; }
   .gate-err.show{ display:block; }
   .btn{
@@ -135,7 +144,12 @@
   <div class="gate-card">
     <div class="gate-eyebrow">Aesthetic SAU — Press Desk</div>
     <div class="gate-title">Admin Access</div>
-    <input type="password" id="pwInput" placeholder="Password" autocomplete="off">
+    <div class="pw-wrap">
+      <input type="password" id="pwInput" placeholder="Password" autocomplete="off">
+      <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
+        <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
     <div class="gate-err" id="pwErr">ভুল password, আবার চেষ্টা করো।</div>
     <button class="btn" id="pwSubmit">Enter</button>
   </div>
@@ -172,7 +186,7 @@
   <div class="resp-list" id="respList"></div>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase + app logic (single module script — avoids load-order issues) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -193,19 +207,15 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  window.__adminLogin = (email, password) => signInWithEmailAndPassword(auth, email, password);
-  window.__adminLogout = () => signOut(auth);
-  window.__onAuthChange = (cb) => onAuthStateChanged(auth, cb);
+  const adminLogin = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  const adminLogout = () => signOut(auth);
 
-  window.__fetchResponses = async () => {
+  const fetchResponses = async () => {
     const q = query(collection(db, "sau_campus_rep_2026"), orderBy("submittedAt","desc"));
     const snap = await getDocs(q);
     return snap.docs.map(d=>({ id:d.id, ...d.data() }));
   };
-</script>
 
-<script>
-(function(){
   // TODO: this must match the admin account you create in
   // Firebase Console → Authentication → Users (Email/Password provider)
   const ADMIN_EMAIL = "aestheticsau3100@gmail.com";
@@ -214,6 +224,18 @@
   const dashboard = document.getElementById('dashboard');
   const pwInput = document.getElementById('pwInput');
   const pwErr = document.getElementById('pwErr');
+
+  const pwToggle = document.getElementById('pwToggle');
+  const eyeIcon = document.getElementById('eyeIcon');
+  const EYE_OPEN = '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/>';
+  const EYE_OFF = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a20.3 20.3 0 0 1-2.68 3.68M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  pwToggle.addEventListener('click', ()=>{
+    const showing = pwInput.type === 'text';
+    pwInput.type = showing ? 'password' : 'text';
+    eyeIcon.innerHTML = showing ? EYE_OPEN : EYE_OFF;
+    pwToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    pwInput.focus();
+  });
 
   function unlock(){
     gate.classList.add('hidden');
@@ -226,7 +248,7 @@
     pwInput.value = '';
   }
 
-  window.__onAuthChange((user)=>{
+  onAuthStateChanged(auth, (user)=>{
     if(user && user.email === ADMIN_EMAIL){ unlock(); }
     else { lock(); }
   });
@@ -240,11 +262,11 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Checking...';
     try{
-      await window.__adminLogin(ADMIN_EMAIL, pwInput.value);
-      // onAuthChange listener above calls unlock()
+      await adminLogin(ADMIN_EMAIL, pwInput.value);
+      // onAuthStateChanged listener above calls unlock()
     } catch(e){
       console.error(e);
-      pwErr.textContent = 'ভুল password, আবার চেষ্টা করো।';
+      pwErr.textContent = 'ভুল password, আবার চেষ্টা করো। (' + (e.code || e.message) + ')';
       pwErr.classList.add('show');
     } finally {
       submitBtn.disabled = false;
@@ -253,7 +275,7 @@
   }
 
   document.getElementById('logoutBtn').addEventListener('click', ()=>{
-    window.__adminLogout();
+    adminLogout();
   });
 
   let allResponses = [];
@@ -378,15 +400,14 @@
     const respList = document.getElementById('respList');
     respList.innerHTML = '';
     try{
-      allResponses = await window.__fetchResponses();
+      allResponses = await fetchResponses();
       applyFilters();
     }catch(e){
       console.error(e);
       document.getElementById('emptyState').classList.remove('hidden');
-      document.getElementById('emptyState').textContent = 'Firebase config বসানো হয়নি অথবা লোড করতে সমস্যা হয়েছে।';
+      document.getElementById('emptyState').textContent = 'Data লোড করতে সমস্যা হয়েছে: ' + (e.code || e.message);
     }
   }
-})();
 </script>
 
 </body>
