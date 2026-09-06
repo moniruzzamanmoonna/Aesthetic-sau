@@ -318,9 +318,32 @@
 
       <div class="row2">
         <div class="field"><label>Faculty<span class="req">*</span></label>
-          <input type="text" id="faculty" placeholder="e.g. Agriculture"></div>
+          <select id="faculty">
+            <option value="" disabled selected>Select faculty...</option>
+            <option value="Veterinary, Animal and Biomedical Sciences">Veterinary, Animal and Biomedical Sciences</option>
+            <option value="Agriculture">Agriculture</option>
+            <option value="Fisheries">Fisheries</option>
+            <option value="Agricultural Economics and Business Studies">Agricultural Economics and Business Studies</option>
+            <option value="Agricultural Engineering and Technology">Agricultural Engineering and Technology</option>
+            <option value="Biotechnology and Genetic Engineering">Biotechnology and Genetic Engineering</option>
+          </select>
+        </div>
         <div class="field"><label>Level & Semester<span class="req">*</span></label>
           <input type="text" id="levelSem" placeholder="e.g. Level 2, Semester 1"></div>
+      </div>
+
+      <div class="field"><label>Hall<span class="req">*</span></label>
+        <select id="hall">
+          <option value="" disabled selected>Select hall...</option>
+          <option value="Hazrat Shahjalal (R.) Hall">Hazrat Shahjalal (R.) Hall</option>
+          <option value="General M A G Osmani Hall">General M A G Osmani Hall</option>
+          <option value="Durre Samad Rahman Hall">Durre Samad Rahman Hall</option>
+          <option value="M Saifur Rahman Hall">M Saifur Rahman Hall</option>
+          <option value="Shaheed Zia Hall">Shaheed Zia Hall</option>
+          <option value="Suhasini Das Hall">Suhasini Das Hall</option>
+          <option value="Hazrat Shahparan (R.) Hall">Hazrat Shahparan (R.) Hall</option>
+          <option value="Non-Residential">Non-Residential</option>
+        </select>
       </div>
 
       <div class="field"><label>Facebook Profile Link<span class="req">*</span></label>
@@ -542,6 +565,7 @@
       `Name: ${p.fullName}${p.nickName ? ' ('+p.nickName+')' : ''}`,
       `ID: ${p.studentId}`,
       `Faculty: ${p.faculty}`,
+      `Hall: ${p.hall || '—'}`,
       `Phone: ${p.phone}`,
       `Skills: ${skills}`,
       `Time commitment: ${p.timeCommit || '—'}`,
@@ -711,7 +735,8 @@
     let bad = false;
     if(n===1){
       bad = [ ['fullName',fullName], ['studentId',studentId], ['faculty',faculty],
-              ['levelSem',document.getElementById('levelSem')], ['phone',document.getElementById('phone')],
+              ['levelSem',document.getElementById('levelSem')], ['hall',document.getElementById('hall')],
+              ['phone',document.getElementById('phone')],
               ['fbLink',document.getElementById('fbLink')] ]
         .map(([id,el])=> markErr(el, !el.value.trim())).some(Boolean);
       document.getElementById('err1').classList.toggle('show', bad);
@@ -768,6 +793,7 @@
       studentId: studentId.value.trim(),
       faculty: faculty.value.trim(),
       levelSem: document.getElementById('levelSem').value.trim(),
+      hall: document.getElementById('hall').value.trim(),
       photoUrl: photoUrl,
       phone: document.getElementById('phone').value.trim(),
       fbLink: document.getElementById('fbLink').value.trim(),
