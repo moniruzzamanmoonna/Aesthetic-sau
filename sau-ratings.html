@@ -252,8 +252,8 @@ function connect(){
   }));
 }
 function trackVisit(){                                     // counts each browser once; stores only a flag
-  if(localStorage.getItem("sau-seen")) return;
-  localStorage.setItem("sau-seen","1"); write({"stats/visitors":1});
+  try{ if(localStorage.getItem("sau-seen")) return; localStorage.setItem("sau-seen","1"); }catch(e){ return; }
+  write({"stats/visitors":1});
 }
 
 /* ===== SIGN UP (name only) =====
@@ -315,7 +315,7 @@ function renderChips(){
 }
 function cardHTML(it){
   return `<article class="card" data-id="${it.id}">
-    <div class="ph" data-i="${esc(it.name[0])}"><img src="${esc(it.image)}" alt="${esc(it.name)}" loading="lazy" onerror="this.parentNode.classList.add('nofx')"><span class="cat">${esc(it.category)}</span></div>
+    <div class="ph" data-i="${esc(it.name[0])}"><img src="${esc(imgSrc(it))}" data-want="${esc(imgSrc(it))}" alt="${esc(it.name)}" loading="lazy" onerror="imgFail(this)"><span class="cat">${esc(it.category)}</span></div>
     <div class="body">
       <h3>${esc(it.name)}</h3><p class="loc">${esc(it.location)}</p><p class="meta"></p>
       <div class="stat"><span class="avg">0.0</span><span class="of">/ 10</span><span class="tot"></span></div>
@@ -324,6 +324,15 @@ function cardHTML(it){
       <button class="toggle"></button>
       <div class="res"><div><div class="dist">${[10,9,8,7,6,5,4,3,2,1].map(s=>`<div class="row" data-s="${s}"><span class="n">${s}</span><div class="track"><div class="fill"></div></div><span class="v"></span></div>`).join("")}</div></div></div>
     </div></article>`;
+}
+/* Images: just upload  images/<item-id>.jpg  (or .png / .webp) next to this file, e.g. images/biotech-night.jpg.
+   A custom https:// link in the item's "image" field also works and takes priority. */
+const IMG_EXT = ["jpg","png","webp"];
+const imgSrc = it => (it.image && !/picsum\.photos/.test(it.image)) ? it.image : `images/${it.id}.jpg`;
+function imgFail(im){
+  const n = +im.dataset.n || 0, id = im.closest(".card").dataset.id;
+  if(im.dataset.want.indexOf("images/")===0 && n < IMG_EXT.length-1){ im.dataset.n = n+1; im.src = `images/${id}.${IMG_EXT[n+1]}`; }
+  else im.parentNode.classList.add("nofx");
 }
 function renderItems(){
   const list = sortItems(searchItems(filterCategory(items))), g = $("grid");
@@ -353,12 +362,14 @@ function updateCard(card, animate){
   if(!tot) a.textContent = "—";
   else if(animate || changed){ countTo(a, parseFloat(a.textContent)||0, avg, 1); a.classList.remove("pop"); void a.offsetWidth; a.classList.add("pop"); }
   else a.textContent = avg.toFixed(1);
+  const im = card.querySelector("img");
+  const want = imgSrc(it);
+  if(im.dataset.want !== want){ im.dataset.want = want; im.dataset.n = 0; im.src = want; card.querySelector(".ph").classList.remove("nofx"); }
   card.dataset.tot = tot;
   card.querySelector(".tot").innerHTML = `${tot.toLocaleString()} ratings<small>${tot && it.updatedAt ? "Last rated "+ago(it.updatedAt) : "Not rated yet"}</small>`;
   card.querySelector(".meta").innerHTML = `<span>Added ${fmtDate(it.addedAt)}</span>`;
   const lbl = card.querySelector(".lbl"); lbl.textContent = my ? `Rated ${my}/10 — anonymously.` : tot ? "Rate:" : "Be the first to rate:"; lbl.classList.toggle("ok", !!my);
   card.querySelectorAll(".scale button").forEach(b=>{ b.disabled = !!my; b.classList.toggle("sel", +b.dataset.score===my); });
-  if(my) ui.open[it.id] = true;
   const open = !!ui.open[it.id];
   card.querySelector(".res").classList.toggle("open", open);
   card.querySelector(".toggle").textContent = open ? "Hide results" : "See results";
@@ -379,9 +390,15 @@ function onData(){
 /* ===== ACTIONS ===== */
 async function submitRating(id, score){
   if(mine[id]) return;                                   // one vote per item per browser
-  mine[id] = score; try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
+  mine[id] = score; ui.open[id] = true;                  // show results right after voting
+  try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
   const ok = await write({[`items/${id}/counts/s${score}`]:1, [`items/${id}/updatedAt`]:"now"});
-  if(!ok){ delete mine[id]; localStorage.setItem(KEY_MINE, JSON.stringify(mine)); onData(); }
+  if(!ok){
+    delete mine[id]; try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
+    onData();
+    const l = document.querySelector(`.card[data-id="${id}"] .lbl`);
+    if(l){ l.textContent = "Couldn't save. Check your connection and try again."; setTimeout(onData, 3500); }
+  }
 }
 
 /* ===== EVENTS ===== */
