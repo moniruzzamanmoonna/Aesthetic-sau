@@ -201,7 +201,7 @@ let mine = {}; try{ mine = JSON.parse(localStorage.getItem(KEY_MINE)) || {}; }ca
 const KEY_DISMISS = "sau-dismissed:v1";
 let dismissed = false; try{ dismissed = localStorage.getItem(KEY_DISMISS)==="1"; }catch(e){}
 /* Faculty-bias rule: at least BIAS.high x 10 AND at least BIAS.lowCount x 1 in one person's ratings. */
-const BIAS = {high:10, low:1, lowCount:2};
+const BIAS = {high:10, low:1, lowCount:3};
 const isBiased = ballot => { const v = Object.values(ballot);
   return v.filter(x=>x===BIAS.high).length>=1 && v.filter(x=>x===BIAS.low).length>=BIAS.lowCount; };
 const ui = {cat:"All", q:"", sort:"most", open:{}};
