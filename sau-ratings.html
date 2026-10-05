@@ -90,10 +90,11 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 
 .meta{display:flex;flex-wrap:wrap;gap:0 12px;font-size:12px;color:var(--muted);margin-top:2px}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:22px}
+.stats .st:last-child:nth-child(odd){grid-column:1/-1}
 .st{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 .st b{display:block;font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
 .st span{font-size:12.5px}
-@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:720px){.stats{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}.stats .st:last-child:nth-child(odd){grid-column:auto}}
 .brand{flex:none}
 #who{display:flex;align-items:center;gap:10px;min-width:0}
 .hi{font-size:13.5px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -152,7 +153,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
     <a class="sb" id="shTg" target="_blank" rel="noopener">Telegram</a>
     <button class="sb" id="copyLink">Copy link</button>
   </div></div></div>
-<footer><div class="wrap"><div class="stats" id="stats"></div><p style="font-size:12.5px">A fun project of Aesthetic SAU</p><p style="font-size:12px;margin-top:2px;opacity:.8">Anonymous by design: no names, emails or accounts are ever collected.</p></div></footer>
+<footer><div class="wrap"><div class="stats" id="stats"></div><p style="font-size:12.5px">A fun project of Aesthetic SAU</p><p style="font-size:12px;margin-top:2px;opacity:.8">Anonymous by design: no names, emails or accounts are ever collected. Visits are counted with anonymous analytics (approximate country/city only).</p></div></footer>
 
 <script>
 /* ===== DATA ===== replace `image` URLs with real photos any time.
@@ -190,7 +191,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 /* Data shape in the database: items/{id}: {name, category, location, image, addedAt, updatedAt, counts:{s1..s10}}
-   and stats: {visitors}. Keys are "s1".."s10" because Firebase turns numeric keys into arrays. */
+   and stats: {visitors, returning}. Keys are "s1".."s10" because Firebase turns numeric keys into arrays. */
 function seedData(demo){
   const now = Date.now(), out = {items:{}, stats: {visitors:0}};
   ITEMS.forEach(it=>{
@@ -251,10 +252,33 @@ function connect(){
     onData();
   }));
 }
-function trackVisit(){                                     // counts each browser once; stores only a flag
-  try{ if(localStorage.getItem("sau-seen")) return; localStorage.setItem("sau-seen","1"); }catch(e){ return; }
-  write({"stats/visitors":1});
+function trackVisit(){        /* new browser -> stats/visitors; coming back -> stats/returning (once per browser session, so refreshes don't inflate it) */
+  let seen = false;
+  try{
+    if(sessionStorage.getItem("sau-sess")) return;            // already counted in this session
+    sessionStorage.setItem("sau-sess","1");
+    seen = !!localStorage.getItem("sau-seen");
+    if(!seen) localStorage.setItem("sau-seen","1");
+  }catch(e){ return; }
+  write({[seen ? "stats/returning" : "stats/visitors"]:1});
 }
+
+
+/* ===== GOOGLE ANALYTICS (GA4) =====
+   Shows where visitors come from (country / city), devices, new vs returning, live users.
+   Firebase console > Project settings > Integrations > Google Analytics (enable), then copy the
+   Measurement ID (looks like G-XXXXXXXXXX) from Analytics > Admin > Data streams > Web, and paste it below.
+   Leave empty to switch analytics off. */
+const GA_ID = "G-L3FF1NTLL1";
+window.dataLayer = window.dataLayer || [];
+function gtag(){ dataLayer.push(arguments); }
+if(GA_ID){
+  const g = document.createElement("script"); g.async = true;
+  g.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(GA_ID);
+  document.head.appendChild(g);
+  gtag("js", new Date()); gtag("config", GA_ID);
+}
+const track = (name, params) => { if(GA_ID) try{ gtag("event", name, params); }catch(e){} };
 
 /* ===== SIGN UP (name only) =====
    The name is saved on this device only and never sent to the database,
@@ -377,7 +401,8 @@ function updateCard(card, animate){
 }
 function renderStats(){
   const s = data.stats||{}, tot = items.reduce((a,i)=>a+calculateTotal(i.ratings),0), last = Math.max(0,...items.map(i=>i.updatedAt||0));
-  const t = [[s.visitors||0,"Total visitors"],[tot,"Ratings given"],[items.length,"Items"],[last?ago(last):"—","Last updated"]];
+  const vis = (s.visitors||0)+(s.returning||0);
+  const t = [[vis,"Total visits"],[s.visitors||0,"New visitors"],[s.returning||0,"Return visits"],[tot,"Ratings given"],[items.length,"Items"],[last?ago(last):"—","Last updated"]];
   $("stats").innerHTML = t.map(([v,l])=>`<div class="st"><b>${typeof v==="number"?v.toLocaleString():v}</b><span>${l}</span></div>`).join("");
 }
 /* Called whenever data changes (own vote, other visitors, other tabs). */
@@ -392,6 +417,7 @@ async function submitRating(id, score){
   if(mine[id]) return;                                   // one vote per item per browser
   mine[id] = score; ui.open[id] = true;                  // show results right after voting
   try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
+  track("rate_item", {item_id:id, score});
   const ok = await write({[`items/${id}/counts/s${score}`]:1, [`items/${id}/updatedAt`]:"now"});
   if(!ok){
     delete mine[id]; try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
