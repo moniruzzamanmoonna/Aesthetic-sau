@@ -118,6 +118,11 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 @media(min-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#rm{position:fixed;inset:0;background:rgba(20,26,22,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;overflow:auto}
+#rm.open{display:flex}
+.rbox{background:var(--surface);border-radius:20px;max-width:520px;width:100%;max-height:100%;overflow:auto;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.rbox canvas{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
+.rbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -147,12 +152,14 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 <div class="wrap share"><div class="sbox">
   <div><h2>Share with friends</h2><p>More ratings make the results more honest. Send SAU Ratings to your friends and ask them to rate.</p></div>
   <div class="sbtns">
+    <button class="sb" id="shareRes">Share results</button>
     <button class="btn-s" id="nativeShare">Share</button>
     <a class="sb" id="shWa" target="_blank" rel="noopener">WhatsApp</a>
     <a class="sb" id="shFb" target="_blank" rel="noopener">Facebook</a>
     <a class="sb" id="shTg" target="_blank" rel="noopener">Telegram</a>
     <button class="sb" id="copyLink">Copy link</button>
   </div></div></div>
+<div id="rm" role="dialog" aria-modal="true" aria-label="Results"><div class="rbox"><canvas id="rcv"></canvas><div class="rbtns"><button class="sb" id="rClose">Close</button><button class="btn-s" id="rSave">Share / Save image</button></div></div></div>
 <footer><div class="wrap"><div class="stats" id="stats"></div><p style="font-size:12.5px">A fun project of Aesthetic SAU</p><p style="font-size:12px;margin-top:2px;opacity:.8">Anonymous by design: no names, emails or accounts are ever collected. Visits are counted with anonymous analytics (approximate country/city only).</p></div></footer>
 
 <script>
@@ -252,17 +259,12 @@ function connect(){
     onData();
   }));
 }
-function trackVisit(){        /* new browser -> stats/visitors; coming back -> stats/returning (once per browser session, so refreshes don't inflate it) */
+function trackVisit(){        /* EVERY page load counts: first time ever -> stats/visitors, every later load (refresh or coming back) -> stats/returning */
   let seen = false;
-  try{
-    if(sessionStorage.getItem("sau-sess")) return;            // already counted in this session
-    sessionStorage.setItem("sau-sess","1");
-    seen = !!localStorage.getItem("sau-seen");
-    if(!seen) localStorage.setItem("sau-seen","1");
-  }catch(e){ return; }
+  try{ seen = !!localStorage.getItem("sau-seen"); if(!seen) localStorage.setItem("sau-seen","1"); }
+  catch(e){ return; }
   write({[seen ? "stats/returning" : "stats/visitors"]:1});
 }
-
 
 /* ===== GOOGLE ANALYTICS (GA4) =====
    Shows where visitors come from (country / city), devices, new vs returning, live users.
@@ -456,6 +458,46 @@ $("copyLink").onclick = async () => {
   catch(e){ const i = document.createElement("input"); i.value = shareUrl; document.body.appendChild(i); i.select(); document.execCommand("copy"); i.remove(); }
   const b = $("copyLink"); b.textContent = "Link copied"; setTimeout(()=>b.textContent = "Copy link", 1800);
 };
+
+/* ===== SHARE RESULTS (ratings only, drawn as a picture) ===== */
+function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+function drawResults(cv){
+  const list = items.map(i=>({name:i.name, tot:calculateTotal(i.ratings), avg:calculateAverage(i.ratings)}))
+    .sort((a,b)=> (!a.tot!==!b.tot) ? (a.tot?-1:1) : (b.avg-a.avg)||(b.tot-a.tot)).slice(0,12);
+  const W=1080, P=64, RH=108, HEAD=275, FOOT=120, H=HEAD+Math.max(1,list.length)*RH+FOOT;
+  cv.width=W; cv.height=H; const c=cv.getContext("2d");
+  const sans='system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif', serif='"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif';
+  c.fillStyle="#fafaf9"; c.fillRect(0,0,W,H);
+  c.fillStyle="#1f6b45"; c.beginPath(); c.arc(P+8,P+8,8,0,7); c.fill();
+  c.fillStyle="#171a18"; c.font=`650 28px ${sans}`; c.textBaseline="middle"; c.fillText("SAU Ratings",P+28,P+8);
+  c.textBaseline="alphabetic"; c.font=`500 84px ${serif}`; c.fillText("Results",P,190);
+  c.fillStyle="#737a75"; c.font=`26px ${sans}`; c.fillText("Anonymous student ratings \u00b7 "+fmtDate(Date.now()),P,232);
+  list.forEach((it,i)=>{
+    const y=HEAD+i*RH;
+    c.fillStyle="#fff"; rr(c,P,y,W-2*P,RH-14,22); c.fill(); c.strokeStyle="#e7e9e6"; c.lineWidth=2; c.stroke();
+    c.fillStyle=i===0&&it.tot?"#1f6b45":"#737a75"; c.font=`500 32px ${serif}`; c.textAlign="center"; c.fillText(i+1,P+44,y+56); c.textAlign="left";
+    c.fillStyle="#171a18"; c.font=`620 30px ${sans}`;
+    let nm=it.name; while(c.measureText(nm).width>560&&nm.length>3) nm=nm.slice(0,-2); if(nm!==it.name) nm+="\u2026";
+    c.fillText(nm,P+86,y+42);
+    c.fillStyle="#737a75"; c.font=`22px ${sans}`; c.fillText(it.tot?it.tot.toLocaleString()+(it.tot===1?" rating":" ratings"):"No ratings yet",P+86,y+70);
+    const bw=W-2*P-86-190;
+    c.fillStyle="#f0f1ef"; rr(c,P+86,y+78,bw,8,4); c.fill();
+    if(it.tot){ c.fillStyle=i===0?"#1f6b45":"#b9cfc2"; rr(c,P+86,y+78,Math.max(8,bw*it.avg/10),8,4); c.fill(); }
+    c.fillStyle="#171a18"; c.font=`500 46px ${serif}`; c.textAlign="right"; c.fillText(it.tot?it.avg.toFixed(1):"\u2014",W-P-62,y+58);
+    c.fillStyle="#737a75"; c.font=`22px ${sans}`; c.fillText("/10",W-P-24,y+58); c.textAlign="left";
+  });
+  c.fillStyle="#737a75"; c.font=`24px ${sans}`; c.fillText("Rate anonymously: "+shareUrl.replace(/^https?:\/\//,""),P,H-60);
+}
+$("shareRes").onclick = () => { drawResults($("rcv")); $("rm").classList.add("open"); };
+$("rClose").onclick = () => $("rm").classList.remove("open");
+$("rm").addEventListener("click", e=>{ if(e.target.id==="rm") $("rm").classList.remove("open"); });
+addEventListener("keydown", e=>{ if(e.key==="Escape") $("rm").classList.remove("open"); });
+$("rSave").onclick = () => $("rcv").toBlob(async blob=>{
+  if(!blob) return;
+  const file = new File([blob],"sau-ratings-results.png",{type:"image/png"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:"SAU Ratings",text:shareText+" "+shareUrl}); return; }catch(e){ if(e&&e.name==="AbortError") return; } }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="sau-ratings-results.png"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+},"image/png");
 
 renderChips(); renderWho();
 $("grid").innerHTML = '<div class="empty">Loading…</div>';
