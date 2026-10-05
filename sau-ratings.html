@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAU Ratings — Your campus. Your opinion. Anonymous.</title>
+<style>
+:root{
+  --bg:#fafaf9;--surface:#fff;--ink:#171a18;--muted:#737a75;--line:#e7e9e6;
+  --green:#1f6b45;--green-deep:#154b31;--green-soft:#e9f3ed;
+  --shadow:0 1px 2px rgba(20,30,25,.04),0 2px 8px rgba(20,30,25,.04);
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+header{border-bottom:1px solid var(--line);background:var(--surface)}
+.bar{height:58px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:650;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
+.anon{font-size:13px;color:var(--green-deep);background:var(--green-soft);padding:5px 12px;border-radius:99px;font-weight:550}
+
+.hero{padding:56px 0 8px}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(34px,7vw,58px);line-height:1.05;letter-spacing:-.03em}
+.tag{margin-top:14px;color:var(--muted);font-size:17px}
+.tag b{color:var(--ink);font-weight:550}
+.search{margin-top:28px;max-width:540px;position:relative}
+.search svg{position:absolute;left:16px;top:50%;margin-top:-9px;width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2}
+.search input{width:100%;height:50px;padding:0 18px 0 46px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);transition:.2s}
+.search input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+.note{margin-top:12px;font-size:13px;color:var(--muted)}
+
+.tools{display:flex;flex-wrap:wrap;gap:14px 20px;justify-content:space-between;align-items:center;margin:36px 0 22px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:100%;padding:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:7px 14px;border-radius:99px;font-size:14px;color:var(--muted);border:1px solid transparent;transition:.2s}
+.chip:hover{color:var(--ink);background:#f0f1ef}
+.chip.on{background:var(--ink);color:#fff}
+.sort{display:flex;gap:2px;background:#f0f1ef;border-radius:10px;padding:3px}
+.sort button{padding:6px 12px;border-radius:8px;font-size:13px;color:var(--muted);transition:.2s}
+.sort button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+.grid{display:grid;gap:20px;grid-template-columns:1fr;padding-bottom:72px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);transition:box-shadow .25s,transform .25s}
+.card:hover{box-shadow:0 2px 4px rgba(20,30,25,.04),0 14px 32px rgba(20,30,25,.08);transform:translateY(-2px)}
+.ph{position:relative;aspect-ratio:16/10;background:linear-gradient(135deg,#e6ece8,#d5dfd8);overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s,opacity .4s}
+.card:hover .ph img{transform:scale(1.03)}
+.ph.nofx img{opacity:0}
+.ph.nofx::after{content:attr(data-i);position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:56px;color:#9db1a5}
+.cat{position:absolute;left:12px;top:12px;font-size:12px;font-weight:550;background:rgba(255,255,255,.92);padding:4px 10px;border-radius:99px}
+.body{padding:18px 18px 16px}
+h3{font-size:18px;font-weight:620;letter-spacing:-.015em;line-height:1.25}
+.loc{color:var(--muted);font-size:14px}
+.stat{display:flex;align-items:baseline;gap:6px;margin:16px 0 18px}
+.avg{font-family:var(--serif);font-size:38px;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;display:inline-block}
+.avg.pop{animation:pop .5s}
+@keyframes pop{40%{transform:scale(1.12);color:var(--green)}}
+.of{color:var(--muted);font-size:15px}
+.tot{margin-left:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;line-height:1.3}
+.tot small{display:block;font-size:11px;opacity:.85}
+.lbl{font-size:13px;font-weight:550;margin-bottom:8px;min-height:20px}
+.lbl.ok{color:var(--green)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scale button{height:40px;border:1px solid var(--line);border-radius:10px;font-weight:600;font-size:15px;background:var(--surface);transition:.15s}
+.scale button:not(:disabled):hover{border-color:var(--green);background:var(--green-soft);color:var(--green-deep)}
+.scale button:not(:disabled):active{transform:scale(.92)}
+.scale button:disabled{cursor:default;color:#a9afab}
+.scale button.sel{background:var(--green);border-color:var(--green);color:#fff;animation:pop .4s}
+.toggle{margin-top:14px;font-size:13px;color:var(--muted);padding:2px 0;transition:.2s}
+.toggle:hover{color:var(--ink)}
+.res{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.2,.8,.2,1)}
+.res.open{grid-template-rows:1fr}
+.res>div{overflow:hidden;min-height:0}
+.dist{display:grid;gap:6px;padding-top:14px}
+.row{display:grid;grid-template-columns:18px 1fr 64px;gap:10px;align-items:center;font-size:12.5px;font-variant-numeric:tabular-nums}
+.row .n{font-weight:600}
+.track{height:8px;border-radius:99px;background:#f0f1ef;overflow:hidden}
+.fill{height:100%;width:0;background:#b9cfc2;border-radius:99px;transition:width .6s cubic-bezier(.2,.8,.2,1),background .3s}
+.row.top .fill{background:var(--green)}
+.row.mine .n{color:var(--green)}
+.v{text-align:right;color:var(--muted)}.v b{color:var(--ink);font-weight:600}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:64px 0}
+footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(--muted)}
+
+.meta{display:flex;flex-wrap:wrap;gap:0 12px;font-size:12px;color:var(--muted);margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:22px}
+.st{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.st b{display:block;font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.st span{font-size:12.5px}
+@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+.brand{flex:none}
+#who{display:flex;align-items:center;gap:10px;min-width:0}
+.hi{font-size:13.5px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lnk{font-size:12.5px;color:var(--muted);text-decoration:underline;white-space:nowrap}
+.btn-s{background:var(--green);color:#fff;font-size:13px;font-weight:550;padding:7px 14px;border-radius:99px;transition:.2s}
+.btn-s:hover{background:var(--green-deep)}
+#nm{height:34px;width:130px;border:1px solid var(--line);border-radius:99px;padding:0 12px;font-size:14px;background:var(--surface)}
+#nm:focus{outline:none;border-color:var(--green)}
+.anon{display:none}
+@media(min-width:760px){.anon{display:block}}
+.share{padding-bottom:56px}
+.sbox{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow)}
+.sbox h2{font-size:20px;font-weight:620;letter-spacing:-.01em}
+.sbox p{color:var(--muted);font-size:14px;margin-top:4px;max-width:34em}
+.sbtns{display:flex;flex-wrap:wrap;gap:8px}
+.sbtns .btn-s{padding:9px 18px;font-size:14px}
+.sb{padding:8px 16px;border:1px solid var(--line);border-radius:99px;font-size:14px;font-weight:550;color:var(--ink);text-decoration:none;background:var(--surface);transition:.2s}
+.sb:hover{border-color:var(--green);background:var(--green-soft);color:var(--green-deep)}
+@media(min-width:760px){.sbox{flex-direction:row;align-items:center;justify-content:space-between}}
+@media(min-width:520px){.scale{grid-template-columns:repeat(10,1fr);gap:4px}.scale button{height:38px;font-size:14px}}
+@media(min-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="brand"><span class="dot"></span>SAU Ratings</div>
+  <div style="display:flex;gap:14px;align-items:center;min-width:0"><div id="who"></div><div class="anon">100% Anonymous</div></div>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>Rate anything at SAU.</h1>
+    <p class="tag"><b>Your campus. Your opinion. Anonymous.</b></p>
+    <label class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search anything..." aria-label="Search anything">
+    </label>
+    <p class="note">No account. No name. Just your rating.</p>
+  </div>
+  <div class="tools">
+    <div class="chips" id="chips" role="tablist" aria-label="Categories"></div>
+    <div class="sort" id="sort" aria-label="Sort">
+      <button data-s="most" class="on">Most rated</button><button data-s="top">Highest rated</button><button data-s="new">Recent</button>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+<div class="wrap share"><div class="sbox">
+  <div><h2>Share with friends</h2><p>More ratings make the results more honest. Send SAU Ratings to your friends and ask them to rate.</p></div>
+  <div class="sbtns">
+    <button class="btn-s" id="nativeShare">Share</button>
+    <a class="sb" id="shWa" target="_blank" rel="noopener">WhatsApp</a>
+    <a class="sb" id="shFb" target="_blank" rel="noopener">Facebook</a>
+    <a class="sb" id="shTg" target="_blank" rel="noopener">Telegram</a>
+    <button class="sb" id="copyLink">Copy link</button>
+  </div></div></div>
+<footer><div class="wrap"><div class="stats" id="stats"></div><p style="font-size:12.5px">A fun project of Aesthetic SAU</p><p style="font-size:12px;margin-top:2px;opacity:.8">Anonymous by design: no names, emails or accounts are ever collected.</p></div></footer>
+
+<script>
+/* ===== DATA ===== replace `image` URLs with real photos any time.
+   Demo images are generic placeholders (picsum.photos); if one fails to load,
+   the card falls back to a clean tinted block automatically. */
+const img = s => `https://picsum.photos/seed/${s}/640/400`;
+const ITEMS = [
+  {id:"economics-fiesta",name:"Economics Fiesta",category:"Events",location:"SAU Campus",image:img("sau-economics-fiesta"),added:19},
+  {id:"biotech-night",name:"Biotech Night",category:"Events",location:"SAU Campus",image:img("sau-biotech-night"),added:18},
+  {id:"fisheries-carnival",name:"Fisheries Carnival",category:"Events",location:"SAU Campus",image:img("sau-fisheries-carnival"),added:17},
+  {id:"agri-festival",name:"Agri Festival",category:"Events",location:"SAU Campus",image:img("sau-agri-festival"),added:16},
+  {id:"engineers-gala-night",name:"Engineers Gala Night",category:"Events",location:"SAU Campus",image:img("sau-engineers-gala"),added:15},
+  {id:"veterinary-invisibility",name:"Veterinary Invisibility",category:"Events",location:"SAU Campus",image:img("sau-veterinary"),added:14}
+];
+const CATEGORIES = ["All","Food","Events","Campus","Academic","Sports","Facilities","Random"];
+
+
+/* ===== BACKEND =====
+   Real-time sync: Firebase Realtime Database through its plain REST + streaming API (no SDK).
+   All data lives under one node, /sau-ratings, so other apps in the same database are not touched.
+   1) Paste the database URL into DB_URL below (it is shown at the top of the Data tab).
+   2) Data tab: add a child named sau-ratings, then use its three-dot menu > Import JSON > seed.json.
+      (Import only on that node, never on the root.) Add more items the same way under sau-ratings/items.
+   3) Merge database.rules.json into the Rules tab and Publish.
+   Leave DB_URL empty for an offline demo (data stays in this browser).
+*/
+const CONFIG = { DB_URL: "https://aesthetic-sau-default-rtdb.firebaseio.com" };   // check it matches the URL on the Data tab
+const BASE = CONFIG.DB_URL.replace(/\/$/, ""), REMOTE = !!BASE;
+const KEY = "sau-ratings:v5", KEY_MINE = "sau-mine:v2";
+
+let data = {items:{}, stats:{}}, items = [], ready = false;
+let mine = {}; try{ mine = JSON.parse(localStorage.getItem(KEY_MINE)) || {}; }catch(e){}
+const ui = {cat:"All", q:"", sort:"most", open:{}};
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* Data shape in the database: items/{id}: {name, category, location, image, addedAt, updatedAt, counts:{s1..s10}}
+   and stats: {visitors}. Keys are "s1".."s10" because Firebase turns numeric keys into arrays. */
+function seedData(demo){
+  const now = Date.now(), out = {items:{}, stats: {visitors:0}};
+  ITEMS.forEach(it=>{
+    const counts = {}; for(let s=1;s<=10;s++) counts["s"+s] = 0;               // everything starts at zero
+    out.items[it.id] = {name:it.name, category:it.category, location:it.location, image:it.image,
+      addedAt: now-(20-it.added)*1000, counts};   // addedAt = real time of seeding (offset keeps the list order)
+  });
+  return out;
+}
+function toItems(){
+  return Object.entries(data.items||{}).filter(([,v])=>v&&v.name).map(([id,v])=>{
+    const r = {}; for(let s=1;s<=10;s++) r[s] = (v.counts && v.counts["s"+s]) || 0;
+    return {id, name:v.name, category:v.category, location:v.location||"", image:v.image||"", addedAt:v.addedAt, updatedAt:v.updatedAt, ratings:r};
+  });
+}
+const loadLocal = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } };
+const saveLocal = () => { try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){} };
+
+/* Apply a stream event from Firebase to the local copy. */
+function applyEvent(path, d, merge){
+  const seg = path.split("/").filter(Boolean);
+  if(!seg.length){ data = Object.assign({items:{},stats:{}}, merge ? {...data,...d} : (d||{})); return; }
+  let o = data; for(let i=0;i<seg.length-1;i++) o = o[seg[i]] = o[seg[i]] || {};
+  const k = seg[seg.length-1];
+  if(d===null) delete o[k]; else o[k] = merge ? {...(o[k]||{}), ...d} : d;
+}
+function applyLocal(updates, sign){
+  for(const p in updates){
+    const seg = p.split("/"), v = updates[p]; let o = data;
+    for(let i=0;i<seg.length-1;i++) o = o[seg[i]] = o[seg[i]] || {};
+    const k = seg[seg.length-1];
+    o[k] = v==="now" ? Date.now() : (o[k]||0) + sign*v;
+  }
+}
+/* FIREBASE write: one atomic PATCH using server-side increment + server timestamp. */
+async function write(updates){
+  applyLocal(updates, 1); onData();                       // optimistic: UI updates instantly
+  if(!REMOTE){ saveLocal(); return true; }
+  const body = {};
+  for(const p in updates) body[p] = updates[p]==="now" ? {".sv":"timestamp"} : {".sv":{increment:updates[p]}};
+  try{ const r = await fetch(BASE+"/sau-ratings.json", {method:"PATCH", body:JSON.stringify(body)}); if(!r.ok) throw 0; return true; }
+  catch(e){ const rev = {}; for(const p in updates) if(updates[p]!=="now") rev[p] = updates[p]; applyLocal(rev,-1); onData(); return false; }
+}
+function connect(){
+  if(!REMOTE){
+    data = loadLocal() || seedData(true);
+    const sd = seedData(true); data.items = data.items || {};
+    Object.keys(sd.items).forEach(k=>{ if(!data.items[k]) data.items[k] = sd.items[k]; });   // new ITEMS entries appear automatically
+    saveLocal();
+    addEventListener("storage", e=>{ if(e.key===KEY){ data = loadLocal() || data; onData(); } });
+    onData(); trackVisit(); return;
+  }
+  const es = new EventSource(BASE+"/sau-ratings.json"); let first = true;
+  es.onerror = () => { if(!ready) $("grid").innerHTML = '<div class="empty">Can\u2019t reach the database yet. Check DB_URL and the Firebase rules.</div>'; };       // FIREBASE live stream
+    ["put","patch"].forEach(t=>es.addEventListener(t, e=>{
+    const m = JSON.parse(e.data); applyEvent(m.path, m.data, t==="patch");
+    if(first){ first = false; trackVisit(); }
+    onData();
+  }));
+}
+function trackVisit(){                                     // counts each browser once; stores only a flag
+  if(localStorage.getItem("sau-seen")) return;
+  localStorage.setItem("sau-seen","1"); write({"stats/visitors":1});
+}
+
+/* ===== SIGN UP (name only) =====
+   The name is saved on this device only and never sent to the database,
+   so ratings stay anonymous. It is only used for the greeting at the top. */
+const KEY_NAME = "sau-name";
+let userName = ""; try{ userName = localStorage.getItem(KEY_NAME) || ""; }catch(e){}
+let justSigned = false;
+function renderWho(editing){
+  const w = $("who");
+  if(editing){
+    w.innerHTML = '<input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button class="btn-s" id="saveName">Save</button>';
+    $("nm").focus(); return;
+  }
+  w.innerHTML = userName
+    ? `<span class="hi">${justSigned ? "Welcome, "+esc(userName)+"." : "Hi, "+esc(userName)+". Welcome back."}</span><button class="lnk" id="signOut">Not you?</button>`
+    : '<button class="btn-s" id="signUp">Sign up</button>';
+}
+function saveName(){
+  const v = $("nm").value.trim().replace(/\s+/g," ").slice(0,24); if(!v) return;
+  userName = v; justSigned = true;
+  try{ localStorage.setItem(KEY_NAME, v); }catch(e){}
+  renderWho();
+}
+$("who").addEventListener("click", e=>{
+  if(e.target.id==="signUp") renderWho(true);
+  else if(e.target.id==="saveName") saveName();
+  else if(e.target.id==="signOut"){ userName = ""; justSigned = false; try{ localStorage.removeItem(KEY_NAME); }catch(x){} renderWho(); }
+});
+$("who").addEventListener("keydown", e=>{
+  if(e.target.id!=="nm") return;
+  if(e.key==="Enter") saveName(); else if(e.key==="Escape") renderWho();
+});
+
+/* ===== CALCULATIONS ===== */
+const calculateTotal = r => Object.values(r).reduce((a,b)=>a+b,0);
+const calculateAverage = r => { const t = calculateTotal(r); return t ? Object.entries(r).reduce((s,[k,v])=>s+k*v,0)/t : 0; };
+const fmtDate = t => t ? new Date(t).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "—";
+function ago(t){
+  if(!t) return "—"; const s = Math.max(0,(Date.now()-t)/1e3);
+  if(s<60) return "just now"; const m = s/60; if(m<60) return Math.floor(m)+" min ago";
+  const h = m/60; if(h<24) return Math.floor(h)+" h ago"; const d = Math.floor(h/24);
+  return d<30 ? d+" d ago" : fmtDate(t);
+}
+
+/* ===== FILTER / SEARCH / SORT ===== */
+const filterCategory = list => ui.cat==="All" ? list : list.filter(i=>i.category===ui.cat);
+const searchItems = list => { const q = ui.q.trim().toLowerCase();
+  return q ? list.filter(i=>[i.name,i.category,i.location].some(x=>x.toLowerCase().includes(q))) : list; };
+function sortItems(list){
+  const a = i => calculateAverage(i.ratings), n = i => calculateTotal(i.ratings);
+  return [...list].sort((x,y)=> ui.sort==="new" ? (y.addedAt||0)-(x.addedAt||0) : ui.sort==="top" ? a(y)-a(x) : n(y)-n(x));
+}
+
+/* ===== RENDER ===== */
+function renderChips(){
+  const cats = ["All", ...new Set(items.map(i=>i.category))];
+  $("chips").innerHTML = cats.length<3 ? "" : cats.map(c=>`<button class="chip ${ui.cat===c?"on":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+}
+function cardHTML(it){
+  return `<article class="card" data-id="${it.id}">
+    <div class="ph" data-i="${esc(it.name[0])}"><img src="${esc(it.image)}" alt="${esc(it.name)}" loading="lazy" onerror="this.parentNode.classList.add('nofx')"><span class="cat">${esc(it.category)}</span></div>
+    <div class="body">
+      <h3>${esc(it.name)}</h3><p class="loc">${esc(it.location)}</p><p class="meta"></p>
+      <div class="stat"><span class="avg">0.0</span><span class="of">/ 10</span><span class="tot"></span></div>
+      <p class="lbl"></p>
+      <div class="scale">${Array.from({length:10},(_,i)=>`<button data-score="${i+1}" aria-label="Rate ${i+1} out of 10">${i+1}</button>`).join("")}</div>
+      <button class="toggle"></button>
+      <div class="res"><div><div class="dist">${[10,9,8,7,6,5,4,3,2,1].map(s=>`<div class="row" data-s="${s}"><span class="n">${s}</span><div class="track"><div class="fill"></div></div><span class="v"></span></div>`).join("")}</div></div></div>
+    </div></article>`;
+}
+function renderItems(){
+  const list = sortItems(searchItems(filterCategory(items))), g = $("grid");
+  g.dataset.all = items.length;
+  g.innerHTML = list.length ? list.map(cardHTML).join("")
+    : `<div class="empty">${!items.length ? (REMOTE ? "No items in the database yet. Import seed.json in the Firebase console to add the items." : "No items yet.") : "Nothing found for “"+esc(ui.q)+"”. Try another word or choose All."}</div>`;
+  g.querySelectorAll(".card").forEach(c=>updateCard(c,false));
+}
+function renderDistribution(card, it){
+  const r = it.ratings, t = calculateTotal(r), max = Math.max(...Object.values(r)), my = mine[it.id];
+  card.querySelectorAll(".row").forEach(row=>{
+    const s = +row.dataset.s, v = r[s];
+    row.querySelector(".fill").style.width = (max ? v/max*100 : 0) + "%";
+    row.querySelector(".v").innerHTML = `<b>${v}</b> · ${t ? Math.round(v/t*100) : 0}%`;
+    row.classList.toggle("top", v===max && v>0); row.classList.toggle("mine", my===s);
+  });
+}
+function countTo(el, from, to, dec){
+  const t0 = performance.now();
+  (function f(t){ const p = Math.min(1,(t-t0)/450), e = 1-Math.pow(1-p,3);
+    el.textContent = (from+(to-from)*e).toFixed(dec); if(p<1) requestAnimationFrame(f); })(t0);
+}
+function updateCard(card, animate){
+  const it = items.find(i=>i.id===card.dataset.id); if(!it) return;
+  const r = it.ratings, my = mine[it.id], avg = calculateAverage(r), tot = calculateTotal(r), a = card.querySelector(".avg");
+  const changed = card.dataset.tot && +card.dataset.tot !== tot;     // also animates when other people vote
+  if(!tot) a.textContent = "—";
+  else if(animate || changed){ countTo(a, parseFloat(a.textContent)||0, avg, 1); a.classList.remove("pop"); void a.offsetWidth; a.classList.add("pop"); }
+  else a.textContent = avg.toFixed(1);
+  card.dataset.tot = tot;
+  card.querySelector(".tot").innerHTML = `${tot.toLocaleString()} ratings<small>${tot && it.updatedAt ? "Last rated "+ago(it.updatedAt) : "Not rated yet"}</small>`;
+  card.querySelector(".meta").innerHTML = `<span>Added ${fmtDate(it.addedAt)}</span>`;
+  const lbl = card.querySelector(".lbl"); lbl.textContent = my ? `Rated ${my}/10 — anonymously.` : tot ? "Rate:" : "Be the first to rate:"; lbl.classList.toggle("ok", !!my);
+  card.querySelectorAll(".scale button").forEach(b=>{ b.disabled = !!my; b.classList.toggle("sel", +b.dataset.score===my); });
+  if(my) ui.open[it.id] = true;
+  const open = !!ui.open[it.id];
+  card.querySelector(".res").classList.toggle("open", open);
+  card.querySelector(".toggle").textContent = open ? "Hide results" : "See results";
+  renderDistribution(card, it);
+}
+function renderStats(){
+  const s = data.stats||{}, tot = items.reduce((a,i)=>a+calculateTotal(i.ratings),0), last = Math.max(0,...items.map(i=>i.updatedAt||0));
+  const t = [[s.visitors||0,"Total visitors"],[tot,"Ratings given"],[items.length,"Items"],[last?ago(last):"—","Last updated"]];
+  $("stats").innerHTML = t.map(([v,l])=>`<div class="st"><b>${typeof v==="number"?v.toLocaleString():v}</b><span>${l}</span></div>`).join("");
+}
+/* Called whenever data changes (own vote, other visitors, other tabs). */
+function onData(){
+  items = toItems(); renderStats();
+  if(!ready || +$("grid").dataset.all !== items.length){ ready = true; renderChips(); renderItems(); }
+  else document.querySelectorAll(".card").forEach(c=>updateCard(c,false));
+}
+
+/* ===== ACTIONS ===== */
+async function submitRating(id, score){
+  if(mine[id]) return;                                   // one vote per item per browser
+  mine[id] = score; try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
+  const ok = await write({[`items/${id}/counts/s${score}`]:1, [`items/${id}/updatedAt`]:"now"});
+  if(!ok){ delete mine[id]; localStorage.setItem(KEY_MINE, JSON.stringify(mine)); onData(); }
+}
+
+/* ===== EVENTS ===== */
+$("grid").addEventListener("click", e=>{
+  const card = e.target.closest(".card"); if(!card) return;
+  const b = e.target.closest("[data-score]");
+  if(b){ submitRating(card.dataset.id, +b.dataset.score); return; }
+  if(e.target.closest(".toggle")){ ui.open[card.dataset.id] = !ui.open[card.dataset.id]; updateCard(card,false); }
+});
+$("chips").addEventListener("click", e=>{
+  const c = e.target.closest("[data-cat]"); if(!c) return;
+  ui.cat = c.dataset.cat; renderChips(); renderItems();
+});
+$("sort").addEventListener("click", e=>{
+  const b = e.target.closest("[data-s]"); if(!b) return;
+  ui.sort = b.dataset.s; document.querySelectorAll("#sort button").forEach(x=>x.classList.toggle("on",x===b)); renderItems();
+});
+$("q").addEventListener("input", e=>{ ui.q = e.target.value; renderItems(); });
+
+/* ===== SHARE ===== */
+const shareUrl = location.href.split("#")[0], shareText = "Rate the SAU fests and events. 100% anonymous.";
+$("shWa").href = "https://wa.me/?text=" + encodeURIComponent(shareText+" "+shareUrl);
+$("shFb").href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl);
+$("shTg").href = "https://t.me/share/url?url=" + encodeURIComponent(shareUrl) + "&text=" + encodeURIComponent(shareText);
+if(!navigator.share) $("nativeShare").style.display = "none";
+$("nativeShare").onclick = () => navigator.share({title:"SAU Ratings", text:shareText, url:shareUrl}).catch(()=>{});
+$("copyLink").onclick = async () => {
+  try{ await navigator.clipboard.writeText(shareUrl); }
+  catch(e){ const i = document.createElement("input"); i.value = shareUrl; document.body.appendChild(i); i.select(); document.execCommand("copy"); i.remove(); }
+  const b = $("copyLink"); b.textContent = "Link copied"; setTimeout(()=>b.textContent = "Copy link", 1800);
+};
+
+renderChips(); renderWho();
+$("grid").innerHTML = '<div class="empty">Loading…</div>';
+connect();
+setInterval(onData, 30000);                              // keeps "x min ago" fresh
+</script>
+</body>
+</html>
