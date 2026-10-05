@@ -900,6 +900,85 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
 .nav-mobile-menu a:focus-visible,.theme-swatch-btn:focus-visible,.theme-mode-toggle:focus-visible{outline-offset:2px}
 @media(max-width:480px){.wrap{padding:64px 18px}}
 </style>
+<style id="clean-ui">
+/* Clean, light, minimal look (same language as SAU Ratings) */
+:root,:root[data-mode],:root[data-theme]{--black:#fafaf9;--deep:#f4f5f3;--card:#fff;--border:#e7e9e6;--green:#1f6b45;--gl:#2a8556;--gg:#e9f3ed;--white:#171a18;--muted:#6f7772;--accent:#1f6b45;--focus:#1f6b45;--serif:'Playfair Display',Georgia,serif}
+html,body{background:var(--black)!important;color:var(--white)}
+#scroll-progress,.theme-bar,.theme-controls .theme-bar,.hero-glow{display:none!important}
+*{text-shadow:none!important}
+/* nav */
+nav{padding:0 28px!important;height:60px!important;background:rgba(250,250,249,.9)!important;border-bottom:1px solid var(--border)!important;box-shadow:none!important;backdrop-filter:blur(12px)}
+.nav-links{gap:4px!important}
+.nav-links a{font-size:14px!important;letter-spacing:0!important;text-transform:none!important;font-weight:500!important;color:var(--muted)!important;padding:7px 12px;border-radius:99px;white-space:nowrap}
+.nav-links a:hover{color:var(--white)!important;background:#f0f1ef}
+.nav-links a.nav-strong{color:var(--green)!important;background:var(--gg)}
+.nav-brand{font-family:var(--serif)!important}
+.nav-fb{background:var(--green)!important;border-radius:99px!important;padding:8px 18px!important;box-shadow:none!important}
+.nav-fb,.nav-fb *{color:#fff!important}
+.nav-mobile-menu{background:var(--card)!important;border-bottom:1px solid var(--border)!important}
+.nav-mobile-menu a{color:var(--white)!important;font-size:15px}
+/* hero */
+.hero{min-height:auto!important;padding:132px 24px 56px!important;background:transparent!important}
+.logo-float{animation:none!important}
+.logo-float img{width:104px!important;height:104px!important;box-shadow:0 1px 2px rgba(20,30,25,.08),0 8px 24px rgba(20,30,25,.08)!important;border:1px solid var(--border)!important}
+.h-eyebrow{background:none!important;border:0!important;box-shadow:none!important;color:var(--green)!important;letter-spacing:2.5px!important;font-size:11px!important}
+.h-title{font-family:var(--serif)!important;font-weight:500!important;letter-spacing:-.03em!important;background:none!important;-webkit-text-fill-color:var(--white)!important;color:var(--white)!important;filter:none!important}
+.h-title span{-webkit-text-fill-color:var(--green)!important;color:var(--green)!important;background:none!important}
+.h-sub{color:var(--muted)!important}
+.stats-bar{background:var(--card)!important;border:1px solid var(--border)!important;border-radius:18px!important;box-shadow:0 1px 2px rgba(20,30,25,.04),0 4px 14px rgba(20,30,25,.04)!important;padding:22px 34px!important;gap:34px!important;backdrop-filter:none!important}
+.stat-num,.stat-num *{background:none!important;-webkit-text-fill-color:var(--white)!important;color:var(--white)!important;font-weight:600!important;letter-spacing:-1px!important}
+.stat-num span{-webkit-text-fill-color:var(--green)!important;color:var(--green)!important}
+.stat-lbl{color:var(--muted)!important}
+.stat-div{background:var(--border)!important}
+.btn-fill,.participate-big-btn{background:var(--green)!important;color:#fff!important;border-radius:99px!important;box-shadow:none!important;font-weight:600!important}
+.btn-fill:hover,.participate-big-btn:hover{background:#154b31!important;transform:none!important;box-shadow:none!important}
+.btn-ghost{border:1px solid var(--border)!important;color:var(--white)!important;background:var(--card)!important;border-radius:99px!important}
+.btn-ghost:hover{border-color:var(--green)!important;color:var(--green)!important}
+/* featured: SAU Ratings + Preorder */
+.feat{padding:8px 24px 40px}
+.feat-grid{max-width:1000px;margin:0 auto;display:grid;gap:16px;grid-template-columns:1fr}
+.feat-card{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;text-decoration:none;color:var(--white);box-shadow:0 1px 2px rgba(20,30,25,.04),0 4px 14px rgba(20,30,25,.04);transition:transform .25s,box-shadow .25s,border-color .25s}
+.feat-card:hover{transform:translateY(-3px);border-color:#c9d5ce;box-shadow:0 14px 32px rgba(20,30,25,.09)}
+.feat-tag{align-self:flex-start;font-size:12px;font-weight:600;color:var(--green);background:var(--gg);padding:3px 11px;border-radius:99px}
+.feat-card h3{font-family:var(--serif);font-weight:500;font-size:28px;letter-spacing:-.02em;line-height:1.15}
+.feat-card p{color:var(--muted);font-size:15px;line-height:1.6;max-width:30em}
+.feat-cta{margin-top:6px;font-weight:600;font-size:15px;color:var(--green)}
+@media(min-width:720px){.feat-grid{grid-template-columns:1fr 1fr}}
+/* utility bars */
+#visitor-bar,#game-section{background:var(--card)!important;border-color:var(--border)!important;backdrop-filter:none!important}
+#visitor-bar *,#game-section>span{color:var(--muted)!important}
+#visitor-bar #daily-visitor-count{color:var(--white)!important}
+#game-section button{background:var(--gg)!important;border:1px solid var(--border)!important;color:var(--green)!important;border-radius:99px!important}
+/* sections */
+section{background:transparent}
+.sec-dark,.cw-section,.bday-sec,.product-sec,.team-sec{background:var(--deep)!important;background-image:none!important;border-color:var(--border)!important}
+.sec-head{border-bottom:1px solid var(--border)!important}
+.sec-ti{font-family:var(--serif)!important;font-weight:500!important;letter-spacing:-.02em!important;background:none!important;-webkit-text-fill-color:var(--white)!important;color:var(--white)!important}
+.sec-ey{color:var(--green)!important}
+.contest-hero{background:var(--card)!important;border:1px solid var(--border)!important;box-shadow:none!important}
+.contest-hero::after{display:none!important}
+.contest-pill{background:var(--deep)!important;border:1px solid var(--border)!important}
+footer{background:var(--deep)!important;border-top:1px solid var(--border)!important;color:var(--muted)!important}
+.foot-mod{margin-top:14px;font-size:13px;text-align:center}.foot-mod a{color:var(--green)!important}
+@media(max-width:760px){nav{padding:0 16px!important}.stats-bar{gap:18px!important;padding:18px 20px!important}.stat-num{min-width:0!important}}
+
+/* kill leftover glows / gradients from the old theme layers */
+.hero::before,.hero::after,.h-title::before,.h-title::after,.logo-float::before,.logo-float::after,.stats-bar::before,.stats-bar::after{display:none!important}
+.h-title,.h-title span,.logo-float,.logo-float img,.stat-item{filter:none!important;box-shadow:none!important}
+.logo-float img{box-shadow:0 1px 2px rgba(20,30,25,.08),0 8px 24px rgba(20,30,25,.08)!important}
+.btn-fill,.nav-fb,.participate-big-btn{background-image:none!important;filter:none!important;box-shadow:none!important}
+.btn-ghost{background-image:none!important;-webkit-text-fill-color:var(--white)!important;opacity:1!important;filter:none!important}
+.btn-ghost:hover{-webkit-text-fill-color:var(--green)!important}
+.stats-bar{box-shadow:0 1px 2px rgba(20,30,25,.04),0 4px 14px rgba(20,30,25,.04)!important;border-radius:18px!important}
+.nav-brand,.nav-logo span{color:var(--white)!important;-webkit-text-fill-color:var(--white)!important;background:none!important}
+.h-eyebrow{-webkit-text-fill-color:var(--green)!important}
+.h-sub{-webkit-text-fill-color:var(--muted)!important}
+.live-dot,.live-dot *{color:var(--green)!important}
+.cta-bar .btn-fill,.hero .btn-fill{background:var(--green)!important;background-image:none!important;box-shadow:none!important}
+.hero .logo-float img{box-shadow:0 1px 2px rgba(20,30,25,.08),0 8px 24px rgba(20,30,25,.08)!important;filter:none!important}
+.stats-bar{filter:none!important}
+
+</style>
 </head>
 <body>
 <!-- ADMIN GATE -->
@@ -1185,17 +1264,14 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
     <span class="nav-brand">Aesthetic SAU</span>
   </a>
   <ul class="nav-links">
+    <li><a href="sau-ratings.html" class="nav-strong">SAU Ratings</a></li>
+    <li><a href="#preorder">Preorder</a></li>
     <li><a href="#contest">Contest</a></li>
-    <li><a href="#voting" style="color:var(--green);font-weight:700">❤️ Vote</a></li>
+    <li><a href="#voting">Vote</a></li>
     <li><a href="#content">Gallery</a></li>
-    <li><a href="#chithi">Chithi.me</a></li>
-    <li><a href="#birthday" style="color:#a78bfa;font-weight:700">🎂 Birthday</a></li>
-    <li><a href="#aesthetic-tab" style="color:var(--green)">✨ Aesthetic Tab</a></li>
-    <li><a href="#products">Merch</a></li><li><a href="#event">Events</a></li>
-    <li><a href="#fans">Top Fans</a></li>
+    <li><a href="#products">Merch</a></li>
+    <li><a href="#event">Events</a></li>
     <li><a href="#team">Team</a></li>
-    <li><a href="https://forms.gle/AdqUi57p5uPKYNJS8" class="nav-participate" target="_blank">&#128247; Participate</a></li>
-    <li><a href="https://forms.gle/jNaQTFBY7Z7PT1FM7" class="nav-join" target="_blank">&#10024; Join as Moderator</a></li>
   </ul>
   <a href="https://www.facebook.com/share/1CMzNM8vvG/" class="nav-fb" target="_blank">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
@@ -1207,24 +1283,20 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
 </button>
 </nav>
 <div class="nav-mobile-menu" id="mob-menu">
-  <a href="#contest" onclick="toggleMenu()">&#128247; Contest</a>
-  <a href="#voting" onclick="toggleMenu()" style="color:var(--green);font-weight:700">❤️ Vote করো</a>
-  <a href="#birthday" onclick="toggleMenu()" style="color:#a78bfa;font-weight:700">🎂 Birthday Mate</a>
-  <a href="#aesthetic-tab" onclick="toggleMenu()" style="color:var(--green)">✨ Aesthetic Tab</a>
-  <a href="#content" onclick="toggleMenu()">Content</a>
-  <a href="#chithi" onclick="toggleMenu()">Chithi.me</a>
+  <a href="sau-ratings.html" onclick="toggleMenu()">SAU Ratings</a>
+  <a href="#preorder" onclick="toggleMenu()">Preorder</a>
+  <a href="#contest" onclick="toggleMenu()">Contest</a>
+  <a href="#voting" onclick="toggleMenu()">Vote</a>
+  <a href="#content" onclick="toggleMenu()">Gallery</a>
   <a href="#products" onclick="toggleMenu()">Merch</a>
   <a href="#event" onclick="toggleMenu()">Events</a>
-  <a href="#fans" onclick="toggleMenu()">Top Fans</a>
   <a href="#team" onclick="toggleMenu()">Team</a>
-  <a href="https://forms.gle/AdqUi57p5uPKYNJS8" class="mob-participate" target="_blank">&#128247; Participate</a>
-  <a href="https://forms.gle/jNaQTFBY7Z7PT1FM7" class="mob-join" target="_blank">&#10024; Join as Moderator</a>
-  <a href="https://www.facebook.com/share/1CMzNM8vvG/" class="mob-fb" target="_blank">Facebook Page</a>
+  <a href="https://www.facebook.com/share/1CMzNM8vvG/" class="mob-fb" target="_blank" rel="noopener">Facebook Page</a>
 </div>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-glow"></div>
+  
   <div class="logo-float">
     <img src="data:image/webp;base64,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" alt="Aesthetic SAU"/>
   </div>
@@ -1248,6 +1320,16 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
   </div>
 </section>
 
+<section id="featured" class="feat"><div class="feat-grid">
+  <a class="feat-card" href="sau-ratings.html">
+    <span class="feat-tag">New</span><h3>SAU Ratings</h3>
+    <p>Rate campus events, food and places from 1 to 10. 100% anonymous, no login.</p>
+    <span class="feat-cta">Rate now &rarr;</span></a>
+  <a class="feat-card" id="preorder" href="https://docs.google.com/forms/d/1hzW6mYK-QxOrx9R00CSEruNeR1BnjWTep7KmugyMfu8/viewform" target="_blank" rel="noopener">
+    <span class="feat-tag">Preorder</span><h3>Dropshoulder Preorder</h3>
+    <p>Reserve your Aesthetic SAU dropshoulder. Fill in the short form to place your preorder.</p>
+    <span class="feat-cta">Preorder now &rarr;</span></a>
+</div></section>
 <!-- VISITOR BAR -->
 <div id="visitor-bar" style="background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);padding:8px 20px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;">
   <span id="live-visitor-dot" style="display:none"></span>
@@ -1267,40 +1349,7 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
 </div>
 
 <!-- WELCOME BANNER — নব সিকৃবিয়ানদের জন্য (shows on page load) -->
-<div id="welcome-float" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-140%);z-index:9000;max-width:min(94vw,560px);background:linear-gradient(135deg,rgba(10,26,16,.96),rgba(6,16,11,.96));backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(76,175,80,.4);border-radius:20px;box-shadow:0 24px 70px -14px rgba(76,175,80,.4),0 12px 40px rgba(0,0,0,.6);overflow:hidden;transition:transform .7s cubic-bezier(.16,1,.3,1);">
-  <div id="welcome-float-glow" style="position:absolute;inset:-40%;background:conic-gradient(from 0deg,rgba(76,175,80,0),rgba(76,175,80,.35),rgba(76,175,80,0) 40%);animation:welcomeSpin 5s linear infinite;pointer-events:none;"></div>
-  <div style="position:relative;padding:20px 46px 20px 22px;display:flex;align-items:center;gap:14px;">
-    <div style="flex-shrink:0;font-size:30px;line-height:1;animation:welcomeBounce 1.6s ease-in-out infinite;">🎓</div>
-    <div>
-      <p style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;line-height:1.4;font-family:'Noto Serif Bengali',serif;">অভিনন্দন ২০২৫-২৬ শিক্ষাবর্ষের নব সিকৃবিয়ান!</p>
-      <p style="font-size:13px;color:#7ee6a4;font-weight:700;margin:0;line-height:1.5;font-family:'Noto Serif Bengali',serif;">সিকৃবিতে তোমাদের স্বাগতম! 🌿</p>
-    </div>
-    <button onclick="closeWelcomeFloat()" style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.55);width:24px;height:24px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>
-  </div>
-</div>
-<style>
-@keyframes welcomeSpin{to{transform:rotate(360deg)}}
-@keyframes welcomeBounce{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-5px) rotate(4deg)}}
-@media (max-width:480px){
-  #welcome-float p:first-of-type{font-size:13.5px}
-  #welcome-float p:last-of-type{font-size:12px}
-}
-</style>
-<script>
-(function(){
-  var el = document.getElementById('welcome-float');
-  if (!el) return;
-  window.closeWelcomeFloat = function(){
-    el.style.transform = 'translateX(-50%) translateY(-140%)';
-    setTimeout(function(){ if (el) el.style.display = 'none'; }, 700);
-  };
-  el.style.display = 'block';
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){ el.style.transform = 'translateX(-50%) translateY(0)'; });
-  });
-  setTimeout(window.closeWelcomeFloat, 7000);
-})();
-</script>
+
 
 <!-- GAME MODAL -->
 <div id="game-modal" style="display:none;position:fixed;inset:0;z-index:9500;align-items:center;justify-content:center;padding:20px;">
@@ -1978,7 +2027,7 @@ html[data-mode="light"] .sec-head{border-bottom-color:rgba(0,0,0,.08)}
   <div class="foot-copy">&#169; 2025 Aesthetic SAU, Sylhet &middot; Sylhet Agricultural University &middot; Made with &#128154;</div>
   <div class="foot-copy" style="margin-top:6px;border-top:none;padding-top:0">Developer: Muhammad Moniruzzaman</div>
 </div>
-</footer>
+<p class="foot-mod"><a href="https://forms.gle/jNaQTFBY7Z7PT1FM7" target="_blank" rel="noopener">Join as moderator</a></p></footer>
 
 <script>
 var FIREBASE_URL = "https://aesthetic-sau-default-rtdb.firebaseio.com";
@@ -3737,11 +3786,11 @@ function toggleMenu() {
 
 <script id="a11y-theme-script">
 (function(){
-  const STORAGE_KEY='asau_theme_v1';
+  const STORAGE_KEY='asau_theme_v2';
   const root=document.documentElement;
   const saved=(()=>{try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch(e){return{}}})();
   const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const state={theme:saved.theme||'forest',mode:saved.mode||(prefersDark?'dark':'dark')};
+  const state={theme:saved.theme||'forest',mode:saved.mode||'light'};
   function apply(){root.setAttribute('data-theme',state.theme);root.setAttribute('data-mode',state.mode);try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}refresh()}
   function refresh(){
     document.querySelectorAll('.theme-bar button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.theme===state.theme?'true':'false'));
