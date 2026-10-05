@@ -104,6 +104,9 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 #nm{height:34px;width:130px;border:1px solid var(--line);border-radius:99px;padding:0 12px;font-size:14px;background:var(--surface)}
 #nm:focus{outline:none;border-color:var(--green)}
 .anon{display:none}
+.honest{display:inline-block;margin-bottom:18px;font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--green-deep);background:var(--green-soft);border:1px solid #cfe3d6;padding:6px 14px;border-radius:99px}
+.dismiss{margin-top:22px;max-width:540px;font-size:14px;font-weight:550;color:#8f1d16;background:#fdecea;border:1px solid #f3c6c2;border-radius:14px;padding:12px 16px}
+.dismiss[hidden]{display:none}
 @media(min-width:760px){.anon{display:block}}
 .share{padding-bottom:56px}
 .sbox{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow)}
@@ -133,6 +136,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 
 <main class="wrap">
   <div class="hero">
+    <div class="honest">Please be honest.</div>
     <h1>Rate anything at SAU.</h1>
     <p class="tag"><b>Your campus. Your opinion. Anonymous.</b></p>
     <label class="search">
@@ -140,6 +144,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
       <input id="q" type="search" placeholder="Search anything..." aria-label="Search anything">
     </label>
     <p class="note">No account. No name. Just your rating.</p>
+    <div class="dismiss" id="dismissBox" hidden role="alert">Your ratings got dismissed for your faculty biasness.</div>
   </div>
   <div class="tools">
     <div class="chips" id="chips" role="tablist" aria-label="Categories"></div>
@@ -193,6 +198,12 @@ const KEY = "sau-ratings:v5", KEY_MINE = "sau-mine:v2";
 
 let data = {items:{}, stats:{}}, items = [], ready = false;
 let mine = {}; try{ mine = JSON.parse(localStorage.getItem(KEY_MINE)) || {}; }catch(e){}
+const KEY_DISMISS = "sau-dismissed:v1";
+let dismissed = false; try{ dismissed = localStorage.getItem(KEY_DISMISS)==="1"; }catch(e){}
+/* Faculty-bias rule: at least BIAS.high x 10 AND at least BIAS.lowCount x 1 in one person's ratings. */
+const BIAS = {high:10, low:1, lowCount:2};
+const isBiased = ballot => { const v = Object.values(ballot);
+  return v.filter(x=>x===BIAS.high).length>=1 && v.filter(x=>x===BIAS.low).length>=BIAS.lowCount; };
 const ui = {cat:"All", q:"", sort:"most", open:{}};
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -394,8 +405,8 @@ function updateCard(card, animate){
   card.dataset.tot = tot;
   card.querySelector(".tot").innerHTML = `${tot.toLocaleString()} ratings<small>${tot && it.updatedAt ? "Last rated "+ago(it.updatedAt) : "Not rated yet"}</small>`;
   card.querySelector(".meta").innerHTML = `<span>Added ${fmtDate(it.addedAt)}</span>`;
-  const lbl = card.querySelector(".lbl"); lbl.textContent = my ? `Rated ${my}/10 — anonymously.` : tot ? "Rate:" : "Be the first to rate:"; lbl.classList.toggle("ok", !!my);
-  card.querySelectorAll(".scale button").forEach(b=>{ b.disabled = !!my; b.classList.toggle("sel", +b.dataset.score===my); });
+  const lbl = card.querySelector(".lbl"); lbl.textContent = dismissed ? "Your ratings were dismissed." : my ? `Rated ${my}/10 — anonymously.` : tot ? "Rate:" : "Be the first to rate:"; lbl.classList.toggle("ok", !!my);
+  card.querySelectorAll(".scale button").forEach(b=>{ b.disabled = !!my || dismissed; b.classList.toggle("sel", +b.dataset.score===my); });
   const open = !!ui.open[it.id];
   card.querySelector(".res").classList.toggle("open", open);
   card.querySelector(".toggle").textContent = open ? "Hide results" : "See results";
@@ -415,8 +426,20 @@ function onData(){
 }
 
 /* ===== ACTIONS ===== */
+async function dismissVoter(){
+  dismissed = true;
+  try{ localStorage.setItem(KEY_DISMISS,"1"); }catch(e){}
+  const undo = {};                                         // take this person's earlier votes back out of the totals
+  Object.entries(mine).forEach(([id,s])=>{ undo[`items/${id}/counts/s${s}`] = -1; });
+  mine = {}; try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
+  track("ratings_dismissed");
+  showDismiss(); onData();
+  if(Object.keys(undo).length) await write(undo);
+}
+function showDismiss(){ $("dismissBox").hidden = !dismissed; if(dismissed) $("dismissBox").scrollIntoView({block:"nearest",behavior:"smooth"}); }
 async function submitRating(id, score){
-  if(mine[id]) return;                                   // one vote per item per browser
+  if(mine[id] || dismissed) return;                      // one vote per item per browser
+  if(isBiased({...mine, [id]:score})){ await dismissVoter(); return; }   // new vote is never saved
   mine[id] = score; ui.open[id] = true;                  // show results right after voting
   try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
   track("rate_item", {item_id:id, score});
@@ -499,7 +522,7 @@ $("rSave").onclick = () => $("rcv").toBlob(async blob=>{
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="sau-ratings-results.png"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 },"image/png");
 
-renderChips(); renderWho();
+renderChips(); renderWho(); showDismiss();
 $("grid").innerHTML = '<div class="empty">Loading…</div>';
 connect();
 setInterval(onData, 30000);                              // keeps "x min ago" fresh
