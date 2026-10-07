@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community Feedback — SAU Ratings</title>
+<style>
+:root{
+  --bg:#fafaf9;--surface:#fff;--ink:#171a18;--muted:#737a75;--line:#e7e9e6;
+  --green:#1f6b45;--green-deep:#154b31;--green-soft:#e9f3ed;
+  --shadow:0 1px 2px rgba(20,30,25,.04),0 2px 8px rgba(20,30,25,.04);
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);background:var(--surface)}
+.bar{height:58px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:650;letter-spacing:-.01em;display:flex;align-items:center;gap:9px;flex:none}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--green)}
+.sb{display:inline-block;padding:8px 16px;border:1px solid var(--line);border-radius:99px;font-size:14px;font-weight:550;color:var(--ink);text-decoration:none;background:var(--surface)}
+.sb:hover{border-color:var(--green);background:var(--green-soft);color:var(--green-deep)}
+.btn-s{background:var(--green);color:#fff;font-size:14px;font-weight:550;padding:9px 18px;border-radius:99px}
+.btn-s:hover{background:var(--green-deep)}
+.btn-s:disabled{opacity:.6;cursor:default}
+.top{padding:22px 0 0}
+.hero{padding:26px 0 8px}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(34px,7vw,58px);line-height:1.05;letter-spacing:-.03em}
+.tag{margin-top:14px;color:var(--muted);font-size:17px}
+.sbox{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow);margin-top:28px;max-width:640px}
+.sbox h2{font-size:20px;font-weight:620;letter-spacing:-.01em}
+.sbox>p{color:var(--muted);font-size:14px;margin-top:4px}
+form{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+label{font-size:13px;font-weight:550}
+input[type=text],textarea{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:12px 16px;font-size:15px;margin-top:6px;display:block}
+input[type=text]{height:46px;padding-top:0;padding-bottom:0}
+textarea{resize:vertical;min-height:96px;line-height:1.45}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+.row2{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cnt{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.msg{font-size:13px;font-weight:550;min-height:20px}
+.msg.ok{color:var(--green)}.msg.err{color:#8f1d16}
+.sech{margin:44px 0 20px}
+.sech h2{font-family:var(--serif);font-weight:500;font-size:clamp(26px,5vw,36px);line-height:1.1;letter-spacing:-.025em}
+.sech p{margin-top:8px;color:var(--muted);font-size:15px}
+.list{display:grid;gap:14px;grid-template-columns:1fr;padding-bottom:72px;max-width:640px}
+.fb{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:18px}
+.fb .who{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 12px}
+.fb h3{font-size:16px;font-weight:620;letter-spacing:-.015em}
+.fb time{font-size:12px;color:var(--muted)}
+.fb p{margin-top:8px;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.acts{display:flex;gap:8px;margin-top:14px}
+.like{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border:1px solid var(--line);border-radius:99px;font-size:13px;font-weight:550;color:var(--muted);background:var(--surface);font-variant-numeric:tabular-nums}
+.like svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.like b{font-weight:600;color:var(--ink)}
+.like:hover,.like.on{border-color:var(--green);background:var(--green-soft);color:var(--green-deep)}
+.like.on svg{fill:currentColor}
+.like.on b{color:var(--green-deep)}
+.empty{text-align:center;color:var(--muted);padding:48px 0}
+footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="wrap bar">
+  <div class="brand"><span class="dot"></span>SAU Ratings</div>
+</div></header>
+
+<main class="wrap">
+  <div class="top"><a class="sb" id="back" href="sau-ratings.html">← Back to SAU Ratings</a></div>
+  <div class="hero">
+    <h1>Community Feedback.</h1>
+    <p class="tag">Say what's on your mind about SAU. Everyone sees it instantly.</p>
+  </div>
+
+  <div class="sbox">
+    <h2>Share your feedback</h2>
+    <p>Be honest and respectful. Your feedback appears right away.</p>
+    <form id="form" autocomplete="off">
+      <div><label for="nm">Name</label><input type="text" id="nm" maxlength="24" placeholder="Your name (optional)"></div>
+      <div><label for="tx">Feedback</label><textarea id="tx" maxlength="500" placeholder="Write your feedback..." required></textarea></div>
+      <div class="row2"><span class="cnt" id="cnt">0 / 500</span><button class="btn-s" id="send" type="submit">Post feedback</button></div>
+      <p class="msg" id="msg" role="status"></p>
+    </form>
+  </div>
+
+  <div class="sech"><h2>Latest feedback</h2><p id="sub">Newest first.</p></div>
+  <div class="list" id="list"><div class="empty">Loading…</div></div>
+</main>
+<footer><div class="wrap"><p style="font-size:12.5px">A fun project of Aesthetic SAU</p></div></footer>
+
+<script>
+/* Same Firebase Realtime Database as sau-ratings.html. Everything is stored under /sau-ratings/community/{id}:
+   {name, text, ts, likes, dislikes}. Nothing else in the database is touched. */
+const CONFIG = { DB_URL: "https://aesthetic-sau-default-rtdb.firebaseio.com" };
+const BASE = CONFIG.DB_URL.replace(/\/$/, "");
+const NODE = BASE + "/sau-ratings/community";
+const KEY_NAME = "sau-name", KEY_REACT = "sau-community-react:v1", KEY_LAST = "sau-community-last:v1";
+const POST_COOLDOWN = 20000, REACT_COOLDOWN = 1500, MAX_SHOWN = 200;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDate = t => t ? new Date(t).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "—";
+function ago(t){
+  if(!t) return "just now"; const s = Math.max(0,(Date.now()-t)/1e3);
+  if(s<60) return "just now"; const m = s/60; if(m<60) return Math.floor(m)+" min ago";
+  const h = m/60; if(h<24) return Math.floor(h)+" h ago"; const d = Math.floor(h/24);
+  return d<30 ? d+" d ago" : fmtDate(t);
+}
+const UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>';
+const DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>';
+
+let store = {};      // id -> {name,text,ts,likes,dislikes}
+let react = {}; try{ react = JSON.parse(localStorage.getItem(KEY_REACT)) || {}; }catch(e){}   // id -> "like" | "dislike" (this browser only)
+const saveReact = () => { try{ localStorage.setItem(KEY_REACT, JSON.stringify(react)); }catch(e){} };
+try{ $("nm").value = localStorage.getItem(KEY_NAME) || ""; }catch(e){}
+
+/* ===== RENDER ===== */
+let ready = false, lastSig = "";
+function render(){
+  const rows = Object.entries(store).filter(([,v])=>v && typeof v==="object" && v.text)
+    .map(([id,v])=>({id, name:v.name||"Anonymous", text:v.text, ts:+v.ts||0, likes:Math.max(0,+v.likes||0), dislikes:Math.max(0,+v.dislikes||0)}))
+    .sort((a,b)=>(b.ts-a.ts) || (a.id<b.id?1:-1)).slice(0,MAX_SHOWN);
+  const sig = rows.map(r=>[r.id,r.likes,r.dislikes,react[r.id]||""].join(":")).join("|") + "|" + Math.floor(Date.now()/30000);
+  if(ready && sig===lastSig) return;
+  lastSig = sig; ready = true;
+  $("sub").textContent = rows.length ? rows.length + (rows.length===1 ? " feedback" : " feedbacks") + ", newest first." : "Newest first.";
+  $("list").innerHTML = rows.length ? rows.map(r=>{
+    const m = react[r.id];
+    return `<article class="fb" data-id="${esc(r.id)}">
+      <div class="who"><h3>${esc(r.name)}</h3><time>${esc(ago(r.ts))}</time></div>
+      <p>${esc(r.text)}</p>
+      <div class="acts">
+        <button class="like ${m==="like"?"on":""}" data-r="like" aria-pressed="${m==="like"}" aria-label="Like">${UP}<b>${r.likes.toLocaleString()}</b></button>
+        <button class="like ${m==="dislike"?"on":""}" data-r="dislike" aria-pressed="${m==="dislike"}" aria-label="Dislike">${DOWN}<b>${r.dislikes.toLocaleString()}</b></button>
+      </div></article>`;
+  }).join("") : '<div class="empty">No feedback yet. Be the first to share.</div>';
+}
+
+/* ===== LIVE STREAM (Firebase REST streaming, same technique as the main page) ===== */
+function setAt(seg, v){
+  if(!seg.length){ store = (v && typeof v==="object") ? v : {}; return; }
+  let o = store;
+  for(let i=0;i<seg.length-1;i++) o = o[seg[i]] = (o[seg[i]] && typeof o[seg[i]]==="object") ? o[seg[i]] : {};
+  const k = seg[seg.length-1];
+  if(v===null || v===undefined) delete o[k]; else o[k] = v;
+}
+function applyEvent(path, d, merge){
+  const base = path.split("/").filter(Boolean);
+  if(merge && d && typeof d==="object") for(const k in d) setAt(base.concat(k.split("/").filter(Boolean)), d[k]);
+  else setAt(base, d);
+}
+let es = null, retry = 0, retryT = 0, hideT = 0, lastMsg = 0, cool = 0, pending = false;
+function live(){
+  if(document.hidden) return;
+  if(cool){ pending = true; return; }
+  render(); cool = setTimeout(()=>{ cool = 0; if(pending){ pending = false; live(); } }, 200);
+}
+function openStream(){
+  if(es) return;
+  clearTimeout(retryT);
+  const s = es = new EventSource(NODE + ".json");
+  lastMsg = Date.now();
+  s.onopen = () => { retry = 0; lastMsg = Date.now(); };
+  s.onerror = () => {
+    if(!ready) $("list").innerHTML = '<div class="empty">Can\u2019t reach the database yet. Check your connection and the Firebase rules.</div>';
+    if(s.readyState === 2){ s.close(); if(es===s) es = null; retryT = setTimeout(openStream, Math.min(30000, 1000*Math.pow(2, retry++))); }
+  };
+  s.addEventListener("keep-alive", () => { lastMsg = Date.now(); });
+  ["cancel","auth_revoked"].forEach(t=>s.addEventListener(t, () => { s.close(); if(es===s) es = null; if(!ready) $("list").innerHTML = '<div class="empty">The database rules do not allow reading feedback yet (see setup note).</div>'; }));
+  ["put","patch"].forEach(t=>s.addEventListener(t, e=>{
+    lastMsg = Date.now();
+    const m = JSON.parse(e.data); applyEvent(m.path, m.data, t==="patch");
+    if(!ready){ ready = true; lastSig = ""; }
+    live();
+  }));
+}
+function closeStream(){ clearTimeout(retryT); if(es){ es.close(); es = null; } }
+document.addEventListener("visibilitychange", ()=>{
+  clearTimeout(hideT);
+  if(document.hidden){ hideT = setTimeout(closeStream, 30000); return; }
+  if(es && Date.now()-lastMsg > 70000) closeStream();
+  if(!es) openStream(); else render();
+});
+addEventListener("online", ()=>{ if(!document.hidden){ if(es && es.readyState===2) closeStream(); openStream(); } });
+addEventListener("pageshow", e=>{ if(e.persisted && !document.hidden){ closeStream(); openStream(); } });
+setInterval(()=>{ if(!document.hidden) render(); }, 30000);   // keeps "x min ago" fresh
+
+/* ===== POST FEEDBACK ===== */
+const clean = (s,n) => String(s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,"").replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n").trim().slice(0,n);
+const setMsg = (t,c) => { const m = $("msg"); m.textContent = t; m.className = "msg " + (c||""); };
+$("tx").addEventListener("input", e=>{ $("cnt").textContent = e.target.value.length + " / 500"; });
+$("form").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const name = clean($("nm").value,24).replace(/\n/g," ") || "Anonymous", text = clean($("tx").value,500);
+  if(!text){ setMsg("Please write some feedback first.","err"); return; }
+  let last = 0; try{ last = +localStorage.getItem(KEY_LAST) || 0; }catch(x){}
+  const wait = POST_COOLDOWN - (Date.now()-last);
+  if(wait>0){ setMsg("Please wait "+Math.ceil(wait/1000)+" seconds before posting again.","err"); return; }
+  const dupe = Object.values(store).some(v=>v && v.text===text && v.name===name && Date.now()-(+v.ts||0) < 600000);
+  if(dupe){ setMsg("This exact feedback was already posted.","err"); return; }
+
+  const id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,7), now = Date.now();
+  store[id] = {name, text, ts:now, likes:0, dislikes:0};        // shows immediately, newest first
+  try{ localStorage.setItem(KEY_NAME, name==="Anonymous" ? "" : name); localStorage.setItem(KEY_LAST, String(now)); }catch(x){}
+  $("tx").value = ""; $("cnt").textContent = "0 / 500"; setMsg("Posted.","ok"); render();
+  $("send").disabled = true;
+  try{
+    const r = await fetch(NODE+"/"+id+".json", {method:"PUT", body:JSON.stringify({name, text, ts:{".sv":"timestamp"}, likes:0, dislikes:0})});
+    if(!r.ok) throw r.status;
+  }catch(err){
+    delete store[id]; $("tx").value = text; $("cnt").textContent = text.length + " / 500";
+    try{ localStorage.removeItem(KEY_LAST); }catch(x){}
+    setMsg(err===401||err===403 ? "Database rules blocked this post (error "+err+")." : "Couldn't post (error "+(err||"network")+"). Check your connection and try again.","err");
+    lastSig = ""; render();
+  }
+  $("send").disabled = false;
+});
+
+/* ===== LIKE / DISLIKE =====
+   One reaction per feedback per browser (remembered in localStorage). Tapping the same button again takes it back,
+   tapping the other one switches. Counts change with atomic server-side increments, so they stay correct for everyone.
+   A short cooldown per feedback stops rapid tapping. */
+const busy = {}, lastTap = {};
+async function react1(id, kind){
+  if(!store[id] || busy[id]) return;
+  if(Date.now()-(lastTap[id]||0) < REACT_COOLDOWN) return;
+  lastTap[id] = Date.now(); busy[id] = true;
+  const prev = react[id] || null, next = prev===kind ? null : kind;
+  const d = {likes:0, dislikes:0};
+  if(prev) d[prev==="like"?"likes":"dislikes"] -= 1;
+  if(next) d[next==="like"?"likes":"dislikes"] += 1;
+  const apply = sign => { const v = store[id]; if(!v) return; v.likes = Math.max(0,(+v.likes||0)+sign*d.likes); v.dislikes = Math.max(0,(+v.dislikes||0)+sign*d.dislikes); };
+  apply(1); if(next) react[id] = next; else delete react[id]; saveReact(); render();
+  const body = {}; if(d.likes) body.likes = {".sv":{increment:d.likes}}; if(d.dislikes) body.dislikes = {".sv":{increment:d.dislikes}};
+  try{
+    const r = await fetch(NODE+"/"+id+".json", {method:"PATCH", body:JSON.stringify(body)});
+    if(!r.ok) throw r.status;
+  }catch(err){
+    apply(-1); if(prev) react[id] = prev; else delete react[id]; saveReact(); render();
+    setMsg(err===401||err===403 ? "Database rules blocked this reaction (error "+err+")." : "Couldn't save your reaction. Try again.","err");
+  }
+  busy[id] = false;
+}
+$("list").addEventListener("click", e=>{
+  const b = e.target.closest("[data-r]"); if(!b) return;
+  const a = b.closest(".fb"); if(a) react1(a.dataset.id, b.dataset.r);
+});
+
+openStream();
+</script>
+</body>
+</html>
