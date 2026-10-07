@@ -228,13 +228,20 @@ function toItems(){
 const loadLocal = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } };
 const saveLocal = () => { try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){} };
 
-/* Apply a stream event from Firebase to the local copy. */
-function applyEvent(path, d, merge){
-  const seg = path.split("/").filter(Boolean);
-  if(!seg.length){ data = Object.assign({items:{},stats:{}}, merge ? {...data,...d} : (d||{})); return; }
-  let o = data; for(let i=0;i<seg.length-1;i++) o = o[seg[i]] = o[seg[i]] || {};
+/* Apply a stream event from Firebase to the local copy.
+   For "patch" events Firebase sends keys that are themselves paths (e.g. "stats/returning", "items/x/counts/s5"),
+   so every key is written at its own depth instead of being merged one level only. */
+function setAt(seg, v){
+  if(!seg.length){ data = Object.assign({items:{},stats:{}}, v && typeof v==="object" ? v : {}); return; }
+  let o = data;
+  for(let i=0;i<seg.length-1;i++) o = o[seg[i]] = (o[seg[i]] && typeof o[seg[i]]==="object") ? o[seg[i]] : {};
   const k = seg[seg.length-1];
-  if(d===null) delete o[k]; else o[k] = merge ? {...(o[k]||{}), ...d} : d;
+  if(v===null || v===undefined) delete o[k]; else o[k] = v;
+}
+function applyEvent(path, d, merge){
+  const base = path.split("/").filter(Boolean);
+  if(merge && d && typeof d==="object") for(const k in d) setAt(base.concat(k.split("/").filter(Boolean)), d[k]);
+  else setAt(base, d);
 }
 function applyLocal(updates, sign){
   for(const p in updates){
