@@ -204,7 +204,6 @@ const FAMOUS = [
 const FAMOUS_IDS = new Set(FAMOUS.map(f=>f.id));
 
 
-  
 /* ===== BACKEND =====
    Real-time sync: Firebase Realtime Database through its plain REST + streaming API (no SDK).
    All data lives under one node, /sau-ratings, so other apps in the same database are not touched.
@@ -220,7 +219,7 @@ const KEY = "sau-ratings:v5", KEY_MINE = "sau-mine:v2";
 
 let data = {items:{}, stats:{}}, items = [], ready = false;
 let mine = {}; try{ mine = JSON.parse(localStorage.getItem(KEY_MINE)) || {}; }catch(e){}
-const KEY_DISMISS = "sau-dismissed:v1";
+const KEY_DISMISS = "sau-dismissed:v2";   // v2: old lock-outs from the previous rule are cleared
 let dismissed = false; try{ dismissed = localStorage.getItem(KEY_DISMISS)==="1"; }catch(e){}
 /* Faculty-bias rule: at least BIAS.high x 10 AND at least BIAS.lowCount x 1 in one person's ratings. */
 const BIAS = {high:10, low:1, lowCount:3};
@@ -536,7 +535,12 @@ async function dismissVoter(){
 function showDismiss(){ $("dismissBox").hidden = !dismissed; if(dismissed) $("dismissBox").scrollIntoView({block:"nearest",behavior:"smooth"}); }
 async function submitRating(id, score){
   if(mine[id] || dismissed) return;                      // one vote per item per browser
-  if(isBiased({...mine, [id]:score})){ await dismissVoter(); return; }   // new vote is never saved
+  if(isBiased({...mine, [id]:score})){                   // only THIS vote is skipped; earlier ratings stay and other items remain open
+    track("rating_skipped_bias", {item_id:id});
+    const l = document.querySelector(`.card[data-id="${id}"] .lbl`);
+    if(l){ l.textContent = "This rating wasn't counted (faculty bias). You can still rate other items."; setTimeout(onData, 4000); }
+    return;
+  }
   mine[id] = score; ui.open[id] = true;                  // show results right after voting
   try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
   track("rate_item", {item_id:id, score});
