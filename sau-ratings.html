@@ -129,6 +129,14 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 .sech{margin:0 0 20px}
 .sech h2{font-family:var(--serif);font-weight:500;font-size:clamp(26px,5vw,36px);line-height:1.1;letter-spacing:-.025em}
 .sech p{margin-top:8px;color:var(--muted);font-size:15px}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.foot .toggle{margin-top:0}
+.like{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border:1px solid var(--line);border-radius:99px;font-size:13px;font-weight:550;color:var(--muted);background:var(--surface);font-variant-numeric:tabular-nums}
+.like svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.like b{font-weight:600;color:var(--ink)}
+.like:hover,.like.on{border-color:var(--green);background:var(--green-soft);color:var(--green-deep)}
+.like.on svg{fill:currentColor}
+.like.on b{color:var(--green-deep)}
 </style>
 </head>
 <body>
@@ -159,6 +167,10 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
   <section class="famous" id="famousSec" hidden aria-labelledby="famousTitle">
     <div class="sech"><h2 id="famousTitle">Famous at SAU</h2><p>Memorable places around campus. Rate them anonymously.</p></div>
     <div class="grid" id="famous"></div>
+  </section>
+  <section class="foodsec" id="foodSec" hidden aria-labelledby="foodTitle">
+    <div class="sech"><h2 id="foodTitle">SAU Food Corner</h2><p>Campus food favourites. Rate and like them anonymously.</p></div>
+    <div class="grid" id="food"></div>
   </section>
 </main>
 <div class="wrap share"><div class="sbox">
@@ -203,6 +215,19 @@ const FAMOUS = [
 ];
 const FAMOUS_IDS = new Set(FAMOUS.map(f=>f.id));
 
+/* ===== SAU FOOD CORNER =====
+   To add a food item, copy one line below and give it a new unique `id`. Nothing else needs to change.
+   name = title, price = taka (shown on the photo), desc = short description under the name.
+   Photo: upload images/<id>.jpg (or .png / .webp) next to this file, or paste a link into `image`.
+   Ratings use the same system as everything else (items/{id}/counts); likes are stored at items/{id}/likes. */
+const FOOD = [
+  {id:"chicken-chap",name:"Chicken Chap",price:140,desc:"Tender, spicy chicken chap",image:""},
+  {id:"chicken-kacchi",name:"Chicken Kacchi",price:120,desc:"Fragrant rice layered with chicken",image:""},
+  {id:"burger",name:"Burger",price:30,desc:"Quick, filling campus snack",image:""},
+  {id:"halim",name:"Halim",price:40,desc:"Thick, savory lentil and meat stew",image:""}
+];
+const FOOD_IDS = new Set(FOOD.map(f=>f.id));
+
 
 /* ===== BACKEND =====
    Real-time sync: Firebase Realtime Database through its plain REST + streaming API (no SDK).
@@ -219,11 +244,13 @@ const KEY = "sau-ratings:v5", KEY_MINE = "sau-mine:v2";
 
 let data = {items:{}, stats:{}}, items = [], ready = false;
 let mine = {}; try{ mine = JSON.parse(localStorage.getItem(KEY_MINE)) || {}; }catch(e){}
+const KEY_LIKES = "sau-likes:v1";   // which food items this browser has liked (one like per item per browser)
+let likes = {}; try{ likes = JSON.parse(localStorage.getItem(KEY_LIKES)) || {}; }catch(e){}
 const KEY_DISMISS = "sau-dismissed:v2";   // v2: old lock-outs from the previous rule are cleared
 let dismissed = false; try{ dismissed = localStorage.getItem(KEY_DISMISS)==="1"; }catch(e){}
 /* Faculty-bias rule: at least BIAS.high x 10 AND at least BIAS.lowCount x 1 in one person's ratings. */
 const BIAS = {high:10, low:1, lowCount:3};
-const isBiased = ballot => { const v = Object.entries(ballot).filter(([id])=>!FAMOUS_IDS.has(id)).map(([,x])=>x);   // places are not faculty events
+const isBiased = ballot => { const v = Object.entries(ballot).filter(([id])=>!FAMOUS_IDS.has(id)&&!FOOD_IDS.has(id)).map(([,x])=>x);   // places and food are not faculty events
   return v.filter(x=>x===BIAS.high).length>=1 && v.filter(x=>x===BIAS.low).length>=BIAS.lowCount; };
 const ui = {cat:"All", q:"", sort:"most", open:{}};
 const $ = id => document.getElementById(id);
@@ -241,10 +268,10 @@ function seedData(demo){
   return out;
 }
 function toItems(){
-  return Object.entries(data.items||{}).filter(([id,v])=>v&&v.name&&!FAMOUS_IDS.has(id)).map(([id,v])=>{
+  return Object.entries(data.items||{}).filter(([id,v])=>v&&v.name&&!FAMOUS_IDS.has(id)&&!FOOD_IDS.has(id)).map(([id,v])=>{
     const r = {}; for(let s=1;s<=10;s++) r[s] = (v.counts && v.counts["s"+s]) || 0;
     return {id, name:v.name, category:v.category, location:v.location||"", image:v.image||"", addedAt:v.addedAt, updatedAt:v.updatedAt, ratings:r};
-  }).concat(famousItems());
+  }).concat(famousItems(), foodItems());
 }
 /* Famous places: details come from FAMOUS above, live counts from data.items/{id}/counts (same node as every other item). */
 function famousItems(){
@@ -252,6 +279,14 @@ function famousItems(){
   return FAMOUS.map((f,n)=>{
     const v = db[f.id]||{}, r = {}; for(let s=1;s<=10;s++) r[s] = (v.counts && v.counts["s"+s]) || 0;
     return {id:f.id, name:f.name, category:f.category, location:f.desc, image:f.image||"", updatedAt:v.updatedAt, ratings:r, section:"famous", order:n};
+  });
+}
+/* Food: details come from FOOD above, live ratings + likes from data.items/{id} (same node as every other item). */
+function foodItems(){
+  const db = data.items||{};
+  return FOOD.map((f,n)=>{
+    const v = db[f.id]||{}, r = {}; for(let s=1;s<=10;s++) r[s] = (v.counts && v.counts["s"+s]) || 0;
+    return {id:f.id, name:f.name, category:"Food", price:f.price, location:f.desc, image:f.image||"", updatedAt:v.updatedAt, ratings:r, likes:Math.max(0,+v.likes||0), section:"food", order:n};
   });
 }
 const loadLocal = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } };
@@ -281,13 +316,15 @@ function applyLocal(updates, sign){
   }
 }
 /* FIREBASE write: one atomic PATCH using server-side increment + server timestamp. */
+let lastErr = "";
 async function write(updates){
+  lastErr = "";
   applyLocal(updates, 1); onData();                       // optimistic: UI updates instantly
   if(!REMOTE){ saveLocal(); return true; }
   const body = {};
   for(const p in updates) body[p] = updates[p]==="now" ? {".sv":"timestamp"} : {".sv":{increment:updates[p]}};
-  try{ const r = await fetch(BASE+"/sau-ratings.json", {method:"PATCH", body:JSON.stringify(body)}); if(!r.ok) throw 0; return true; }
-  catch(e){ const rev = {}; for(const p in updates) if(updates[p]!=="now") rev[p] = updates[p]; applyLocal(rev,-1); onData(); return false; }
+  try{ const r = await fetch(BASE+"/sau-ratings.json", {method:"PATCH", body:JSON.stringify(body)}); if(!r.ok){ lastErr = r.status; throw 0; } return true; }
+  catch(e){ if(!lastErr) lastErr = "network"; const rev = {}; for(const p in updates) if(updates[p]!=="now") rev[p] = updates[p]; applyLocal(rev,-1); onData(); return false; }
 }
 function connect(){
   if(!REMOTE){
@@ -307,7 +344,7 @@ function connect(){
    while the tab is hidden, and the connection is released after 30s in the background (and reopened on return). */
 const STREAM_ERR = '<div class="empty">Can\u2019t reach the database yet. Check DB_URL and the Firebase rules.</div>';
 let es = null, retry = 0, retryT = 0, hideT = 0, lastMsg = 0, firstEvent = true, cool = 0, pending = false, dirty = false, lastStats = "";
-const sigOf = it => it.updatedAt+"|"+it.name+"|"+it.image+"|"+Object.values(it.ratings).join(",");
+const sigOf = it => it.updatedAt+"|"+it.name+"|"+it.image+"|"+Object.values(it.ratings).join(",")+"|"+(it.likes||0);
 function openStream(){
   if(es || !REMOTE) return;
   clearTimeout(retryT);
@@ -360,7 +397,6 @@ function trackVisit(){        /* EVERY page load counts: first time ever -> stat
   write({[seen ? "stats/returning" : "stats/visitors"]:1});
 }
 
-  
 /* ===== GOOGLE ANALYTICS (GA4) =====
    Shows where visitors come from (country / city), devices, new vs returning, live users.
    Firebase console > Project settings > Integrations > Google Analytics (enable), then copy the
@@ -434,15 +470,19 @@ function renderChips(){
   const cats = ["All", ...new Set(items.filter(i=>!i.section).map(i=>i.category))];
   $("chips").innerHTML = cats.length<3 ? "" : cats.map(c=>`<button class="chip ${ui.cat===c?"on":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
 }
+const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>';
 function cardHTML(it){
+  const tg = '<button class="toggle"></button>';
+  const foot = it.section==="food"
+    ? `<div class="foot">${tg}<button class="like" data-like aria-pressed="false" aria-label="Like ${esc(it.name)}">${HEART}<b>0</b></button></div>` : tg;
   return `<article class="card" data-id="${it.id}">
-    <div class="ph" data-i="${esc(it.name[0])}"><img src="${esc(imgSrc(it))}" data-want="${esc(imgSrc(it))}" alt="${esc(it.name)}" loading="lazy" onerror="imgFail(this)"><span class="cat">${esc(it.category)}</span></div>
+    <div class="ph" data-i="${esc(it.name[0])}"><img src="${esc(imgSrc(it))}" data-want="${esc(imgSrc(it))}" alt="${esc(it.name)}" loading="lazy" onerror="imgFail(this)"><span class="cat">${esc(it.price!=null ? "\u09f3"+it.price : it.category)}</span></div>
     <div class="body">
       <h3>${esc(it.name)}</h3><p class="loc">${esc(it.location)}</p><p class="meta"></p>
       <div class="stat"><span class="avg">0.0</span><span class="of">/ 10</span><span class="tot"></span></div>
       <p class="lbl"></p>
       <div class="scale">${Array.from({length:10},(_,i)=>`<button data-score="${i+1}" aria-label="Rate ${i+1} out of 10">${i+1}</button>`).join("")}</div>
-      <button class="toggle"></button>
+      ${foot}
       <div class="res"><div><div class="dist">${[10,9,8,7,6,5,4,3,2,1].map(s=>`<div class="row" data-s="${s}"><span class="n">${s}</span><div class="track"><div class="fill"></div></div><span class="v"></span></div>`).join("")}</div></div></div>
     </div></article>`;
 }
@@ -463,13 +503,21 @@ function renderFamous(){
   g.querySelectorAll(".card").forEach(c=>updateCard(c,false));
   return !!list.length;
 }
+function renderFood(){
+  const g = $("food"), sec = $("foodSec");
+  const list = sortItems(searchItems(items.filter(i=>i.section==="food").sort((a,b)=>a.order-b.order)));
+  sec.hidden = !list.length;
+  g.innerHTML = list.map(cardHTML).join("");
+  g.querySelectorAll(".card").forEach(c=>updateCard(c,false));
+  return !!list.length;
+}
 function renderItems(){
   const main = items.filter(i=>!i.section);
   const list = sortItems(searchItems(filterCategory(main))), g = $("grid");
-  const famShown = renderFamous();
+  const famShown = renderFamous(), foodShown = renderFood();
   g.dataset.all = items.length;
   g.innerHTML = list.length ? list.map(cardHTML).join("")
-    : (famShown && ui.q.trim()) ? ""                               // search matched a place below, so no "nothing found" box
+    : ((famShown||foodShown) && ui.q.trim()) ? ""                               // search matched a place below, so no "nothing found" box
     : `<div class="empty">${!main.length ? (REMOTE ? "No items in the database yet. Import seed.json in the Firebase console to add the items." : "No items yet.") : "Nothing found for “"+esc(ui.q)+"”. Try another word or choose All."}</div>`;
   g.querySelectorAll(".card").forEach(c=>updateCard(c,false));
 }
@@ -505,6 +553,8 @@ function updateCard(card, animate){
   const open = !!ui.open[it.id];
   card.querySelector(".res").classList.toggle("open", open);
   card.querySelector(".toggle").textContent = open ? "Hide results" : "See results";
+  const lk = card.querySelector(".like");
+  if(lk){ const on = !!likes[it.id]; lk.classList.toggle("on", on); lk.setAttribute("aria-pressed", on); lk.querySelector("b").textContent = (it.likes||0).toLocaleString(); }
   renderDistribution(card, it);
   card.dataset.sig = sigOf(it);
 }
@@ -550,19 +600,37 @@ async function submitRating(id, score){
     delete mine[id]; try{ localStorage.setItem(KEY_MINE, JSON.stringify(mine)); }catch(e){}
     onData();
     const l = document.querySelector(`.card[data-id="${id}"] .lbl`);
-    if(l){ l.textContent = "Couldn't save. Check your connection and try again."; setTimeout(onData, 3500); }
+    if(l){ l.textContent = lastErr===401||lastErr===403 ? "Database rules blocked this save (error "+lastErr+")." : "Couldn't save (error "+lastErr+"). Check your connection and try again."; setTimeout(onData, 3500); }
   }
+}
+
+let likeBusy = {};
+async function toggleLike(id){
+  if(likeBusy[id]) return; likeBusy[id] = true;
+  const was = !!likes[id];
+  if(was) delete likes[id]; else likes[id] = 1;
+  const saveLikes = () => { try{ localStorage.setItem(KEY_LIKES, JSON.stringify(likes)); }catch(e){} };
+  saveLikes(); track("like_food", {item_id:id, liked:!was});
+  const ok = await write({[`items/${id}/likes`]: was ? -1 : 1});   // atomic server-side increment, same as ratings
+  if(!ok){
+    if(was) likes[id] = 1; else delete likes[id]; saveLikes(); onData();
+    const l = document.querySelector(`.card[data-id="${id}"] .lbl`);
+    if(l){ l.textContent = lastErr===401||lastErr===403 ? "Database rules blocked this like (error "+lastErr+")." : "Couldn't save like (error "+lastErr+"). Try again."; setTimeout(onData, 3500); }
+  }
+  likeBusy[id] = false;
 }
 
 /* ===== EVENTS ===== */
 const onCardClick = e=>{
   const card = e.target.closest(".card"); if(!card) return;
+  if(e.target.closest("[data-like]")){ toggleLike(card.dataset.id); return; }
   const b = e.target.closest("[data-score]");
   if(b){ submitRating(card.dataset.id, +b.dataset.score); return; }
   if(e.target.closest(".toggle")){ ui.open[card.dataset.id] = !ui.open[card.dataset.id]; updateCard(card,false); }
 };
 $("grid").addEventListener("click", onCardClick);
 $("famous").addEventListener("click", onCardClick);
+$("food").addEventListener("click", onCardClick);
 $("chips").addEventListener("click", e=>{
   const c = e.target.closest("[data-cat]"); if(!c) return;
   ui.cat = c.dataset.cat; renderChips(); renderItems();
