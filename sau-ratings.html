@@ -126,6 +126,9 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 .rbox{background:var(--surface);border-radius:20px;max-width:520px;width:100%;max-height:100%;overflow:auto;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .rbox canvas{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
 .rbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:flex-end}
+.sech{margin:0 0 20px}
+.sech h2{font-family:var(--serif);font-weight:500;font-size:clamp(26px,5vw,36px);line-height:1.1;letter-spacing:-.025em}
+.sech p{margin-top:8px;color:var(--muted);font-size:15px}
 </style>
 </head>
 <body>
@@ -153,6 +156,10 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
     </div>
   </div>
   <div class="grid" id="grid"></div>
+  <section class="famous" id="famousSec" hidden aria-labelledby="famousTitle">
+    <div class="sech"><h2 id="famousTitle">Famous at SAU</h2><p>Memorable places around campus. Rate them anonymously.</p></div>
+    <div class="grid" id="famous"></div>
+  </section>
 </main>
 <div class="wrap share"><div class="sbox">
   <div><h2>Share with friends</h2><p>More ratings make the results more honest. Send SAU Ratings to your friends and ask them to rate.</p></div>
@@ -182,6 +189,20 @@ const ITEMS = [
 ];
 const CATEGORIES = ["All","Food","Events","Campus","Academic","Sports","Facilities","Random"];
 
+/* ===== FAMOUS AT SAU =====
+   To add a place, copy one line below and give it a new unique `id`. Nothing else needs to change.
+   name = title, desc = short description under it, category = label on the photo.
+   Photo: upload images/<id>.jpg (or .png / .webp) next to this file, or paste a link into `image`.
+   Cards use the same rating + live count system as everything else; only the live counts live in the database. */
+const FAMOUS = [
+  {id:"surjaloke-bornomala",name:"Surjaloke Bornomala",desc:"Shaheed Minar",category:"Campus",image:""},
+  {id:"july-36-gate",name:"July 36 Gate",desc:"Campus gate",category:"Campus",image:""},
+  {id:"tsc-cafeteria",name:"TSC Cafeteria",desc:"Student cafeteria",category:"Food",image:""},
+  {id:"premchattar",name:"Premchattar",desc:"Campus hangout spot",category:"Campus",image:""},
+  {id:"auditorium",name:"Auditorium",desc:"Main auditorium",category:"Campus",image:""}
+];
+const FAMOUS_IDS = new Set(FAMOUS.map(f=>f.id));
+
 
 /* ===== BACKEND =====
    Real-time sync: Firebase Realtime Database through its plain REST + streaming API (no SDK).
@@ -202,7 +223,7 @@ const KEY_DISMISS = "sau-dismissed:v1";
 let dismissed = false; try{ dismissed = localStorage.getItem(KEY_DISMISS)==="1"; }catch(e){}
 /* Faculty-bias rule: at least BIAS.high x 10 AND at least BIAS.lowCount x 1 in one person's ratings. */
 const BIAS = {high:10, low:1, lowCount:3};
-const isBiased = ballot => { const v = Object.values(ballot);
+const isBiased = ballot => { const v = Object.entries(ballot).filter(([id])=>!FAMOUS_IDS.has(id)).map(([,x])=>x);   // places are not faculty events
   return v.filter(x=>x===BIAS.high).length>=1 && v.filter(x=>x===BIAS.low).length>=BIAS.lowCount; };
 const ui = {cat:"All", q:"", sort:"most", open:{}};
 const $ = id => document.getElementById(id);
@@ -220,9 +241,17 @@ function seedData(demo){
   return out;
 }
 function toItems(){
-  return Object.entries(data.items||{}).filter(([,v])=>v&&v.name).map(([id,v])=>{
+  return Object.entries(data.items||{}).filter(([id,v])=>v&&v.name&&!FAMOUS_IDS.has(id)).map(([id,v])=>{
     const r = {}; for(let s=1;s<=10;s++) r[s] = (v.counts && v.counts["s"+s]) || 0;
     return {id, name:v.name, category:v.category, location:v.location||"", image:v.image||"", addedAt:v.addedAt, updatedAt:v.updatedAt, ratings:r};
+  }).concat(famousItems());
+}
+/* Famous places: details come from FAMOUS above, live counts from data.items/{id}/counts (same node as every other item). */
+function famousItems(){
+  const db = data.items||{};
+  return FAMOUS.map((f,n)=>{
+    const v = db[f.id]||{}, r = {}; for(let s=1;s<=10;s++) r[s] = (v.counts && v.counts["s"+s]) || 0;
+    return {id:f.id, name:f.name, category:f.category, location:f.desc, image:f.image||"", updatedAt:v.updatedAt, ratings:r, section:"famous", order:n};
   });
 }
 const loadLocal = () => { try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } };
@@ -401,7 +430,7 @@ function sortItems(list){
 
 /* ===== RENDER ===== */
 function renderChips(){
-  const cats = ["All", ...new Set(items.map(i=>i.category))];
+  const cats = ["All", ...new Set(items.filter(i=>!i.section).map(i=>i.category))];
   $("chips").innerHTML = cats.length<3 ? "" : cats.map(c=>`<button class="chip ${ui.cat===c?"on":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
 }
 function cardHTML(it){
@@ -425,11 +454,22 @@ function imgFail(im){
   if(im.dataset.want.indexOf("images/")===0 && n < IMG_EXT.length-1){ im.dataset.n = n+1; im.src = `images/${id}.${IMG_EXT[n+1]}`; }
   else im.parentNode.classList.add("nofx");
 }
+function renderFamous(){
+  const g = $("famous"), sec = $("famousSec");
+  const list = sortItems(searchItems(items.filter(i=>i.section==="famous").sort((a,b)=>a.order-b.order)));   // curated order wins ties
+  sec.hidden = !list.length;
+  g.innerHTML = list.map(cardHTML).join("");
+  g.querySelectorAll(".card").forEach(c=>updateCard(c,false));
+  return !!list.length;
+}
 function renderItems(){
-  const list = sortItems(searchItems(filterCategory(items))), g = $("grid");
+  const main = items.filter(i=>!i.section);
+  const list = sortItems(searchItems(filterCategory(main))), g = $("grid");
+  const famShown = renderFamous();
   g.dataset.all = items.length;
   g.innerHTML = list.length ? list.map(cardHTML).join("")
-    : `<div class="empty">${!items.length ? (REMOTE ? "No items in the database yet. Import seed.json in the Firebase console to add the items." : "No items yet.") : "Nothing found for “"+esc(ui.q)+"”. Try another word or choose All."}</div>`;
+    : (famShown && ui.q.trim()) ? ""                               // search matched a place below, so no "nothing found" box
+    : `<div class="empty">${!main.length ? (REMOTE ? "No items in the database yet. Import seed.json in the Firebase console to add the items." : "No items yet.") : "Nothing found for “"+esc(ui.q)+"”. Try another word or choose All."}</div>`;
   g.querySelectorAll(".card").forEach(c=>updateCard(c,false));
 }
 function renderDistribution(card, it){
@@ -458,7 +498,7 @@ function updateCard(card, animate){
   if(im.dataset.want !== want){ im.dataset.want = want; im.dataset.n = 0; im.src = want; card.querySelector(".ph").classList.remove("nofx"); }
   card.dataset.tot = tot;
   card.querySelector(".tot").innerHTML = `${tot.toLocaleString()} ratings<small>${tot && it.updatedAt ? "Last rated "+ago(it.updatedAt) : "Not rated yet"}</small>`;
-  card.querySelector(".meta").innerHTML = `<span>Added ${fmtDate(it.addedAt)}</span>`;
+  card.querySelector(".meta").innerHTML = it.section ? "" : `<span>Added ${fmtDate(it.addedAt)}</span>`;
   const lbl = card.querySelector(".lbl"); lbl.textContent = dismissed ? "Your ratings were dismissed." : my ? `Rated ${my}/10 — anonymously.` : tot ? "Rate:" : "Be the first to rate:"; lbl.classList.toggle("ok", !!my);
   card.querySelectorAll(".scale button").forEach(b=>{ b.disabled = !!my || dismissed; b.classList.toggle("sel", +b.dataset.score===my); });
   const open = !!ui.open[it.id];
@@ -509,12 +549,14 @@ async function submitRating(id, score){
 }
 
 /* ===== EVENTS ===== */
-$("grid").addEventListener("click", e=>{
+const onCardClick = e=>{
   const card = e.target.closest(".card"); if(!card) return;
   const b = e.target.closest("[data-score]");
   if(b){ submitRating(card.dataset.id, +b.dataset.score); return; }
   if(e.target.closest(".toggle")){ ui.open[card.dataset.id] = !ui.open[card.dataset.id]; updateCard(card,false); }
-});
+};
+$("grid").addEventListener("click", onCardClick);
+$("famous").addEventListener("click", onCardClick);
 $("chips").addEventListener("click", e=>{
   const c = e.target.closest("[data-cat]"); if(!c) return;
   ui.cat = c.dataset.cat; renderChips(); renderItems();
