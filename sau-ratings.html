@@ -262,14 +262,61 @@ function connect(){
     addEventListener("storage", e=>{ if(e.key===KEY){ data = loadLocal() || data; onData(); } });
     onData(); trackVisit(); return;
   }
-  const es = new EventSource(BASE+"/sau-ratings.json"); let first = true;
-  es.onerror = () => { if(!ready) $("grid").innerHTML = '<div class="empty">Can\u2019t reach the database yet. Check DB_URL and the Firebase rules.</div>'; };       // FIREBASE live stream
-    ["put","patch"].forEach(t=>es.addEventListener(t, e=>{
+  openStream();
+}
+/* ===== LIVE STREAM =====
+   One Firebase streaming connection (EventSource). The full node is sent once, after that only the changed
+   values arrive, so ratings, totals and visitor counts update for everyone without a refresh or polling.
+   Efficiency: renders are coalesced (max ~4/s), only cards whose numbers changed are touched, nothing renders
+   while the tab is hidden, and the connection is released after 30s in the background (and reopened on return). */
+const STREAM_ERR = '<div class="empty">Can\u2019t reach the database yet. Check DB_URL and the Firebase rules.</div>';
+let es = null, retry = 0, retryT = 0, hideT = 0, lastMsg = 0, firstEvent = true, cool = 0, pending = false, dirty = false, lastStats = "";
+const sigOf = it => it.updatedAt+"|"+it.name+"|"+it.image+"|"+Object.values(it.ratings).join(",");
+function openStream(){
+  if(es || !REMOTE) return;
+  clearTimeout(retryT);
+  const s = es = new EventSource(BASE+"/sau-ratings.json");
+  lastMsg = Date.now();
+  s.onopen = () => { retry = 0; lastMsg = Date.now(); };
+  s.onerror = () => {
+    if(!ready) $("grid").innerHTML = STREAM_ERR;
+    if(s.readyState === 2){ s.close(); if(es===s) es = null; retryT = setTimeout(openStream, Math.min(30000, 1000*Math.pow(2, retry++))); }   // browser gave up: retry with backoff
+  };
+  s.addEventListener("keep-alive", () => { lastMsg = Date.now(); });
+  ["cancel","auth_revoked"].forEach(t=>s.addEventListener(t, () => { s.close(); if(es===s) es = null; if(!ready) $("grid").innerHTML = STREAM_ERR; }));
+  ["put","patch"].forEach(t=>s.addEventListener(t, e=>{
+    lastMsg = Date.now();
     const m = JSON.parse(e.data); applyEvent(m.path, m.data, t==="patch");
-    if(first){ first = false; trackVisit(); }
-    onData();
+    if(firstEvent){ firstEvent = false; trackVisit(); }
+    liveUpdate();
   }));
 }
+function closeStream(){ clearTimeout(retryT); if(es){ es.close(); es = null; } }
+function armCool(){ cool = setTimeout(()=>{ cool = 0; if(pending){ pending = false; onLive(); armCool(); } }, 250); }
+function liveUpdate(){
+  if(document.hidden){ dirty = true; return; }           // nothing to paint in a background tab; catch up when it is shown
+  if(cool){ pending = true; return; }
+  onLive(); armCool();                                    // first change paints instantly, bursts are merged
+}
+function onLive(){
+  items = toItems(); renderStats();
+  if(!ready || +$("grid").dataset.all !== items.length){ ready = true; renderChips(); renderItems(); return; }
+  document.querySelectorAll(".card").forEach(c=>{
+    const it = items.find(i=>i.id===c.dataset.id);
+    if(it && c.dataset.sig !== sigOf(it)) updateCard(c,false);
+  });
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(!REMOTE) return;
+  clearTimeout(hideT);
+  if(document.hidden){ hideT = setTimeout(closeStream, 30000); return; }
+  if(es && Date.now()-lastMsg > 70000) closeStream();     // connection went stale while the phone slept
+  if(!es) openStream();
+  else if(dirty){ dirty = false; onLive(); }
+});
+addEventListener("online", ()=>{ if(REMOTE && !document.hidden){ if(es && es.readyState===2) closeStream(); openStream(); } });
+addEventListener("pageshow", e=>{ if(REMOTE && e.persisted && !document.hidden){ closeStream(); openStream(); } });
+
 function trackVisit(){        /* EVERY page load counts: first time ever -> stats/visitors, every later load (refresh or coming back) -> stats/returning */
   let seen = false;
   try{ seen = !!localStorage.getItem("sau-seen"); if(!seen) localStorage.setItem("sau-seen","1"); }
@@ -411,12 +458,14 @@ function updateCard(card, animate){
   card.querySelector(".res").classList.toggle("open", open);
   card.querySelector(".toggle").textContent = open ? "Hide results" : "See results";
   renderDistribution(card, it);
+  card.dataset.sig = sigOf(it);
 }
 function renderStats(){
   const s = data.stats||{}, tot = items.reduce((a,i)=>a+calculateTotal(i.ratings),0), last = Math.max(0,...items.map(i=>i.updatedAt||0));
   const vis = (s.visitors||0)+(s.returning||0);
   const t = [[vis,"Total visits"],[s.visitors||0,"New visitors"],[s.returning||0,"Return visits"],[tot,"Ratings given"],[items.length,"Items"],[last?ago(last):"—","Last updated"]];
-  $("stats").innerHTML = t.map(([v,l])=>`<div class="st"><b>${typeof v==="number"?v.toLocaleString():v}</b><span>${l}</span></div>`).join("");
+  const h = t.map(([v,l])=>`<div class="st"><b>${typeof v==="number"?v.toLocaleString():v}</b><span>${l}</span></div>`).join("");
+  if(h !== lastStats){ lastStats = h; $("stats").innerHTML = h; }
 }
 /* Called whenever data changes (own vote, other visitors, other tabs). */
 function onData(){
@@ -525,7 +574,7 @@ $("rSave").onclick = () => $("rcv").toBlob(async blob=>{
 renderChips(); renderWho(); showDismiss();
 $("grid").innerHTML = '<div class="empty">Loading…</div>';
 connect();
-setInterval(onData, 30000);                              // keeps "x min ago" fresh
+setInterval(()=>{ if(!document.hidden) onData(); }, 30000);                              // keeps "x min ago" fresh
 </script>
 </body>
 </html>
