@@ -141,6 +141,8 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 .cfb:hover{border-color:var(--green)}
 .cfb .go{font-size:14px;font-weight:550;color:var(--green-deep);background:var(--green-soft);padding:9px 18px;border-radius:99px;white-space:nowrap;align-self:flex-start}
 @media(min-width:760px){.cfb .go{align-self:center}}
+.topnote{background:var(--green-soft);color:var(--green-deep);border-bottom:1px solid #cfe3d6;font-size:13px;font-weight:550;text-align:center;padding:8px 16px}
+.topnote a{color:inherit;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -148,6 +150,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
   <div class="brand"><span class="dot"></span>SAU Ratings</div>
   <div style="display:flex;gap:14px;align-items:center;min-width:0"><div id="who"></div><div class="anon">100% Anonymous</div></div>
 </div></header>
+<div class="topnote">Some images are AI generated. To share your opinion, go to the <a href="https://aesthetic-sau.web.app/community.html">Community</a> tab.</div>
 
 <main class="wrap">
   <div class="hero">
@@ -167,15 +170,15 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
       <button data-s="most">Most rated</button><button data-s="top">Highest rated</button><button data-s="new">Recent</button><button data-jump="foodSec">Food Corner</button>
     </div>
   </div>
-  <div class="grid" id="grid"></div>
-  <section class="famous" id="famousSec" hidden aria-labelledby="famousTitle">
-    <div class="sech"><h2 id="famousTitle">Famous at SAU</h2><p>Memorable places around campus. Rate them anonymously.</p></div>
-    <div class="grid" id="famous"></div>
-  </section>
   <section class="foodsec" id="foodSec" hidden aria-labelledby="foodTitle">
     <div class="sech"><h2 id="foodTitle">SAU Food Corner</h2><p>Campus food favourites. Rate and like them anonymously.</p></div>
     <div class="grid" id="food"></div>
   </section>
+  <section class="famous" id="famousSec" hidden aria-labelledby="famousTitle">
+    <div class="sech"><h2 id="famousTitle">Famous at SAU</h2><p>Memorable places around campus. Rate them anonymously.</p></div>
+    <div class="grid" id="famous"></div>
+  </section>
+  <div class="grid" id="grid"></div>
 </main>
 <div class="wrap share" style="padding-bottom:20px"><a class="sbox cfb" id="communityCard" href="community.html">
   <div><h2>Community Feedback</h2><p>Share your thoughts about SAU and read what other students say. Like or dislike any feedback.</p></div>
@@ -236,7 +239,6 @@ const FOOD = [
 ];
 const FOOD_IDS = new Set(FOOD.map(f=>f.id));
 
-  
 
 /* ===== BACKEND =====
    Real-time sync: Firebase Realtime Database through its plain REST + streaming API (no SDK).
