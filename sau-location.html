@@ -233,7 +233,7 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
     <div id="mapwrap"><svg id="map" viewBox="0 0 540 763" role="group" aria-label="Map of Bangladesh's 64 districts"></svg></div>
     <div class="legend">
       <span>Participants per district <span id="lg-min">—</span> <i class="grad"></i> <span id="lg-max">—</span></span>
-      <span><i class="sw"></i> Hidden (fewer than 3)</span>
+      <span><i class="sw"></i> No participants yet</span>
       <span><i class="sd"></i> Anonymous shared locations (<span id="pin-n">—</span>)</span>
     </div>
     <div id="detail" aria-live="polite">Hover or tap a district to see its details.</div>
@@ -244,7 +244,7 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
     <div class="stats" id="an-stats"></div>
     <p id="an-note"></p>
     <ul class="list" id="an-list"></ul>
-    <p class="mut" style="margin:10px 0 0">Percentages are shares of all participants. Divisions with fewer than 3 participants are not shown.</p>
+    <p class="mut" style="margin:10px 0 0">Percentages are shares of all participants. Divisions with no participants are not shown.</p>
   </section>
 
   <section class="card" id="c-list" aria-labelledby="h-list">
@@ -259,7 +259,7 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
       <li><b>No GPS by default.</b> The page does not ask for your device location unless you click “Show me on the map”.</li>
       <li><b>Approximate only.</b> Your browser asks a public IP-lookup service (ipwho.is, or geojs.io as a backup) for a rough place based on your network. That service sees your IP address, as any website would. We use only the district name from the answer and throw the rest away — your IP address and coordinates are never stored or shown.</li>
       <li><b>What is saved:</b> a running total for each district, a total visitor count, and a private record under a random anonymous Firebase ID saying when this browser first visited and which district it is counted in. Only your own browser can read that record. If (and only if) you publish a pin, one blurred point is also stored under the same random ID. No names, emails, phone numbers or profiles exist anywhere in this system.</li>
-      <li><b>Minimum of 3.</b> A district appears on the map and in the list only when at least 3 people are counted there.</li>
+      <li><b>District totals only.</b> A district appears on the map and in the list as soon as 1 person is counted there. Only the district-level total is shown, never who is counted.</li>
       <li><b>“Show me on the map” is optional.</b> Your browser asks permission to use GPS. Your exact coordinates never leave your device: the page shifts them by a random 500 m–1 km, rounds them to about 100 m (the database rejects anything finer), tells you which district the pin lands near, and publishes only after you confirm. Everyone else sees an anonymous dot. The same random shift is reused each time, so repeated sharing can't be averaged to find you.</li>
       <li><b>You stay in control.</b> “Remove my count” and “Hide me” undo what this page did for you. Sharing again moves your pin.</li>
       <li><b>Limits.</b> IP locations can be wrong (mobile data, VPNs, university networks). Clearing browser data or using another browser can lead to being counted again. A blurred pin still shows roughly where you are (within about a kilometre), so skip it if that is sensitive.</li>
@@ -313,7 +313,8 @@ const FIREBASE_CONFIG = {
   appId: "1:584202645287:web:7893dd0af00cdb04d30302",
   measurementId: "G-L3FF1NTLL1"
 };
-const MIN_USERS = 3;            // districts below this stay hidden
+const MIN_USERS = 1;            // a district shows as soon as 1 participant is counted
+const stu = n => n === 1 ? 'student' : 'students';
 const SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
 const GEO_PROVIDERS = [
   { url: 'https://ipwho.is/?fields=success,country_code,region,city',
@@ -610,7 +611,7 @@ function stats() {
 }
 function label(d, n) {
   const { pct } = stats();
-  return n >= MIN_USERS ? `${d.name}: ${n} students (${pct(n)}%)` : `${d.name}: hidden, not enough participants`;
+  return n >= MIN_USERS ? `${d.name}: ${n} ${stu(n)} (${pct(n)}%)` : `${d.name}: no participants yet`;
 }
 function renderMap() {
   const vis = DISTRICTS.filter(d => (counts[d.id] || 0) >= MIN_USERS);
@@ -625,11 +626,11 @@ function renderMap() {
     t.g.setAttribute('aria-label', label(d, n));
   }
   $('#lg-min').textContent = loaded.counts && vis.length ? MIN_USERS : '—';
-  $('#lg-max').textContent = loaded.counts && vis.length ? max + '+' : '—';
+  $('#lg-max').textContent = loaded.counts && vis.length ? (max > MIN_USERS ? max + '+' : max) : '—';
   const { total } = stats();
   $('#summary').textContent = total
-    ? `${total} participants counted · ${vis.length} of 64 districts shown`
-    : 'No participants yet. Districts appear once 3 or more people are counted there.';
+    ? `${total} ${total === 1 ? 'participant' : 'participants'} counted · ${vis.length} of 64 districts with participants`
+    : 'No participants yet.';
 }
 function outline(id, want) {
   if (want) { id.setAttribute('href', '#p-' + want); id.setAttribute('display', 'inline'); }
@@ -642,8 +643,8 @@ function renderDetail() {
   if (!id) { el.textContent = 'Hover or tap a district to see its details.'; return; }
   const d = BY_ID[id], n = counts[id] || 0, { pct } = stats();
   el.textContent = n >= MIN_USERS
-    ? `${d.name} (${d.div} division): ${n} students (${pct(n)}% of participants).`
-    : `${d.name} (${d.div} division): not enough participants to display yet (minimum ${MIN_USERS}).`;
+    ? `${d.name} (${d.div} division): ${n} ${stu(n)} (${pct(n)}% of participants).`
+    : `${d.name} (${d.div} division): no participants yet.`;
 }
 function renderPins() {                            // anonymous blurred dots only; no ids, no names
   const now = Date.now(), out = [];
@@ -674,8 +675,8 @@ function renderList() {
     .filter(r => r.n >= MIN_USERS).sort((a, b) => b.n - a.n);
   const shown = showAll ? rows : rows.slice(0, 8);
   $('#list').innerHTML = rows.length
-    ? shown.map(r => `<li><div class="li-top"><span>${r.name}</span><span><b>${r.n}</b> students (${pct(r.n)}%)</span></div><div class="bar"><b style="width:${Math.max(2, pct(r.n))}%"></b></div></li>`).join('')
-    : '<li class="mut">Nothing to show yet — a district appears when at least 3 people are counted there.</li>';
+    ? shown.map(r => `<li><div class="li-top"><span>${r.name}</span><span><b>${r.n}</b> ${stu(r.n)} (${pct(r.n)}%)</span></div><div class="bar"><b style="width:${Math.max(2, pct(r.n))}%"></b></div></li>`).join('')
+    : '<li class="mut">No participants yet.</li>';
   const more = $('#more');
   more.hidden = rows.length <= 8;
   more.textContent = showAll ? 'Show fewer' : `Show all ${rows.length}`;
@@ -720,17 +721,17 @@ function renderAnalysis() {
     stat(`${visD} of 64`, 'districts shown') +
     stat(rows[0] ? pc(rows[0].n) : '—', rows[0] ? `in ${rows[0].name} division (largest)` : 'largest division');
   const notes = [];
-  if (rows[0]) notes.push(`${rows[0].name} division leads with ${rows[0].n} students (${pc(rows[0].n)}).`);
+  if (rows[0]) notes.push(`${rows[0].name} division leads with ${rows[0].n} ${stu(rows[0].n)} (${pc(rows[0].n)}).`);
   if (rows.length >= 3) notes.push(`The top three divisions together hold ${pc(rows[0].n + rows[1].n + rows[2].n)} of participants.`);
   const home = divs.Sylhet;
   if (home && home.n >= MIN_USERS) {
     const elsewhere = total - home.n - (out >= MIN_USERS ? out : 0);
     notes.push(`${pc(home.n)} are in Sylhet division, where SAU is, and ${pc(elsewhere)} are in other divisions of Bangladesh${out >= MIN_USERS ? `, with ${pc(out)} outside the country` : ''}.`);
   }
-  $('#an-note').textContent = notes.length ? notes.join(' ') : 'Not enough data yet. A division appears once 3 or more people are counted in it.';
+  $('#an-note').textContent = notes.length ? notes.join(' ') : 'No participants yet.';
   const items = rows.map(r => ({ name: r.name + ' division', n: r.n, sub: (r.top ? `Top district: ${r.top.name} (${r.top.n}) · ` : '') + `${r.vis} of ${r.dc} districts shown` }));
   if (out >= MIN_USERS) items.push({ name: 'Outside Bangladesh', n: out, sub: '' });
-  $('#an-list').innerHTML = items.map(r => `<li><div class="li-top"><span>${r.name}${r.sub ? `<span class="sub2">${r.sub}</span>` : ''}</span><span><b>${r.n}</b> students (${pc(r.n)})</span></div><div class="bar"><b style="width:${Math.max(2, total ? Math.round(r.n / total * 100) : 0)}%"></b></div></li>`).join('');
+  $('#an-list').innerHTML = items.map(r => `<li><div class="li-top"><span>${r.name}${r.sub ? `<span class="sub2">${r.sub}</span>` : ''}</span><span><b>${r.n}</b> ${stu(r.n)} (${pc(r.n)})</span></div><div class="bar"><b style="width:${Math.max(2, total ? Math.round(r.n / total * 100) : 0)}%"></b></div></li>`).join('');
 }
 function renderAll() { renderMap(); renderDetail(); renderList(); renderAnalysis(); renderPins(); renderStats(); }
 
