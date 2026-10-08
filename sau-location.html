@@ -113,9 +113,17 @@ h1{font-size:1.25rem;margin:0;line-height:1.2}
 .sub{font-size:.8rem;opacity:.85}
 .statsbar{background:#fff;border-bottom:1px solid var(--line)}
 .sb-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0 0;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
-.live{text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:600;color:var(--g2);text-align:right}
-.live::before{content:"●";margin-right:5px;color:#9aa5a0}
-.live.st-live::before{color:#1f9d55}.live.st-off::before{color:#c0392b}
+.live{text-transform:none;letter-spacing:.08em;font-size:.8rem;font-weight:700;color:var(--mut);text-align:right;display:inline-flex;align-items:center;gap:6px}
+.live::before{content:"";width:9px;height:9px;border-radius:50%;background:#9aa5a0;flex:none}
+.live.st-live{color:#d62828}
+.live.st-live::before{background:#d62828;animation:livepulse 2.4s ease-in-out infinite}
+.live.st-off{color:#8a948f}
+.live.st-off::before{background:#b4bcb8;animation:none}
+@keyframes livepulse{
+  0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(214,40,40,.45)}
+  50%{opacity:.55;box-shadow:0 0 0 5px rgba(214,40,40,0)}
+}
+@media (prefers-reduced-motion:reduce){.live.st-live::before{animation:none}}
 .sb-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:4px 0 12px}
 .sb{padding:0 10px;min-width:0}
 .sb:first-child{padding-left:0}
@@ -224,9 +232,9 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
     <div class="zoombar"><span class="mut">Use + to zoom in on crowded areas</span><span><button type="button" class="btn zb" id="zout" aria-label="Zoom out" disabled>−</button> <button type="button" class="btn zb" id="zin" aria-label="Zoom in">+</button></span></div>
     <div id="mapwrap"><svg id="map" viewBox="0 0 540 763" role="group" aria-label="Map of Bangladesh's 64 districts"></svg></div>
     <div class="legend">
-      <span><i class="grad"></i> 3 <span id="lg-max"></span></span>
+      <span>Participants per district <span id="lg-min">—</span> <i class="grad"></i> <span id="lg-max">—</span></span>
       <span><i class="sw"></i> Hidden (fewer than 3)</span>
-      <span><i class="sd"></i> Anonymous pin, blurred 0.5–1 km (<span id="pin-n">0</span>)</span>
+      <span><i class="sd"></i> Anonymous shared locations (<span id="pin-n">—</span>)</span>
     </div>
     <div id="detail" aria-live="polite">Hover or tap a district to see its details.</div>
   </section>
@@ -245,7 +253,6 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
     <div class="row"><button class="btn" id="more" hidden>Show all</button></div>
   </section>
 
- 
   <section class="card priv" id="c-priv" aria-labelledby="h-priv">
     <h2 id="h-priv">Privacy, in plain words</h2>
     <ul>
@@ -297,11 +304,14 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
 <script type="module">
 /* ============ CONFIG — paste your Firebase web-app config here ============ */
 const FIREBASE_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD5Ee8qZulCbxGPa3w7UdgEwYscfb8pxck",
+  authDomain: "aesthetic-sau.firebaseapp.com",
+  databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com",
+  projectId: "aesthetic-sau",
+  storageBucket: "aesthetic-sau.firebasestorage.app",
+  messagingSenderId: "584202645287",
+  appId: "1:584202645287:web:7893dd0af00cdb04d30302",
+  measurementId: "G-L3FF1NTLL1"
 };
 const MIN_USERS = 3;            // districts below this stay hidden
 const SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
@@ -489,7 +499,7 @@ function setLive(k, why) {
   live = k;
   const p = $('#live');
   p.className = 'live st-' + k;
-  p.textContent = { live: 'Live — Firebase connected', off: 'Offline — Firebase unavailable' }[k] || 'Connecting…';
+  p.textContent = { live: 'LIVE', off: 'OFFLINE' }[k] || 'CONNECTING…';
   $('#fb').hidden = k !== 'off';
   if (k === 'off') $('#fb-t').textContent = why || 'Live statistics can’t be loaded right now, so no numbers are shown.';
   applyView();
@@ -614,7 +624,8 @@ function renderMap() {
     t.lg.classList.toggle('dark', !!(sh && sh.dark));
     t.g.setAttribute('aria-label', label(d, n));
   }
-  $('#lg-max').textContent = max;
+  $('#lg-min').textContent = loaded.counts && vis.length ? MIN_USERS : '—';
+  $('#lg-max').textContent = loaded.counts && vis.length ? max + '+' : '—';
   const { total } = stats();
   $('#summary').textContent = total
     ? `${total} participants counted · ${vis.length} of 64 districts shown`
@@ -646,7 +657,6 @@ function renderPins() {                            // anonymous blurred dots onl
     if (out.length >= 1200) break;
   }
   $('#pins').innerHTML = out.join('');
-  $('#pin-n').textContent = out.length;
   pinCount = out.length; renderStats(); if (was !== me.pinned) renderMe();
 }
 function renderStats() {                           // every number comes straight from the Firebase snapshots; '—' until loaded
@@ -654,6 +664,7 @@ function renderStats() {                           // every number comes straigh
   const covered = DISTRICTS.filter(d => (counts[d.id] || 0) >= MIN_USERS).length;   // districts shown (3+ people)
   $('#s-visitors').textContent = loaded.stats ? fmt(Math.floor(Number(statsNode.visitors)) || 0) : '—';
   $('#s-sharing').textContent = loaded.pins ? fmt(pinCount) : '—';
+  $('#pin-n').textContent = loaded.pins ? fmt(pinCount) : '—';
   $('#s-districts').textContent = loaded.counts ? covered : '—';
 }
 function renderList() {
