@@ -23,7 +23,8 @@
    sessions/{uid}       {c, lv, d?}  PRIVATE: only that uid can read it. c = first-seen time,
                                   lv = last page-load time (throttle for totalVisits),
                                   d = district this browser is counted in (absent if not counted).
-   pins/{uid}           {latE3, lonE3, t}  PUBLIC read, OPT-IN. Blurred position only:
+   pins/{uid}           {latE3, lonE3, t, n?}  PUBLIC read, OPT-IN. Optional n = display name (max 24 chars)
+                                   that others see when they tap the pin. Blurred position only:
                                   degrees x 1000 as INTEGERS, so the database itself refuses
                                   anything finer than ~110 m. Exact GPS never leaves the device.
 
@@ -92,6 +93,9 @@
         },
         "t": {
           ".validate": "newData.isNumber() && newData.val() === now"
+        },
+        "n": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24"
         },
         "$other": {
           ".validate": false
@@ -178,6 +182,28 @@ svg{width:100%;height:auto;display:block;max-width:480px;margin:0 auto}
 .stat span{font-size:.78rem;color:var(--mut)}
 .sub2{display:block;font-size:.8rem;color:var(--mut)}
 #pins{pointer-events:none}
+#pins .mk{pointer-events:all;cursor:pointer;outline:none}
+.mk-hit{fill:transparent}
+.mk-pulse{pointer-events:none}
+.mk:focus-visible .mk-halo{stroke:var(--gold);stroke-width:4}
+.mapbox{position:relative}
+#pop{position:absolute;z-index:6;width:max-content;min-width:140px;max-width:min(240px,calc(100% - 8px));background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.2);padding:9px 34px 10px 12px;font-size:.86rem;transform:translate(-50%,-100%);margin-top:-12px}
+#pop.below{transform:translate(-50%,0);margin-top:12px}
+#pop b{display:block;color:var(--g2);font-size:.8rem;margin-bottom:3px}
+#pop ul{list-style:none;margin:0;padding:0}
+#pop li{padding:2px 0;overflow-wrap:anywhere;font-weight:600}
+#pop li.an{font-weight:400;color:var(--mut)}
+#pop .px{position:absolute;top:0;right:0;width:34px;height:34px;border:0;background:none;font-size:1.3rem;line-height:1;color:var(--mut);cursor:pointer}
+.float{position:fixed;z-index:50;left:12px;right:12px;bottom:12px;max-width:380px;margin:0 auto;background:#fff;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:14px;box-shadow:0 10px 32px rgba(0,0,0,.25);padding:14px 16px 14px;animation:fup .35s ease-out}
+.float[hidden]{display:none}
+.float b{display:flex;align-items:center;gap:8px;color:var(--g2);padding-right:28px}
+.float p{margin:6px 0 4px;font-size:.88rem;color:var(--mut)}
+.float svg{width:20px;height:20px;max-width:none;margin:0;display:inline-block;flex:none}
+.float .fx{position:absolute;top:6px;right:6px;width:34px;height:34px;border:0;background:none;font-size:1.4rem;line-height:1;color:var(--mut);cursor:pointer}
+@media(min-width:600px){.float{left:auto;right:20px;bottom:20px;margin:0}}
+@keyframes fup{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.float{animation:none}}
+input.txt{width:100%;min-height:44px;font:inherit;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;margin:4px 0 6px}
 .mk-halo{fill:#fff;stroke:#fff;stroke-width:3}
 .mk-band{fill:var(--gold);stroke:var(--ink);stroke-width:1.3}
 .mk-core{fill:#fff;stroke:var(--ink);stroke-width:1}
@@ -278,12 +304,12 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
         <span class="lg-sc"><i class="sw"></i> None yet</span>
       </div>
       <div class="lg-row">
-        <span class="lg-item"><svg class="lgm" viewBox="-9 -9 18 18" aria-hidden="true"><circle r="6.2" class="mk-halo"/><circle r="6.2" class="mk-band"/><circle r="2.9" class="mk-core"/></svg> <span>Anonymous shared location (<span id="pin-n">—</span>)</span></span>
+        <span class="lg-item"><svg class="lgm" viewBox="-9 -9 18 18" aria-hidden="true"><circle r="6.2" class="mk-halo"/><circle r="6.2" class="mk-band"/><circle r="2.9" class="mk-core"/></svg> <span>Shared location (<span id="pin-n">—</span>)</span></span>
       </div>
-      <div class="lg-note">District shade shows how many people are counted there. Markers are optional, blurred public locations.</div>
+      <div class="lg-note">District shade shows how many people are counted there. Markers are optional, blurred public locations. Tap a marker to see its name, if the person added one.</div>
     </div>
-    <div class="zoombar"><span class="mut">Use + to zoom in on crowded areas</span><span><button type="button" class="btn zb" id="zout" aria-label="Zoom out" disabled>−</button> <button type="button" class="btn zb" id="zin" aria-label="Zoom in">+</button></span></div>
-    <div id="mapwrap"><svg id="map" viewBox="0 0 540 763" role="group" aria-label="Map of Bangladesh's 64 districts"></svg></div>
+    <div class="zoombar"><span class="mut">Use + to zoom in. Tap a marker to see who it is.</span><span><button type="button" class="btn zb" id="zout" aria-label="Zoom out" disabled>−</button> <button type="button" class="btn zb" id="zin" aria-label="Zoom in">+</button></span></div>
+    <div class="mapbox" id="mapbox"><div id="mapwrap"><svg id="map" viewBox="0 0 540 763" role="group" aria-label="Map of Bangladesh's 64 districts"></svg></div><div id="pop" role="dialog" aria-label="Marker details" hidden></div></div>
     <div id="detail" aria-live="polite">Hover or tap a district to see its details.</div>
   </section>
 
@@ -304,11 +330,11 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
   <section class="card priv" id="c-priv" aria-labelledby="h-priv">
     <h2 id="h-priv">Privacy, in plain words</h2>
     <ul>
-      <li><b>No GPS by default.</b> The page does not ask for your device location unless you click “Show me on the map”.</li>
+      <li><b>No GPS by default.</b> The page only offers to use your device location through a small prompt, and nothing is requested from the browser until you press “Allow location” (or “Show me on the map”).</li>
       <li><b>Approximate only.</b> Your browser asks a public IP-lookup service (ipwho.is, or geojs.io as a backup) for a rough place based on your network. That service sees your IP address, as any website would. We use only the district name from the answer and throw the rest away — your IP address and coordinates are never stored or shown.</li>
-      <li><b>What is saved:</b> a running total for each district, a count of unique visitors, a count of total page visits (every page load adds one), and a private record under a random anonymous Firebase ID saying when this browser first visited, when it last loaded the page, and which district it is counted in. Only your own browser can read that record. If (and only if) you publish a pin, one blurred point is also stored under the same random ID. No names, emails, phone numbers or profiles exist anywhere in this system.</li>
+      <li><b>What is saved:</b> a running total for each district, a count of unique visitors, a count of total page visits (every page load adds one), and a private record under a random anonymous Firebase ID saying when this browser first visited, when it last loaded the page, and which district it is counted in. Only your own browser can read that record. If (and only if) you publish a pin, one blurred point is also stored under the same random ID, together with a display name only if you choose to type one. No emails, phone numbers or profiles exist anywhere in this system.</li>
       <li><b>District totals only.</b> A district appears on the map and in the list as soon as 1 person is counted there. Only the district-level total is shown, never who is counted.</li>
-      <li><b>“Show me on the map” is optional.</b> Your browser asks permission to use GPS. Your exact coordinates never leave your device: the page shifts them by a random 500 m–1 km, rounds them to about 100 m (the database rejects anything finer), tells you which district the pin lands near, and publishes only after you confirm. Everyone else sees an anonymous marker. The same random shift is reused each time, so repeated sharing can't be averaged to find you.</li>
+      <li><b>“Show me on the map” is optional.</b> Your browser asks permission to use GPS. Your exact coordinates never leave your device: the page shifts them by a random 500 m–1 km, rounds them to about 100 m (the database rejects anything finer), tells you which district the pin lands near, and publishes only after you confirm. Everyone else sees a marker; if you added a name, they see it when they tap your marker, otherwise it stays anonymous. Please use a nickname you are comfortable showing publicly. The same random shift is reused each time, so repeated sharing can't be averaged to find you.</li>
       <li><b>You stay in control of the map pin.</b> If you choose to show a pin, a “Hide me” button lets you take it off the map at any time. Sharing again moves your pin. Your district count itself is anonymous and automatic, with nothing personal attached.</li>
       <li><b>Limits.</b> IP locations can be wrong (mobile data, VPNs, university networks). Clearing browser data or using another browser can lead to being counted again. A blurred pin still shows roughly where you are (within about a kilometre), so skip it if that is sensitive.</li>
     </ul>
@@ -327,6 +353,13 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
   <div class="ft-int">Integrator: Moniruzzaman</div>
 </footer>
 
+<aside id="float" class="float" role="region" aria-label="Share your location on the map" hidden>
+  <button type="button" class="fx" id="f-x" aria-label="Close">×</button>
+  <b><svg viewBox="-9 -9 18 18" aria-hidden="true"><circle r="6.2" class="mk-halo"/><circle r="6.2" class="mk-band"/><circle r="2.9" class="mk-core"/></svg> Show yourself on the map?</b>
+  <p>Allow your location to drop a small pin, blurred by 0.5–1 km. Next you can add a name so others can tap your pin and see who you are, or stay anonymous.</p>
+  <div class="row"><button type="button" class="btn" id="f-no">Not now</button><button type="button" class="btn pri" id="f-yes">Allow location</button></div>
+</aside>
+
 <dialog id="dlg">
   <h2>Show me on the map?</h2>
   <div id="d-ask">
@@ -334,7 +367,7 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
     <ul class="mut" style="margin:0 0 10px;padding-left:20px">
       <li>Your exact coordinates never leave your device.</li>
       <li>Others see only an anonymous marker, placed at a random spot 500 m – 1 km away from you.</li>
-      <li>No name, email or phone number is attached, only a random anonymous ID.</li>
+      <li>No email or phone number is attached, only a random anonymous ID. A name is shown only if you type one.</li>
       <li>Nothing is published until you confirm on the next screen. You can hide your pin any time.</li>
     </ul>
     <div class="row"><button type="button" class="btn" data-close>Cancel</button><button type="button" class="btn pri" id="go">Use my location</button></div>
@@ -345,7 +378,10 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
   </div>
   <div id="d-ok" hidden>
     <p>Your pin would appear near <b id="d-district"></b> district, shifted randomly by about 0.5–1 km from where you are.</p>
-    <label class="chk"><input type="checkbox" id="agree"> I understand this blurred pin will be visible to everyone.</label>
+    <label for="nm" style="font-weight:600;font-size:.92rem">Your name <span class="mut" style="font-weight:400">(optional)</span></label>
+    <input id="nm" class="txt" type="text" maxlength="24" autocomplete="off" placeholder="e.g. Rafi">
+    <p class="mut" style="margin:0 0 4px;font-size:.82rem">If you add a name, everyone can see it by tapping your pin. Leave it empty to stay anonymous.</p>
+    <label class="chk"><input type="checkbox" id="agree"> I understand this blurred pin (and my name, if I add one) will be visible to everyone.</label>
     <div class="row"><button type="button" class="btn" data-close>Cancel</button><button type="button" class="btn pri" id="pub" disabled>Publish my pin</button></div>
   </div>
   <div id="d-err" hidden>
@@ -498,8 +534,9 @@ const $ = s => document.querySelector(s);
 const CONFIGURED = !Object.values(FIREBASE_CONFIG).some(v => /YOUR_/.test(v));
 const KEY = 'sau-location-v2';   // device-only: cached district and blur offset
 let me = { area: null, counted: null, pinned: false, off: null, uid: null };
-try { const o = JSON.parse(localStorage.getItem(KEY)); if (o) me = { ...me, area: o.area || null, off: o.off || null }; } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ area: me.area, off: me.off })); } catch (e) {} };
+me.name = '';
+try { const o = JSON.parse(localStorage.getItem(KEY)); if (o) me = { ...me, area: o.area || null, off: o.off || null, name: typeof o.name === 'string' ? o.name : '' }; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ area: me.area, off: me.off, name: me.name || '' })); } catch (e) {} };
 
 let backend = null, authOk = false, live = 'connecting';
 let counts = {}, pins = {}, statsNode = {}, pinCount = 0, loaded = { counts: false, pins: false, stats: false };
@@ -560,7 +597,7 @@ async function initBackend() {
       if (!hasSession) newSession(u);
       await update(ref(db), u); hasSession = true; uvMark();
     },
-    setPin: p => set(ref(db, 'pins/' + uid), { latE3: Math.round(p.lat * 1000), lonE3: Math.round(p.lon * 1000), t: serverTimestamp() }),
+    setPin: (p, n) => set(ref(db, 'pins/' + uid), { latE3: Math.round(p.lat * 1000), lonE3: Math.round(p.lon * 1000), t: serverTimestamp(), ...(n ? { n } : {}) }),
     clearPin: () => remove(ref(db, 'pins/' + uid))
   };
 }
@@ -610,6 +647,13 @@ async function countMe() {
 /* ============ GPS -> blurred pin (everything in this block runs on the device) ============ */
 const PK = Math.cos(23.6 * Math.PI / 180), PIN_TTL = 30 * 864e5;
 const proj = (lat, lon) => [(lon - 88.0) * PK * 125, (26.64 - lat) * 125];   // same projection as the map data
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const cleanName = s => {                           // display names are untrusted text: trimmed, no control / bidi characters, max 24
+  if (typeof s !== 'string') return '';
+  let t = s.replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 24);
+  if (/[\ud800-\udbff]$/.test(t)) t = t.slice(0, -1);
+  return t.trim();
+};
 const rnd = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
 const POLY = {};
 const polysOf = id => POLY[id] || (POLY[id] = GEO[id].split('M').filter(Boolean)
@@ -723,26 +767,63 @@ function renderDetail() {
     ? `${d.name} (${d.div} division): ${n} ${stu(n)} (${pct(n)}% of participants).`
     : `${d.name} (${d.div} division): no participants yet.`;
 }
-function renderPins() {                            // anonymous blurred markers only; no ids, no names
+const GROUPS = new Map();
+function renderPins() {                            // markers; a name is only ever read from the database as text and shown via textContent
   const now = Date.now(), at = new Map();
   const was = me.pinned; me.pinned = !!(me.uid && pins && pins[me.uid]);
   let n = 0;
-  for (const p of Object.values(pins || {})) {
+  for (const [uid, p] of Object.entries(pins || {})) {
     const lat = +(p && p.latE3) / 1000, lon = +(p && p.lonE3) / 1000, t = +(p && p.t);
     if (!(lat > 20.5 && lat < 26.7 && lon > 87.9 && lon < 92.8)) continue;
     if (t && now - t > PIN_TTL) continue;
     const [x, y] = proj(lat, lon), k = x.toFixed(1) + ',' + y.toFixed(1);
-    const e = at.get(k); if (e) e.n++; else at.set(k, { x, y, n: 1 });
+    let e = at.get(k); if (!e) at.set(k, e = { k, x, y, lat, lon, n: 0, list: [], anon: 0 });
+    e.n++;
+    const nm = cleanName(p && p.n);
+    if (me.uid && uid === me.uid) e.list.unshift(nm ? nm + ' (you)' : 'You (anonymous)');
+    else if (nm) e.list.push(nm); else e.anon++;
     if (++n >= 1200) break;
   }
-  const sc = (1.55 / Z[zi]).toFixed(3);                 // markers keep a steady on-screen size; zooming in separates close ones
+  GROUPS.clear(); at.forEach((v, k) => GROUPS.set(k, v));
+  const sc = (1 / Z[zi]).toFixed(3);                    // small markers with a steady on-screen size; zooming in separates close ones
   const out = [...at.values()].sort((a, b) => a.y - b.y).map(m =>
-    `<g transform="translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) scale(${sc})"><circle class="mk-pulse" r="6.2"/><circle class="mk-halo" r="6.2"/><circle class="mk-band" r="6.2"/><circle class="mk-core" r="2.9"/>` +
+    `<g class="mk" data-k="${m.k}" tabindex="0" role="button" aria-label="Shared location${m.n > 1 ? ', ' + m.n + ' people' : ''}. Show details" transform="translate(${m.x.toFixed(1)} ${m.y.toFixed(1)}) scale(${sc})"><circle class="mk-hit" r="13"/><circle class="mk-pulse" r="6.2"/><circle class="mk-halo" r="6.2"/><circle class="mk-band" r="6.2"/><circle class="mk-core" r="2.9"/>` +
     (m.n > 1 ? `<circle class="mk-cb" cx="6.4" cy="-6.4" r="4"/><text class="mk-ct" x="6.4" y="-4.5">${m.n}</text>` : '') + '</g>');
   const g = $('#pins'); g.innerHTML = out.join('');
   g.classList.toggle('many-pins', at.size > 60);     // pulse only while there are few markers
   pinCount = n; renderStats(); if (was !== me.pinned) renderMe();
+  if (popKey) { if (GROUPS.has(popKey)) { fillPop(); placePop(); } else closePop(); }
 }
+const pop = $('#pop'); let popKey = null;
+function fillPop() {
+  const m = GROUPS.get(popKey); if (!m) return;
+  pop.textContent = '';
+  const x = document.createElement('button'); x.type = 'button'; x.className = 'px'; x.setAttribute('aria-label', 'Close'); x.textContent = '×'; x.addEventListener('click', closePop);
+  const hd = document.createElement('b'); let d = null; try { d = locate(m.lat, m.lon); } catch (e) {}
+  hd.textContent = d ? 'Near ' + nameOf(d) : 'Shared location';
+  const ul = document.createElement('ul');
+  const add = (t, cls) => { const li = document.createElement('li'); li.textContent = t; if (cls) li.className = cls; ul.appendChild(li); };
+  m.list.slice(0, 10).forEach(t => add(t));
+  if (m.list.length > 10) add('+ ' + (m.list.length - 10) + ' more named', 'an');
+  if (m.anon) add(m.anon === 1 ? 'Anonymous' : m.anon + ' anonymous people', 'an');
+  pop.append(x, hd, ul);
+}
+function placePop() {
+  if (!popKey) return;
+  const el = [...document.querySelectorAll('#pins .mk')].find(e => e.dataset.k === popKey);
+  if (!el) { closePop(); return; }
+  const box = $('#mapbox').getBoundingClientRect(), wr = $('#mapwrap').getBoundingClientRect(), r = el.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  if (cx < wr.left || cx > wr.right || r.bottom < wr.top || r.top > wr.bottom) { pop.hidden = true; return; }
+  pop.hidden = false;
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  const left = Math.max(w / 2 + 4, Math.min(box.width - w / 2 - 4, cx - box.left));
+  const below = (r.top - box.top) < h + 24;
+  pop.classList.toggle('below', below);
+  pop.style.left = left + 'px'; pop.style.top = ((below ? r.bottom : r.top) - box.top) + 'px';
+}
+function openPop(k) { popKey = k; fillPop(); placePop(); }
+function closePop() { popKey = null; pop.hidden = true; }
 function renderStats() {                           // every number comes straight from the Firebase snapshots; '—' until loaded
   const fmt = n => Number(n).toLocaleString('en-US');
   const covered = DISTRICTS.filter(d => (counts[d.id] || 0) >= MIN_USERS).length;   // districts shown (3+ people)
@@ -773,8 +854,9 @@ function renderMe() {
   else if (area === OUT) h += `<p>Your network looks like it's <b>outside Bangladesh</b>. You're counted anonymously as “Outside Bangladesh”.</p>`;
   else h += `<p>Your approximate area: <b>${nameOf(area)}</b> district. ${me.counted ? 'You are included in the anonymous totals.' : (backend ? 'Adding you to the totals…' : '')}</p>`;
   if (area) h += `<p class="mut">IP-based location is approximate and can be wrong. Only the district is used.</p>`;
+  const myNm = me.pinned ? cleanName(pins[me.uid] && pins[me.uid].n) : '';
   h += me.pinned
-    ? `<p class="ok">Your anonymous pin is visible on the map, blurred by about 0.5–1 km.</p>`
+    ? `<p class="ok">Your pin is visible on the map, blurred by about 0.5–1 km. ${myNm ? 'Shown as <b>' + esc(myNm) + '</b>.' : 'It shows no name.'}</p>`
     : `<p class="mut">Your device location is not used or visible to anyone unless you choose “Show me on the map”.</p>`;
   const sdis = (busy || !canWrite()) ? ' disabled' : '';
   h += '<div class="row">';
@@ -782,7 +864,7 @@ function renderMe() {
     ? `<button class="btn pri" data-act="share"${sdis}>Update my pin</button><button class="btn" data-act="hide"${dis}>Hide me</button>`
     : `<button class="btn pri" data-act="share"${sdis}>Show me on the map</button>`;
   h += '</div>';
-  h += `<div class="privnote"><b>Your data is completely anonymous, so you can stay worry-free.</b><span>Only anonymous aggregate statistics and optional approximate map presence are used. No name, email, phone number or exact location is publicly shown.</span></div>`;
+  h += `<div class="privnote"><b>Your data stays anonymous, so you can stay worry-free.</b><span>Only anonymous aggregate statistics and optional approximate map presence are used. Your exact location, email and phone number are never shown. A name appears only if you choose to type one.</span></div>`;
   $('#me-body').innerHTML = h;
 }
 function renderAnalysis() {
@@ -822,7 +904,7 @@ const Z = [1, 1.7, 2.6]; let zi = 0;
 function setZoom(i) {
   const wrap = $('#mapwrap');
   const fx = (wrap.scrollLeft + wrap.clientWidth / 2) / svg.clientWidth, fy = (wrap.scrollTop + wrap.clientHeight / 2) / svg.clientHeight;
-  zi = Math.max(0, Math.min(Z.length - 1, i)); const z = Z[zi];
+  closePop(); zi = Math.max(0, Math.min(Z.length - 1, i)); const z = Z[zi];
   svg.style.width = z * 100 + '%'; svg.style.maxWidth = z > 1 ? 'none' : ''; svg.style.margin = z > 1 ? '0' : '';
   wrap.classList.toggle('z', z > 1);
   wrap.scrollLeft = fx * svg.clientWidth - wrap.clientWidth / 2; wrap.scrollTop = fy * svg.clientHeight - wrap.clientHeight / 2;
@@ -832,9 +914,19 @@ function setZoom(i) {
 $('#zin').addEventListener('click', () => setZoom(zi + 1));
 $('#zout').addEventListener('click', () => setZoom(zi - 1));
 const gid = e => { const g = e.target.closest && e.target.closest('.dist'); return g ? g.dataset.id : null; };
-svg.addEventListener('click', e => { sel = gid(e); renderDetail(); });
+svg.addEventListener('click', e => {
+  const mk = e.target.closest && e.target.closest('.mk');
+  if (mk) { const k = mk.dataset.k; if (popKey === k) closePop(); else openPop(k); return; }
+  closePop(); sel = gid(e); renderDetail();
+});
+document.addEventListener('click', e => { if (popKey && !e.target.closest('#pop') && !e.target.closest('.mk')) closePop(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && popKey) closePop(); });
+$('#mapwrap').addEventListener('scroll', placePop, { passive: true });
+window.addEventListener('resize', placePop);
 svg.addEventListener('keydown', e => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
+  const mk = e.target.closest && e.target.closest('.mk');
+  if (mk) { e.preventDefault(); const k = mk.dataset.k; if (popKey === k) closePop(); else openPop(k); return; }
   const id = gid(e); if (id) { e.preventDefault(); sel = id; renderDetail(); }
 });
 svg.addEventListener('pointerover', e => { if (e.pointerType === 'touch') return; hov = gid(e); renderDetail(); });
@@ -859,7 +951,7 @@ async function useGps() {                          // 1) ask the browser for GPS
     const id = locate(c.latitude, c.longitude);
     if (!id) { showDlg('err', 'Your location doesn’t appear to be inside Bangladesh, so no pin can be placed.'); return; }
     pending = blur(c.latitude, c.longitude);      // exact coordinates are not kept anywhere
-    $('#d-district').textContent = nameOf(id); agree.checked = false; syncPub(); showDlg('ok');
+    $('#d-district').textContent = nameOf(id); $('#nm').value = me.name || ''; agree.checked = false; syncPub(); showDlg('ok');
   } catch (e) {
     if (tok === gpsTok && dlg.open) showDlg('err', geoMsg(e));
   }
@@ -871,7 +963,8 @@ dlg.addEventListener('close', () => { gpsTok++; pending = null; });
 pub.addEventListener('click', () => {
   const p = pending; if (!p || busy) return;
   dlg.close();
-  run(async () => { await backend.setPin(p); me.pinned = true; save(); setMsg('Your anonymous pin is now on the map.'); });
+  const name = cleanName($('#nm').value);
+  run(async () => { await backend.setPin(p, name); me.pinned = true; me.name = name; save(); setMsg(name ? 'Your pin is now on the map. Others can tap it to see your name.' : 'Your pin is now on the map, without a name.'); });
 });
 
 $('#me-body').addEventListener('click', e => {
@@ -882,6 +975,27 @@ $('#me-body').addEventListener('click', e => {
   } else if (a === 'hide') {
     run(async () => { await backend.clearPin(); setMsg('Your pin was removed from the map.'); });
   }
+});
+
+/* ============ Floating prompt (offered once the page is live) ============ */
+const FK = 'sau-prompt-v1', FLOAT_SNOOZE = 7 * 864e5, floatEl = $('#float');
+let floatDone = false;
+const snoozed = () => { try { const t = +localStorage.getItem(FK); return !!t && Date.now() - t < FLOAT_SNOOZE; } catch (e) { return false; } };
+const snooze = () => { try { localStorage.setItem(FK, String(Date.now())); } catch (e) {} };
+const hasPin = () => !!(me.uid && raw.pins && raw.pins[me.uid]);
+async function maybeFloat() {
+  if (floatDone || !rawLoaded.pins || !canWrite() || !me.uid || hasPin() || snoozed() || !navigator.geolocation) return;
+  floatDone = true;
+  try { if (navigator.permissions) { const p = await navigator.permissions.query({ name: 'geolocation' }); if (p.state === 'denied') return; } } catch (e) {}
+  setTimeout(() => { if (!hasPin() && !dlg.open) floatEl.hidden = false; }, 1200);
+}
+const closeFloat = () => { floatEl.hidden = true; snooze(); };
+$('#f-x').addEventListener('click', closeFloat);
+$('#f-no').addEventListener('click', closeFloat);
+$('#f-yes').addEventListener('click', () => {
+  closeFloat();
+  if (busy) return;
+  pending = null; agree.checked = false; dlg.showModal(); useGps();      // the browser's own permission prompt comes next, then the optional name
 });
 
 /* ============ Start ============ */
@@ -896,7 +1010,7 @@ $('#me-body').addEventListener('click', e => {
     backend.onConnection(on => { if (on) { everConnected = true; setLive('live'); } else if (everConnected) setLive('off', 'The connection to Firebase was lost. Numbers will return when it reconnects.'); });
     const denied = () => setLive('off', 'Firebase refused to send the statistics. Check that the published database rules match this page.');
     backend.watch('counts', v => { raw.counts = clean(v); rawLoaded.counts = true; if (live === 'live') applyView(); }, denied);
-    backend.watch('pins', v => { raw.pins = v || {}; rawLoaded.pins = true; if (live === 'live') applyView(); }, denied);
+    backend.watch('pins', v => { raw.pins = v || {}; rawLoaded.pins = true; if (live === 'live') applyView(); maybeFloat(); }, denied);
     backend.watch('stats', v => { raw.stats = v || {}; rawLoaded.stats = true; if (live === 'live') applyView(); }, denied);
     try {
       const s = await backend.ready(); authOk = true; me.uid = s.uid; me.counted = s.district;
@@ -914,7 +1028,7 @@ $('#me-body').addEventListener('click', e => {
     if (area && !me.counted) await run(countMe);
     else if (!backend.hasSession()) await run(() => backend.visit());
   }
-  renderMe();
+  renderMe(); maybeFloat();
 })();
 </script>
 </body>
