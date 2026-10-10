@@ -378,6 +378,7 @@ label.chk input{width:20px;height:20px;margin-top:2px;flex:none}
   </div>
   <div id="d-ok" hidden>
     <p>Your pin would appear near <b id="d-district"></b> district, shifted randomly by about 0.5–1 km from where you are.</p>
+    <p id="d-move" class="mut" style="font-size:.84rem" hidden></p>
     <label for="nm" style="font-weight:600;font-size:.92rem">Your name <span class="mut" style="font-weight:400">(optional)</span></label>
     <input id="nm" class="txt" type="text" maxlength="24" autocomplete="off" placeholder="e.g. Rafi">
     <p class="mut" style="margin:0 0 4px;font-size:.82rem">If you add a name, everyone can see it by tapping your pin. Leave it empty to stay anonymous.</p>
@@ -597,6 +598,9 @@ async function initBackend() {
       if (!hasSession) newSession(u);
       await update(ref(db), u); hasSession = true; uvMark();
     },
+    async leave(d) {                                  // session.d removed and counts/d -1, atomically (the rules accept exactly this pair)
+      await update(ref(db), { ['sessions/' + uid + '/d']: null, ['counts/' + d]: increment(-1) });
+    },
     setPin: (p, n) => set(ref(db, 'pins/' + uid), { latE3: Math.round(p.lat * 1000), lonE3: Math.round(p.lon * 1000), t: serverTimestamp(), ...(n ? { n } : {}) }),
     clearPin: () => remove(ref(db, 'pins/' + uid))
   };
@@ -641,6 +645,13 @@ async function countMe() {
   if (!area || !canWrite() || me.counted) return;
   await backend.join(area);
   me.counted = area;
+}
+async function moveTo(d) {                         // GPS beats the IP guess: leave the old district, then join the real one (two atomic steps)
+  if (!d || !canWrite()) return;
+  me.area = area = d; areaState = 'ok'; save();     // remembered first, so a half-finished move is repaired on the next load
+  if (me.counted === d) return;
+  if (me.counted) { await backend.leave(me.counted); me.counted = null; }
+  await backend.join(d); me.counted = d;
 }
 
 
@@ -950,7 +961,11 @@ async function useGps() {                          // 1) ask the browser for GPS
     if (tok !== gpsTok || !dlg.open) return;      // cancelled meanwhile: drop the reading
     const id = locate(c.latitude, c.longitude);
     if (!id) { showDlg('err', 'Your location doesn’t appear to be inside Bangladesh, so no pin can be placed.'); return; }
-    pending = blur(c.latitude, c.longitude);      // exact coordinates are not kept anywhere
+    pending = blur(c.latitude, c.longitude); pending.d = id;      // exact coordinates are not kept anywhere; only the district name is
+    const mv = $('#d-move');
+    if (me.counted && me.counted !== id) { mv.textContent = `Your district count will also change from ${nameOf(me.counted)} to ${nameOf(id)}, because your GPS is more accurate than your network.`; mv.hidden = false; }
+    else if (!me.counted) { mv.textContent = `You will be counted in ${nameOf(id)}.`; mv.hidden = false; }
+    else mv.hidden = true;
     $('#d-district').textContent = nameOf(id); $('#nm').value = me.name || ''; agree.checked = false; syncPub(); showDlg('ok');
   } catch (e) {
     if (tok === gpsTok && dlg.open) showDlg('err', geoMsg(e));
@@ -964,7 +979,11 @@ pub.addEventListener('click', () => {
   const p = pending; if (!p || busy) return;
   dlg.close();
   const name = cleanName($('#nm').value);
-  run(async () => { await backend.setPin(p, name); me.pinned = true; me.name = name; save(); setMsg(name ? 'Your pin is now on the map. Others can tap it to see your name.' : 'Your pin is now on the map, without a name.'); });
+  run(async () => {
+    const was = me.counted; await moveTo(p.d);
+    await backend.setPin(p, name); me.pinned = true; me.name = name; save();
+    setMsg((name ? 'Your pin is now on the map. Others can tap it to see your name.' : 'Your pin is now on the map, without a name.') + (was !== p.d ? ` You are now counted in ${nameOf(p.d)}.` : ''));
+  });
 });
 
 $('#me-body').addEventListener('click', e => {
