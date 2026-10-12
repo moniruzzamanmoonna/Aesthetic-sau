@@ -148,6 +148,22 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
 .toptab a:hover,.toptab a:focus-visible{opacity:1;text-decoration:underline;text-underline-offset:3px}
 .toptab svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .toptab .ar{opacity:.7}
+
+.poll{margin:28px 0 8px;max-width:640px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.poll-h{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12.5px;color:var(--muted)}
+.poll-k{font-weight:600;color:var(--green-deep);background:var(--green-soft);padding:3px 10px;border-radius:99px}
+.poll h2{font-family:var(--serif);font-weight:500;font-size:clamp(22px,4.5vw,28px);letter-spacing:-.02em;line-height:1.15;margin:12px 0 6px}
+.po{position:relative;display:flex;align-items:center;justify-content:space-between;width:100%;min-height:56px;margin-top:10px;padding:0 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;text-align:left;transition:border-color .2s,background .2s}
+.po:hover{border-color:var(--green);background:var(--green-soft)}
+.pf{position:absolute;left:0;top:0;bottom:0;width:0;background:#dbe8f3;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.po[data-opt=summer] .pf{background:#f8e7cf}
+.pc{position:relative;display:flex;align-items:center;gap:10px;font-weight:600}
+.pc svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex:none}
+.pp{position:relative;text-align:right;font-size:12.5px;color:var(--muted);line-height:1.25;font-variant-numeric:tabular-nums}
+.pp b{display:block;font-size:18px;color:var(--ink);font-weight:650}
+.po.mine{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+.poll.voted .po:not(.mine):hover{background:var(--surface);border-color:var(--line)}
+.poll-n{margin-top:12px;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -170,6 +186,13 @@ footer{border-top:1px solid var(--line);padding:26px 0;font-size:13px;color:var(
     <p class="note">No account. No name. Just your rating.</p>
     <div class="dismiss" id="dismissBox" hidden role="alert">Your ratings got dismissed for your faculty biasness.</div>
   </div>
+  <section class="poll" id="poll" aria-labelledby="pollQ">
+    <div class="poll-h"><span class="poll-k">Quick poll</span><span id="pollTot">No votes yet</span></div>
+    <h2 id="pollQ">Winter lover or Summer lover?</h2>
+    <button class="po" type="button" data-opt="winter" aria-pressed="false"><span class="pf"></span><span class="pc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></svg>Winter lover</span><span class="pp"></span></button>
+    <button class="po" type="button" data-opt="summer" aria-pressed="false"><span class="pf"></span><span class="pc"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Summer lover</span><span class="pp"></span></button>
+    <p class="poll-n" id="pollN">Tap an option to vote and see the results. Anonymous.</p>
+  </section>
   <div class="tools">
     <div class="chips" id="chips" role="tablist" aria-label="Categories"></div>
     <div class="sort" id="sort" aria-label="Sort">
@@ -388,7 +411,7 @@ function liveUpdate(){
   if(cool){ pending = true; return; }
   onLive(); armCool();                                    // first change paints instantly, bursts are merged
 }
-function onLive(){
+function onLive(){ renderPoll();
   items = toItems(); renderStats();
   if(!ready || +$("grid").dataset.all !== items.length){ ready = true; renderChips(); renderItems(); return; }
   document.querySelectorAll(".card").forEach(c=>{
@@ -616,7 +639,7 @@ function renderStats(){
   if(h !== lastStats){ lastStats = h; $("stats").innerHTML = h; }
 }
 /* Called whenever data changes (own vote, other visitors, other tabs). */
-function onData(){
+function onData(){ renderPoll();
   items = toItems(); renderStats();
   if(!ready || +$("grid").dataset.all !== items.length){ ready = true; renderChips(); renderItems(); }
   else document.querySelectorAll(".card").forEach(c=>updateCard(c,false));
@@ -750,7 +773,44 @@ $("rSave").onclick = () => $("rcv").toBlob(async blob=>{
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="sau-ratings-results.png"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 },"image/png");
 
-renderChips(); renderWho(); showDismiss();
+
+/* ===== SEASON POLL (Winter vs Summer) =====
+   Counts live at polls/season/{winter,summer} inside the same /sau-ratings node, written with the same atomic increment.
+   One vote per browser (remembered in localStorage); tapping the other option moves the vote. */
+const KEY_POLL = "sau-poll-season:v1", POLL_OPTS = ["winter","summer"];
+let myPoll = null; try{ myPoll = localStorage.getItem(KEY_POLL); }catch(e){}
+if(!POLL_OPTS.includes(myPoll)) myPoll = null;
+let pollBusy = false;
+function renderPoll(){
+  const el = $("poll"); if(!el) return;
+  const p = (data.polls && data.polls.season) || {}, c = {};
+  POLL_OPTS.forEach(o=>{ c[o] = Math.max(0, +p[o] || 0); });
+  const tot = c.winter + c.summer;
+  el.classList.toggle("voted", !!myPoll);
+  POLL_OPTS.forEach(o=>{
+    const b = el.querySelector(`[data-opt="${o}"]`), pct = tot ? c[o]/tot*100 : 0;
+    b.classList.toggle("mine", myPoll===o); b.setAttribute("aria-pressed", myPoll===o);
+    b.querySelector(".pf").style.width = myPoll ? pct+"%" : "0";
+    b.querySelector(".pp").innerHTML = myPoll ? `<b>${Math.round(pct)}%</b>${c[o].toLocaleString()} ${c[o]===1?"vote":"votes"}` : "";
+  });
+  $("pollTot").textContent = tot ? tot.toLocaleString()+(tot===1?" vote":" votes") : "No votes yet";
+  $("pollN").textContent = myPoll ? "You voted. Tap the other option to change your vote." : "Tap an option to vote and see the results. Anonymous.";
+}
+async function votePoll(o){
+  if(pollBusy || myPoll===o) return; pollBusy = true;
+  const prev = myPoll, u = {}; u["polls/season/"+o] = 1; if(prev) u["polls/season/"+prev] = -1;
+  myPoll = o; try{ localStorage.setItem(KEY_POLL, o); }catch(e){}
+  track("poll_vote", {poll:"season", option:o});
+  const ok = await write(u);
+  if(!ok){
+    myPoll = prev; try{ prev ? localStorage.setItem(KEY_POLL, prev) : localStorage.removeItem(KEY_POLL); }catch(e){}
+    renderPoll(); $("pollN").textContent = "Couldn't save your vote (error "+lastErr+"). Try again.";
+  }
+  pollBusy = false;
+}
+$("poll").addEventListener("click", e=>{ const b = e.target.closest("[data-opt]"); if(b) votePoll(b.dataset.opt); });
+
+renderChips(); renderWho(); showDismiss(); renderPoll();
 $("grid").innerHTML = '<div class="empty">Loading…</div>';
 connect();
 setInterval(()=>{ if(!document.hidden) onData(); }, 30000);                              // keeps "x min ago" fresh
