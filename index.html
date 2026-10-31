@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Aesthetic SAU, Sylhet</title>
+<meta name="description" content="Aesthetic SAU — the community page of Sylhet Agricultural University: photo contest winners, birthday mates, merch, events and live campus games."/>
+<meta name="theme-color" content="#f7faf8"/>
+<noscript><style>.rv,[data-reveal],[data-stagger]>*{opacity:1!important;transform:none!important}</style></noscript>
 <link rel="icon" type="image/png" href="https://i.imgur.com/aRxuSTw.jpeg"/>
 <link rel="shortcut icon" type="image/png" href="https://i.imgur.com/aRxuSTw.jpeg"/>
 <link rel="apple-touch-icon" href="https://i.imgur.com/aRxuSTw.jpeg"/>
@@ -1251,6 +1254,42 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
   </div>
 </div>
 
+<!-- PRE-ORDER MODAL -->
+<div id="preorder-modal" role="dialog" aria-modal="true" aria-labelledby="po-title" style="display:none;position:fixed;inset:0;z-index:9400;align-items:center;justify-content:center;padding:20px;">
+  <div class="po-backdrop" onclick="closePreOrder()"></div>
+  <div class="preorder-box">
+    <button type="button" class="po-close" onclick="closePreOrder()" aria-label="Close">&#10005;</button>
+    <div id="po-form">
+      <div class="po-head">
+        <div class="po-ico">🎒</div>
+        <h3 id="po-title">Zipper Bag Pre-Order</h3>
+        <p>আপনার তথ্য দিন — আমরা চাহিদা বুঝে দ্রুত যোগাযোগ করব।</p>
+      </div>
+      <div class="po-field"><label for="po-name">নাম</label><input type="text" id="po-name" placeholder="Full Name" autocomplete="name"/></div>
+      <div class="po-field"><label for="po-phone">মোবাইল নম্বর</label><input type="tel" id="po-phone" placeholder="01XXXXXXXXX" autocomplete="tel"/></div>
+      <div class="po-field"><label for="po-email">Gmail</label><input type="email" id="po-email" placeholder="yourname@gmail.com" autocomplete="email"/></div>
+      <div class="po-field"><label for="po-faculty">Faculty</label>
+        <select id="po-faculty">
+          <option value="">Select Faculty (optional)</option>
+          <option>Agriculture</option>
+          <option>Fisheries</option>
+          <option>Veterinary, Animal and Biomedical Sciences</option>
+          <option>Agricultural Economics &amp; Business Studies</option>
+          <option>Agricultural Engineering &amp; Technology</option>
+          <option>Biotechnology &amp; Genetic Engineering</option>
+        </select>
+      </div>
+      <button type="button" class="po-submit" id="po-btn" onclick="submitPreOrder()">✅ Pre-Order নিশ্চিত করুন</button>
+    </div>
+    <div id="po-success" style="display:none;text-align:center;padding:12px 0;">
+      <div style="font-size:52px;margin-bottom:12px">🎉</div>
+      <h3 class="po-done-title">Pre-Order সম্পন্ন!</h3>
+      <p class="po-done-sub">ধন্যবাদ! আমরা শীঘ্রই আপনার সাথে যোগাযোগ করব।</p>
+      <button type="button" class="po-submit" onclick="closePreOrder()" style="margin-top:18px">ঠিক আছে</button>
+    </div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLB()">
   <button class="lightbox-close" onclick="closeLB()">&#10005;</button>
@@ -1273,7 +1312,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
     <li><a href="#event">Events</a></li>
     <li><a href="#team">Team</a></li>
   </ul>
-  <a href="https://www.facebook.com/share/1CMzNM8vvG/" class="nav-fb" target="_blank">
+  <a href="https://www.facebook.com/share/1CMzNM8vvG/" class="nav-fb" target="_blank" rel="noopener noreferrer">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
     Facebook
   </a>
@@ -1305,7 +1344,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
   <p class="h-sub">&#x9EB;&#x9E6; &#x98F;&#x995;&#x9B0;&#x9C7;&#x9B0; &#x9AD;&#x9BE;&#x9B2;&#x9CB;&#x9AC;&#x9BE;&#x9B8;&#x9BE;, &#x9B8;&#x9BF;&#x9B2;&#x9C7;&#x99F; &#x995;&#x9C3;&#x9B7;&#x9BF; &#x9AC;&#x9BF;&#x9B6;&#x9CD;&#x9AC;&#x9AC;&#x9BF;&#x9A6;&#x9CD;&#x9AF;&#x9BE;&#x9B2;&#x9AF;&#x9BC;&#x9C7; &#x986;&#x9AA;&#x9A8;&#x9BE;&#x995;&#x9C7; &#x9B8;&#x9CD;&#x9AC;&#x9BE;&#x997;&#x9A4;&#x9AE;</p>
   <div class="stats-bar">
     <div class="stat-item">
-      <div class="stat-num" id="fcount" style="overflow:hidden;position:relative;"></div>
+      <div class="stat-num" id="fcount" style="overflow:hidden;position:relative;">4,272</div>
       <div class="stat-lbl">Followers</div>
       <div class="live-dot">Live Count</div>
     </div>
@@ -1315,7 +1354,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
     <div class="stat-item"><div class="stat-num"><span>50</span></div><div class="stat-lbl">Acres Campus</div></div>
   </div>
   <div class="cta-bar">
-    <a href="https://www.facebook.com/share/1CMzNM8vvG/" class="btn-fill" target="_blank">Follow on Facebook</a>
+    <a href="https://www.facebook.com/share/1CMzNM8vvG/" class="btn-fill" target="_blank" rel="noopener noreferrer">Follow on Facebook</a>
     <a href="#contest" class="btn-ghost">Explore &#8595;</a>
   </div>
 </section>
@@ -1352,12 +1391,12 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
 
 
 <!-- GAME MODAL -->
-<div id="game-modal" style="display:none;position:fixed;inset:0;z-index:9500;align-items:center;justify-content:center;padding:20px;">
+<div id="game-modal" role="dialog" aria-modal="true" aria-labelledby="gm-title" style="display:none;position:fixed;inset:0;z-index:9500;align-items:center;justify-content:center;padding:20px;">
   <div style="position:absolute;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);" onclick="closeGameModal()"></div>
   <div id="game-modal-box" style="position:relative;background:#111;border:1px solid rgba(76,175,80,.3);border-radius:20px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,.8);">
     <div style="padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;">
       <span id="gm-title" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:#fff;"></span>
-      <button onclick="closeGameModal()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>
+      <button onclick="closeGameModal()" aria-label="Close" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#10005;</button>
     </div>
     <div id="gm-body" style="padding:20px;"></div>
   </div>
@@ -1393,7 +1432,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
       <h3 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:900;margin-bottom:10px;color:#fff">আজ <span id="tb-count" style="color:#a78bfa">0</span> জন SAUian-এর জন্মদিন!</h3>
       <p style="font-size:13px;color:var(--muted);max-width:480px;margin:0 auto 22px;line-height:1.7;font-family:'Noto Serif Bengali',serif">Facebook follow করার পর তাদের একটু শুভেচ্ছা জানিয়ে দিন — দিনটা আরও সুন্দর হয়ে উঠুক ✨</p>
       <div id="tb-list" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px"></div>
-      <a href="https://www.facebook.com/share/1CMzNM8vvG/" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 28px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.5px">💌 Facebook-এ শুভেচ্ছা জানাও</a>
+      <a href="https://www.facebook.com/share/1CMzNM8vvG/" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 28px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.5px" rel="noopener noreferrer">💌 Facebook-এ শুভেচ্ছা জানাও</a>
     </div>
   </div>
 </section>
@@ -1790,7 +1829,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
         </div>
 
         <!-- CTA Button -->
-        <a href="https://anon-box2026.web.app" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;gap:12px;background:var(--green);color:#000;padding:16px 32px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:all .25s;box-shadow:0 8px 28px rgba(76,175,80,.35);margin-top:4px">
+        <a href="https://anon-box2026.web.app" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;gap:12px;background:var(--green);color:#000;padding:16px 32px;border-radius:12px;font-weight:700;font-size:16px;text-decoration:none;transition:all .25s;box-shadow:0 8px 28px rgba(76,175,80,.35);margin-top:4px" rel="noopener noreferrer">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Account তৈরি করুন, Link নিন, শেয়ার করুন
         </a>
@@ -1835,7 +1874,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
   </div>
   <div class="product-card rv">
     <div class="product-img-wrap">
-      <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="SAU'iAN Premium T-Shirt"/>
+      <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="SAU'iAN Premium T-Shirt"/>
     </div>
     <div class="product-info">
       <span class="product-tag" style="color:#aaa;border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.05)">&#128683; Currently Out of Stock</span>
@@ -1853,7 +1892,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
         <div class="product-feat">Available in multiple colors</div>
         <div class="product-feat">Limited edition — don't miss out!</div>
       </div>
-      <a href="https://wa.me/8801644159115?text=Hello%21%20I%20am%20interested%20in%20the%20SAU%27iAN%20Premium%20T-Shirt%20from%20Aesthetic%20SAU.%20Please%20notify%20me%20when%20it%27s%20back%20in%20stock%21" class="product-order-btn" style="background:#222;border:1.5px solid var(--green);color:var(--green);box-shadow:none" target="_blank">
+      <a href="https://wa.me/8801644159115?text=Hello%21%20I%20am%20interested%20in%20the%20SAU%27iAN%20Premium%20T-Shirt%20from%20Aesthetic%20SAU.%20Please%20notify%20me%20when%20it%27s%20back%20in%20stock%21" class="product-order-btn" style="background:#222;border:1.5px solid var(--green);color:var(--green);box-shadow:none" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.532 5.849L.057 23.743a.5.5 0 0 0 .615.636l6.094-1.598A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 0 1-5.073-1.389l-.363-.215-3.761.986.999-3.648-.237-.376A9.944 9.944 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
         &#128276; Notify Me When Available
       </a>
@@ -1873,7 +1912,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
   </div>
   <div class="gallery-grid rv" id="gallery-grid"></div>
 
-    <a href="https://forms.gle/AdqUi57p5uPKYNJS8" class="gc-card-teaser rv" target="_blank">
+    <a href="https://forms.gle/AdqUi57p5uPKYNJS8" class="gc-card-teaser rv" target="_blank" rel="noopener noreferrer">
       <div class="gc-teaser-icon">&#128247;</div>
       <div class="gc-teaser-title">Next Featured Photo<br/>Could Be <span>Yours!</span></div>
       <div class="gc-teaser-sub">Submit your best campus shot and get featured on Aesthetic SAU</div>
@@ -1907,10 +1946,10 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
         <div class="ch-url-ico">&#9993;</div>
         <div>
           <div class="ch-url-lbl">Send Anonymously</div>
-          <a href="https://chithi.me/aestheticsau" target="_blank">chithi.me/aestheticsau</a>
+          <a href="https://chithi.me/aestheticsau" target="_blank" rel="noopener noreferrer">chithi.me/aestheticsau</a>
         </div>
       </div>
-      <a href="https://chithi.me/aestheticsau" class="ch-btn" target="_blank">Send a Chithi &#8594;</a>
+      <a href="https://chithi.me/aestheticsau" class="ch-btn" target="_blank" rel="noopener noreferrer">Send a Chithi &#8594;</a>
     </div>
   </div>
 </div>
@@ -1958,10 +1997,10 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
       <div>
         <div class="ev-lbl" style="margin-bottom:8px">Event Gallery</div>
         <div class="ev-gallery" style="grid-template-columns:repeat(2,1fr);gap:8px">
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%2523e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%25236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
+          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
+          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
+          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
+          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
         </div>
       </div>
     </div>
@@ -1978,7 +2017,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
       <h2 class="sec-ti" style="margin-bottom:10px;">Aesthetic SAU <span style="color:#34d399;">News</span></h2>
       <p style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.8;max-width:520px;font-family:'Noto Serif Bengali',serif;">SAU campus-এর সর্বশেষ খবর, ইভেন্ট আর গল্প — এক জায়গায়। আমাদের নতুন News Portal ঘুরে দেখুন!</p>
     </div>
-    <a href="https://aesthetic-sau-news.web.app" target="_blank" style="flex-shrink:0;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#10b981,#34d399);color:#04140c;padding:14px 30px;border-radius:12px;font-size:14px;font-weight:800;text-decoration:none;letter-spacing:.3px;box-shadow:0 10px 30px -8px rgba(16,185,129,.55);">News Portal দেখুন →</a>
+    <a href="https://aesthetic-sau-news.web.app" target="_blank" style="flex-shrink:0;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#10b981,#34d399);color:#04140c;padding:14px 30px;border-radius:12px;font-size:14px;font-weight:800;text-decoration:none;letter-spacing:.3px;box-shadow:0 10px 30px -8px rgba(16,185,129,.55);" rel="noopener noreferrer">News Portal দেখুন →</a>
   </div>
 </div>
 </section>
@@ -2014,9 +2053,9 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
       <span>Aesthetic SAU, Sylhet</span>
     </div>
     <div class="foot-links">
-      <a href="https://www.facebook.com/share/1CMzNM8vvG/" target="_blank">Facebook</a>
-      <a href="https://chithi.me/aestheticsau" target="_blank">Chithi.me</a>
-      <a href="https://sau.ac.bd" target="_blank">SAU Official</a>
+      <a href="https://www.facebook.com/share/1CMzNM8vvG/" target="_blank" rel="noopener noreferrer">Facebook</a>
+      <a href="https://chithi.me/aestheticsau" target="_blank" rel="noopener noreferrer">Chithi.me</a>
+      <a href="https://sau.ac.bd" target="_blank" rel="noopener noreferrer">SAU Official</a>
     </div>
   </div>
   <div class="foot-total-visits">
@@ -2031,6 +2070,77 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
 
 <script>
 var FIREBASE_URL = "https://aesthetic-sau-default-rtdb.firebaseio.com";
+
+// ── Shared safety / network helpers ──
+// Escape any text that came from the database before it is put into innerHTML.
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+// Only allow http(s), root-relative and data:image URLs.
+function safeUrl(u) {
+  u = String(u == null ? '' : u).trim();
+  return /^(https?:\/\/|\/|data:image\/)/i.test(u) ? u : '';
+}
+// Admin-authored "extra panel" HTML stays rich, but scripts / inline handlers / js: URLs are stripped.
+function cleanHtml(html) {
+  var t = document.createElement('template');
+  t.innerHTML = String(html == null ? '' : html);
+  t.content.querySelectorAll('script,iframe,object,embed,link,meta,style,base,form').forEach(function(n){ n.remove(); });
+  t.content.querySelectorAll('*').forEach(function(el) {
+    Array.prototype.slice.call(el.attributes).forEach(function(a) {
+      var n = a.name.toLowerCase(), v = a.value;
+      if (n.indexOf('on') === 0) { el.removeAttribute(a.name); return; }
+      if ((n === 'href' || n === 'src' || n === 'xlink:href' || n === 'action' || n === 'formaction') &&
+          /^\s*(javascript|vbscript):|^\s*data:(?!image\/)/i.test(v)) el.removeAttribute(a.name);
+    });
+    if (el.tagName === 'A' && el.getAttribute('target') === '_blank') el.setAttribute('rel', 'noopener noreferrer');
+  });
+  return t.innerHTML;
+}
+// fetch + JSON that rejects on HTTP errors (Firebase answers 401/404 with a JSON error body).
+function fbJson(url) {
+  return fetch(url).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+function fbWrite(url, method, body) {
+  var opts = { method: method, headers: {'Content-Type':'application/json'} };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  return fetch(url, opts).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json().catch(function(){ return null; });
+  });
+}
+function siteToast(msg, kind) {
+  var t = document.createElement('div');
+  t.className = 'site-toast' + (kind ? ' ' + kind : '');
+  t.setAttribute('role', 'status');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){ t.classList.add('show'); });
+  setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ t.remove(); }, 400); }, 2800);
+}
+// One announcement bar, placed right after the fixed nav (it used to sit underneath it, invisible).
+function ensureAnnBar() {
+  var bar = document.getElementById('ann-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'ann-bar';
+    bar.setAttribute('role', 'status');
+    var nav = document.querySelector('nav');
+    if (nav && nav.parentNode) nav.parentNode.insertBefore(bar, nav.nextSibling);
+    else document.body.insertBefore(bar, document.body.firstChild);
+  }
+  return bar;
+}
+function setAnnouncement(show, text) {
+  var bar = ensureAnnBar();
+  if (text != null && text !== '') bar.textContent = text;
+  bar.style.display = (show && bar.textContent) ? 'block' : 'none';
+}
 
 // ── SITE CONFIG — Firebase থেকে load হবে ──
 var SITE_CONFIG = {
@@ -2070,11 +2180,25 @@ var SITE_CONFIG = {
 };
 
 // Firebase থেকে config load করো — সব render এখানেই হবে
-fetch(FIREBASE_URL + '/site-config.json')
-  .then(function(r){ return r.json(); })
+function renderAllConfig() {
+  [renderFans, renderTeam, renderExtraPanels, renderWinners, renderTopGallery].forEach(function(fn) {
+    try { fn(); } catch (e) { console.error('render failed:', fn.name, e); }
+  });
+}
+var followerStarted = false;
+function startFollowerCount() {
+  if (followerStarted) return;
+  followerStarted = true;
+  setTimeout(function() {
+    var fcEl = document.getElementById("fcount");
+    if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
+  }, 500);
+}
+fbJson(FIREBASE_URL + '/site-config.json')
   .then(function(data) {
     if (data && typeof data === 'object') {
-      if (data.followerCount) SITE_CONFIG.followerCount = data.followerCount;
+      var fc = parseInt(data.followerCount, 10);
+      if (fc > 0) SITE_CONFIG.followerCount = fc;
       if (data.fans && Array.isArray(data.fans) && data.fans.length) SITE_CONFIG.fans = data.fans;
       if (data.team && Array.isArray(data.team) && data.team.length) SITE_CONFIG.team = data.team;
       if (data.announcement) SITE_CONFIG.announcement = data.announcement;
@@ -2083,42 +2207,20 @@ fetch(FIREBASE_URL + '/site-config.json')
       if (data.topGallery && Array.isArray(data.topGallery) && data.topGallery.length) SITE_CONFIG.topGallery = data.topGallery;
       if (data.footerLogoUrl) SITE_CONFIG.footerLogoUrl = data.footerLogoUrl;
     }
-    if (SITE_CONFIG.footerLogoUrl) {
+    var logo = safeUrl(SITE_CONFIG.footerLogoUrl);
+    if (logo) {
       var flImg = document.getElementById('footer-logo-img');
-      if (flImg) flImg.src = SITE_CONFIG.footerLogoUrl;
+      if (flImg) flImg.src = logo;
     }
-    // Announcement bar
-    if (SITE_CONFIG.announcement && SITE_CONFIG.announcement.show && SITE_CONFIG.announcement.text) {
-      var bar = document.getElementById('ann-bar');
-      if (!bar) {
-        bar = document.createElement('div');
-        bar.id = 'ann-bar';
-        bar.style.cssText = 'background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;text-align:center;padding:10px 20px;font-size:13px;font-weight:600;position:relative;z-index:100';
-        document.body.insertBefore(bar, document.body.children[2]);
-      }
-      bar.textContent = SITE_CONFIG.announcement.text;
-      bar.style.display = 'block';
-    }
-    renderFans();
-    renderTeam();
-    renderExtraPanels();
-    renderWinners();
-    renderTopGallery();
-    setTimeout(function() {
-      var fcEl = document.getElementById("fcount");
-      if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
-    }, 500);
+    var ann = SITE_CONFIG.announcement;
+    if (ann && (ann.show === true || ann.show === 'true') && ann.text) setAnnouncement(true, ann.text);
+    renderAllConfig();
+    startFollowerCount();
   })
   .catch(function() {
     // Firebase fail হলে default data দিয়ে render
-    renderFans();
-    renderTeam();
-    renderWinners();
-    renderTopGallery();
-    setTimeout(function() {
-      var fcEl = document.getElementById("fcount");
-      if (fcEl) countUp(fcEl, SITE_CONFIG.followerCount, 2200);
-    }, 500);
+    renderAllConfig();
+    startFollowerCount();
   });
 
 // FANS এবং TEAM এখন SITE_CONFIG থেকে directly নেওয়া হয়
@@ -2132,7 +2234,7 @@ function renderWinners() {
   if (!wrap) return;
   var list = SITE_CONFIG.winners || [];
   if (!list.length) {
-    wrap.innerHTML = '<div style="text-align:center;padding:60px;color:rgba(255,255,255,.3);">Winner data নেই।</div>';
+    wrap.innerHTML = '<div class="cw-empty">Winner data নেই।</div>';
     return;
   }
 
@@ -2181,8 +2283,9 @@ function renderWinners() {
         s.className = 'cwin-slide' + (pi === 0 ? ' cwin-active' : '');
         if (p) {
           var img = document.createElement('img');
-          img.src = p; img.loading = 'lazy';
+          img.src = p; img.loading = 'lazy'; img.alt = w.name || '';
           img.style.cssText = 'width:100%;height:100%;object-fit:cover;cursor:zoom-in;';
+          img.addEventListener('error', function(){ var ph = document.createElement('div'); ph.className = 'cw-ph'; ph.textContent = '📷'; if (this.parentNode) this.parentNode.replaceChild(ph, this); });
           img.addEventListener('click', function(e) {
             e.stopPropagation();
             document.getElementById('lb-img').src = this.src;
@@ -2191,9 +2294,8 @@ function renderWinners() {
           });
           s.appendChild(img);
         }
-        else { s.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>'; }
+        else { s.innerHTML = '<div class="cw-ph">📷</div>'; }
         inner.appendChild(s);
-        var dot = document.createElement('span');
       });
       var dotsDiv = document.createElement('div');
       dotsDiv.className = 'cwin-dots';
@@ -2208,8 +2310,9 @@ function renderWinners() {
     } else {
       if (photos[0]) {
         var img = document.createElement('img');
-        img.src = photos[0]; img.loading = 'lazy';
+        img.src = photos[0]; img.loading = 'lazy'; img.alt = w.name || '';
         img.style.cssText = 'width:100%;height:100%;object-fit:cover;cursor:zoom-in;';
+        img.addEventListener('error', function(){ var ph = document.createElement('div'); ph.className = 'cw-ph'; ph.textContent = '📷'; if (this.parentNode) this.parentNode.replaceChild(ph, this); });
         img.addEventListener('click', function(e) {
           e.stopPropagation();
           document.getElementById('lb-img').src = this.src;
@@ -2218,7 +2321,7 @@ function renderWinners() {
         });
         photoDiv.appendChild(img);
       } else {
-        photoDiv.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.1);font-size:60px;">📷</div>';
+        photoDiv.innerHTML = '<div class="cw-ph">📷</div>';
       }
     }
 
@@ -2264,8 +2367,8 @@ function renderWinners() {
     infoDiv.className = 'cwm-info';
     infoDiv.style.background = meta.grad;
     infoDiv.innerHTML = '<div class="cwm-badge">' + meta.emoji + ' ' + meta.label + (meta.sub ? ' · ' + meta.sub : '') + '</div>'
-      + '<div class="cwm-name">' + w.name + '</div>'
-      + '<div class="cwm-meta">' + w.faculty + '<span style="opacity:.4;margin:0 6px;">·</span>Session ' + w.session + '</div>';
+      + '<div class="cwm-name">' + esc(w.name) + '</div>'
+      + '<div class="cwm-meta">' + esc(w.faculty) + '<span style="opacity:.4;margin:0 6px;">·</span>Session ' + esc(w.session) + '</div>';
     slide.appendChild(infoDiv);
     track.appendChild(slide);
   });
@@ -2319,6 +2422,7 @@ window.cwmGo = function(idx) {
 };
 
 window.cwmMove = function(dir) {
+  if (!cwmTotal) return;
   cwmGo((cwmCurrent + dir + cwmTotal) % cwmTotal);
 };
 
@@ -2389,12 +2493,12 @@ function loadWinnersAdmin() {
     return '<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:12px;">'
       + '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:10px;">'+(rankLabels[w.rank]||w.rank+'th Prize')+(w.joint?' (Joint)':'')+'</div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
-      + '<input id="le-win-name-'+i+'" value="'+w.name+'" placeholder="Name" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
-      + '<input id="le-win-faculty-'+i+'" value="'+w.faculty+'" placeholder="Faculty" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-win-name-'+i+'" value="'+esc(w.name)+'" placeholder="Name" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-win-faculty-'+i+'" value="'+esc(w.faculty)+'" placeholder="Faculty" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
       + '</div>'
-      + '<input id="le-win-session-'+i+'" value="'+w.session+'" placeholder="Session (e.g. 2021-22)" style="'+iStyle+'">'
-      + '<input id="le-win-photos-'+i+'" value="'+(w.photos||'')+'" placeholder="Photo URL (multiple: comma separated)" style="'+iStyle+'">'
-      + '<textarea id="le-win-caption-'+i+'" placeholder="Photo caption (optional)" style="'+iStyle+'height:64px;resize:vertical;font-family:inherit;">'+( w.caption||'')+'</textarea>'
+      + '<input id="le-win-session-'+i+'" value="'+esc(w.session)+'" placeholder="Session (e.g. 2021-22)" style="'+iStyle+'">'
+      + '<input id="le-win-photos-'+i+'" value="'+esc(w.photos||'')+'" placeholder="Photo URL (multiple: comma separated)" style="'+iStyle+'">'
+      + '<textarea id="le-win-caption-'+i+'" placeholder="Photo caption (optional)" style="'+iStyle+'height:64px;resize:vertical;font-family:inherit;">'+esc(w.caption||'')+'</textarea>'
       + '</div>';
   }).join('');
   list.innerHTML = html;
@@ -2480,54 +2584,65 @@ document.addEventListener("keydown", function(e) { if (e.key === "Escape") close
 
 function renderFans() {
   var g = document.getElementById("fans-grid"), h = "";
-  var fans = SITE_CONFIG.fans;
+  if (!g) return;
+  var fans = SITE_CONFIG.fans || [];
   for (var i = 0; i < fans.length; i++) {
-    var f = fans[i];
+    var f = fans[i] || {}, nm = String(f.name || '');
+    var img = safeUrl(f.img);
     h += '<div class="fan-card"><div class="fan-rank">#' + (i+1) + '</div>'
       + '<div class="fan-av">'
-      + (f.img ? '<img src="'+f.img+'" alt="'+f.name+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>' : '<span>' + f.name.charAt(0) + '</span>')
-      + '</div><div class="fan-name">' + f.name + '</div><div class="fan-tag">&#11088; Top Fan</div></div>';
+      + (img ? '<img src="' + esc(img) + '" alt="' + esc(nm) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>' : '<span>' + esc(nm.charAt(0)) + '</span>')
+      + '</div><div class="fan-name">' + esc(nm) + '</div><div class="fan-tag">&#11088; Top Fan</div></div>';
   }
   g.innerHTML = h;
 }
 
+function toggleTm(card) {
+  var on = card.classList.toggle('revealed');
+  card.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
 function renderTeam() {
   var g = document.getElementById("team-grid"), h = "";
-  var team = SITE_CONFIG.team;
+  if (!g) return;
+  var team = SITE_CONFIG.team || [];
   for (var i = 0; i < team.length; i++) {
-    var m = team[i];
-    h += '<div class="tm-card">'
+    var m = team[i] || {};
+    var img = safeUrl(m.img), fb = safeUrl(m.fb);
+    h += '<div class="tm-card" tabindex="0" role="button" aria-pressed="false" title="Click to reveal" onclick="toggleTm(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleTm(this)}">'
       + '<div class="tm-av">'
-      + (m.img ? '<img src="'+m.img+'" alt="'+m.name+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>' : '<span>&#128100;</span>')
+      + (img ? '<img src="' + esc(img) + '" alt="' + esc(m.name) + '" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>' : '<span>&#128100;</span>')
       + '</div>'
       + '<div>'
-      + '<span class="tm-role">' + m.role + '</span>'
+      + '<span class="tm-role">' + esc(m.role) + '</span>'
       + '<div class="tm-name tm-name-blur">'
-      + '<span onclick="this.parentElement.classList.toggle(\'revealed\')" class="tm-blur-text" style="display:inline-flex;align-items:center;gap:7px;cursor:pointer">' + m.name
-      + (m.fb ? ' <a href="'+m.fb+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Facebook Profile" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(76,175,80,.15);flex-shrink:0"><svg width="11" height="11" viewBox="0 0 24 24" fill="#4caf50"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>' : '')
+      + '<span class="tm-blur-text" style="display:inline-flex;align-items:center;gap:7px;cursor:pointer">' + esc(m.name)
+      + (fb ? ' <a href="' + esc(fb) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Facebook Profile" aria-label="Facebook profile of ' + esc(m.name) + '" class="tm-fb"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>' : '')
       + '</span>'
       + '</div>'
-      + '<div class="tm-bio">' + m.bio + '</div>'
+      + '<div class="tm-bio">' + esc(m.bio) + '</div>'
       + '</div></div>';
   }
   g.innerHTML = h;
 }
 
 function renderExtraPanels() {
-  var panels = SITE_CONFIG.extraPanels;
-  if (!panels || !panels.length) return;
   var container = document.getElementById('extra-panels-wrap');
   if (!container) return;
+  var panels = SITE_CONFIG.extraPanels;
+  // Always clear first, otherwise deleting the last panel leaves it on screen.
+  if (!panels || !panels.length) { container.innerHTML = ''; return; }
   var h = '';
   panels.forEach(function(p) {
-    h += '<section style="padding:60px 0;border-top:1px solid rgba(255,255,255,.06)"><div class="wrap">'
-      + '<div class="sec-head rv"><div><div class="sec-ey">' + (p.eyebrow||'') + '</div>'
-      + '<h2 class="sec-ti">' + (p.title||'') + '</h2></div>'
-      + '<span class="sec-no">' + (p.subtitle||'') + '</span></div>'
-      + '<div class="rv" style="margin-top:24px;color:rgba(255,255,255,.7);line-height:1.8">' + (p.content||'') + '</div>'
+    p = p || {};
+    h += '<section class="extra-panel"><div class="wrap">'
+      + '<div class="sec-head rv"><div><div class="sec-ey">' + esc(p.eyebrow) + '</div>'
+      + '<h2 class="sec-ti">' + esc(p.title) + '</h2></div>'
+      + '<span class="sec-no">' + esc(p.subtitle) + '</span></div>'
+      + '<div class="rv extra-panel-body">' + cleanHtml(p.content) + '</div>'
       + '</div></section>';
   });
   container.innerHTML = h;
+  container.querySelectorAll('.rv').forEach(function(el) { obs.observe(el); });
 }
 
 var GALLERY_PLACEHOLDER = "data:image/svg+xml;utf8," + encodeURIComponent(
@@ -2543,17 +2658,19 @@ function renderTopGallery() {
   var items = SITE_CONFIG.topGallery || [];
   var h = "";
   items.forEach(function(item, i) {
-    var imgSrc = item.url ? item.url : GALLERY_PLACEHOLDER;
-    var creditHtml = item.creditLink
-      ? '<a href="' + item.creditLink + '" target="_blank">' + (item.credit || '') + '</a>'
-      : (item.credit || '');
+    item = item || {};
+    var imgSrc = safeUrl(item.url) || GALLERY_PLACEHOLDER;
+    var link = safeUrl(item.creditLink);
+    var creditHtml = link
+      ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + esc(item.credit) + '</a>'
+      : esc(item.credit);
     h += '<div class="gc-card rv" style="animation-delay:' + (i * 0.1) + 's">'
       + '<div class="gc-img">'
-      + '<img src="' + imgSrc + '" alt="' + (item.title || '') + '" loading="lazy"/>'
-      + '<div class="gc-overlay"><span class="gc-cat">' + (item.cat || '') + '</span></div>'
+      + '<img src="' + esc(imgSrc) + '" alt="' + esc(item.title) + '" loading="lazy" onerror="this.onerror=null;this.src=GALLERY_PLACEHOLDER"/>'
+      + '<div class="gc-overlay"><span class="gc-cat">' + esc(item.cat) + '</span></div>'
       + '</div>'
       + '<div class="gc-body">'
-      + '<div class="gc-title">' + (item.title || '') + '</div>'
+      + '<div class="gc-title">' + esc(item.title) + '</div>'
       + '<div class="gc-credit">' + creditHtml + '</div>'
       + '</div></div>';
   });
@@ -2562,10 +2679,10 @@ function renderTopGallery() {
 }
 
 var obs = new IntersectionObserver(function(es) {
-  es.forEach(function(e, i) {
-    if (e.isIntersecting) setTimeout(function() { e.target.classList.add("show"); }, i * 80);
+  es.forEach(function(e) {
+    if (e.isIntersecting) { e.target.classList.add("show"); obs.unobserve(e.target); }
   });
-}, {threshold: 0.06});
+}, {threshold: 0, rootMargin: '0px 0px -40px 0px'});
 document.querySelectorAll(".rv").forEach(function(el) { obs.observe(el); });
 
 
@@ -2787,9 +2904,10 @@ function formatBdayDisplay(dateStr) {
   // "2005-06-03" → "3 June 2005"
   try {
     var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var p = dateStr.split('-');
-    return parseInt(p[2],10) + ' ' + months[parseInt(p[1],10)-1] + ' ' + p[0];
-  } catch(e) { return dateStr; }
+    var p = String(dateStr).split('-');
+    var out = parseInt(p[2],10) + ' ' + months[parseInt(p[1],10)-1] + ' ' + p[0];
+    return esc(out.indexOf('undefined') > -1 || out.indexOf('NaN') > -1 ? dateStr : out);
+  } catch(e) { return esc(dateStr); }
 }
 
 function renderBdayForm() {
@@ -2807,8 +2925,8 @@ function renderBdayForm() {
       + '<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎂</div>'
       + '<div style="flex:1;min-width:180px">'
       + '<div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(167,139,250,.7);margin-bottom:4px">Your Birthday is Registered</div>'
-      + '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:800;color:#fff">' + saved.name + '</div>'
-      + '<div style="font-size:13px;color:rgba(167,139,250,.8);margin-top:3px">📅 ' + formatBdayDisplay(saved.birthday) + (saved.district ? ' &nbsp;·&nbsp; 📍 ' + saved.district : '') + '</div>'
+      + '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:800;color:#fff">' + esc(saved.name) + '</div>'
+      + '<div style="font-size:13px;color:rgba(167,139,250,.8);margin-top:3px">📅 ' + formatBdayDisplay(saved.birthday) + (saved.district ? ' &nbsp;·&nbsp; 📍 ' + esc(saved.district) : '') + '</div>'
       + '</div>'
       + '<div style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:8px 16px;font-size:11px;color:rgba(167,139,250,.6);font-weight:600;letter-spacing:1px;text-transform:uppercase;white-space:nowrap">🔒 Saved</div>'
       + '</div>'
@@ -2948,19 +3066,14 @@ function findBdayMate() {
   var entry = { name: name, faculty: faculty, district: district, birthday: dateVal, timestamp: new Date().toISOString() };
   if (gmail) entry.gmail = gmail;
 
-  fetch(FIREBASE_URL + '/birthday-mates.json', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(entry)
-  })
-  .then(function(r){ return r.json(); })
+  fbWrite(FIREBASE_URL + '/birthday-mates.json', 'POST', entry)
   .then(function(saved) {
+    if (!saved || !saved.name) throw new Error('not saved');
     try { localStorage.setItem('sau_bday_entry', JSON.stringify({ name: name, birthday: dateVal, district: district, key: saved.name })); } catch(e){}
     // Re-render form to show locked state
     renderBdayForm();
-    return fetch(FIREBASE_URL + '/birthday-mates.json');
+    return fbJson(FIREBASE_URL + '/birthday-mates.json');
   })
-  .then(function(r){ return r.json(); })
   .then(function(allData) {
     btn.disabled = false;
     btn.textContent = '🎂 Find My Birthday Mate!';
@@ -2983,8 +3096,7 @@ function searchBdayMatches(savedName, savedBirthday, btn) {
   var myYear = parseInt(parts[0], 10);
   var myMD   = String(parseInt(parts[1],10)).padStart(2,'0') + '-' + String(parseInt(parts[2],10)).padStart(2,'0');
 
-  fetch(FIREBASE_URL + '/birthday-mates.json')
-    .then(function(r){ return r.json(); })
+  fbJson(FIREBASE_URL + '/birthday-mates.json')
     .then(function(allData) {
       if (btn) { btn.disabled = false; btn.textContent = '🎂 Find My Birthday Mate!'; }
       showMatchResults(allData, savedName, myMD, myYear);
@@ -3001,13 +3113,14 @@ function searchBdayMatches(savedName, savedBirthday, btn) {
 function showMatchResults(allData, myName, myMD, myYear) {
   var matches = [];
   var myNameLower = myName.toLowerCase();
-  if (allData) {
+  if (allData && typeof allData === 'object') {
     // Collect all entries with same MM-DD, exclude own name+birthday combo
     var seenNames = {};
     Object.keys(allData).forEach(function(k) {
       var p = allData[k];
-      if (!p.birthday || !p.name) return;
-      var pp  = p.birthday.split('-');
+      if (!p || typeof p !== 'object' || !p.birthday || !p.name) return;
+      var pp  = String(p.birthday).split('-');
+      if (pp.length < 3) return;
       var pMD = String(parseInt(pp[1],10)).padStart(2,'0') + '-' + String(parseInt(pp[2],10)).padStart(2,'0');
       // Exclude self: same name AND same full birthday
       if (pMD === myMD && !(p.name.toLowerCase() === myNameLower)) {
@@ -3023,7 +3136,7 @@ function showMatchResults(allData, myName, myMD, myYear) {
   if (matches.length > 0) {
     var cards = matches.map(function(m) {
       var ageLine = '';
-      if (m.birthday && m.birthday.split('-').length === 3) {
+      if (m.birthday && String(m.birthday).split('-').length === 3) {
         var mYear = parseInt(m.birthday.split('-')[0], 10);
         var diff  = myYear - mYear;
         if (diff > 0)      ageLine = 'You are ' + diff + ' year' + (diff > 1 ? 's' : '') + ' older 🎈';
@@ -3031,8 +3144,8 @@ function showMatchResults(allData, myName, myMD, myYear) {
         else               ageLine = 'You were both born the same year! 🎊';
       }
       return '<div class="bmp-match-card">'
-        + '<div class="bmp-match-name">🎂 ' + m.name + '</div>'
-        + '<div class="bmp-match-fac">' + m.faculty + (m.district ? ' · 📍 ' + m.district : '') + '</div>'
+        + '<div class="bmp-match-name">🎂 ' + esc(m.name) + '</div>'
+        + '<div class="bmp-match-fac">' + esc(m.faculty) + (m.district ? ' · 📍 ' + esc(m.district) : '') + '</div>'
         + (ageLine ? '<div class="bmp-match-age">' + ageLine + '</div>' : '')
         + '</div>';
     }).join('');
@@ -3177,8 +3290,8 @@ function loadLiveEditorValues() {
   var fansHtml = '';
   SITE_CONFIG.fans.forEach(function(f, i) {
     fansHtml += '<div style="display:flex;gap:10px;margin-bottom:10px;align-items:center">'
-      + '<input style="flex:2;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="নাম" value="'+f.name+'" id="le-fan-name-'+i+'"/>'
-      + '<input style="flex:3;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Photo URL (optional)" value="'+(f.img||'')+'" id="le-fan-img-'+i+'"/>'
+      + '<input style="flex:2;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="নাম" value="'+esc(f.name)+'" id="le-fan-name-'+i+'"/>'
+      + '<input style="flex:3;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Photo URL (optional)" value="'+esc(f.img||'')+'" id="le-fan-img-'+i+'"/>'
       + '</div>';
   });
   document.getElementById('le-fans-list').innerHTML = fansHtml;
@@ -3190,9 +3303,9 @@ function loadLiveEditorValues() {
       + '<option'+(m.role==='Admin'?' selected':'')+'>Admin</option>'
       + '<option'+(m.role==='Moderator'?' selected':'')+'>Moderator</option>'
       + '</select>'
-      + '<input style="flex:2;min-width:120px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="নাম" value="'+m.name+'" id="le-tm-name-'+i+'"/>'
-      + '<input style="flex:3;min-width:150px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Photo URL (optional)" value="'+(m.img||'')+'" id="le-tm-img-'+i+'"/>'
-      + '<input style="flex:3;min-width:150px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Facebook Profile URL (optional)" value="'+(m.fb||'')+'" id="le-tm-fb-'+i+'"/>'
+      + '<input style="flex:2;min-width:120px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="নাম" value="'+esc(m.name)+'" id="le-tm-name-'+i+'"/>'
+      + '<input style="flex:3;min-width:150px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Photo URL (optional)" value="'+esc(m.img||'')+'" id="le-tm-img-'+i+'"/>'
+      + '<input style="flex:3;min-width:150px;background:#1c1c1c;border:1px solid rgba(167,139,250,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none" placeholder="Facebook Profile URL (optional)" value="'+esc(m.fb||'')+'" id="le-tm-fb-'+i+'"/>'
       + '</div>';
   });
   document.getElementById('le-team-list').innerHTML = teamHtml;
@@ -3215,13 +3328,13 @@ function loadGalleryAdmin() {
   var html = items.map(function(item, i) {
     return '<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-bottom:12px;">'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
-      + '<input id="le-gal-title-'+i+'" value="'+(item.title||'')+'" placeholder="Title" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
-      + '<input id="le-gal-cat-'+i+'" value="'+(item.cat||'')+'" placeholder="Category (e.g. Architecture)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-gal-title-'+i+'" value="'+esc(item.title||'')+'" placeholder="Title" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-gal-cat-'+i+'" value="'+esc(item.cat||'')+'" placeholder="Category (e.g. Architecture)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
       + '</div>'
-      + '<input id="le-gal-url-'+i+'" value="'+(item.url||'')+'" placeholder="Photo URL (Cloudinary link)" style="'+iStyle+'">'
+      + '<input id="le-gal-url-'+i+'" value="'+esc(item.url||'')+'" placeholder="Photo URL (Cloudinary link)" style="'+iStyle+'">'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-      + '<input id="le-gal-credit-'+i+'" value="'+(item.credit||'')+'" placeholder="Credit text (e.g. Photographer name)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
-      + '<input id="le-gal-creditlink-'+i+'" value="'+(item.creditLink||'')+'" placeholder="Credit link (optional)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-gal-credit-'+i+'" value="'+esc(item.credit||'')+'" placeholder="Credit text (e.g. Photographer name)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
+      + '<input id="le-gal-creditlink-'+i+'" value="'+esc(item.creditLink||'')+'" placeholder="Credit link (optional)" style="background:#1c1c1c;border:1px solid rgba(76,175,80,.2);color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;">'
       + '</div>'
       + '</div>';
   }).join('');
@@ -3233,7 +3346,7 @@ function renderLePanelsList() {
   var h = panels.length ? '' : '<div style="color:rgba(255,255,255,.3);font-size:13px">কোনো extra panel নেই</div>';
   panels.forEach(function(p, i) {
     h += '<div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
-      + '<div><strong style="color:#a78bfa">'+p.title+'</strong><div style="font-size:12px;color:rgba(255,255,255,.4)">'+p.eyebrow+'</div></div>'
+      + '<div><strong style="color:#a78bfa">'+esc(p.title)+'</strong><div style="font-size:12px;color:rgba(255,255,255,.4)">'+esc(p.eyebrow)+'</div></div>'
       + '<button onclick="leDeletePanel('+i+')" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);color:#f87171;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer">🗑 মুছো</button>'
       + '</div>';
   });
@@ -3243,8 +3356,8 @@ function renderLePanelsList() {
 function leSave(type) {
   var update = {};
   if (type === 'followers') {
-    var val = parseInt(document.getElementById('le-followers').value);
-    if (!val) return;
+    var val = parseInt(document.getElementById('le-followers').value, 10);
+    if (!val || val < 0) { showAdmToast('⚠️ সঠিক একটি সংখ্যা দিন', 'warn'); return; }
     SITE_CONFIG.followerCount = val;
     update = {followerCount: val};
     countUp(document.getElementById("fcount"), val, 1500);
@@ -3254,10 +3367,9 @@ function leSave(type) {
     var text = document.getElementById('le-ann-text').value.trim();
     SITE_CONFIG.announcement = {show: show, text: text};
     update = {announcement: {show: show, text: text}};
-    var bar = document.getElementById('ann-bar');
-    if (!bar) { bar = document.createElement('div'); bar.id='ann-bar'; bar.style.cssText='background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;text-align:center;padding:10px 20px;font-size:13px;font-weight:600;position:relative;z-index:100'; document.body.insertBefore(bar, document.body.children[2]); }
-    bar.textContent = text;
-    bar.style.display = show ? 'block' : 'none';
+    var annBar = ensureAnnBar();
+    annBar.textContent = text;
+    setAnnouncement(show, text);
   }
   if (type === 'winners') {
     var winners = [];
@@ -3332,14 +3444,10 @@ function leSave(type) {
     if (flImg && logoUrl) flImg.src = logoUrl;
   }
   // Firebase এ save করো
-  fetch(FIREBASE_URL + '/site-config.json', {
-    method: 'PATCH',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(update)
-  }).then(function() {
+  fbWrite(FIREBASE_URL + '/site-config.json', 'PATCH', update).then(function() {
     showAdmToast('✅ সাইটে সাথে সাথে update হয়েছে!');
   }).catch(function() {
-    showAdmToast('⚠️ Save হয়নি, internet চেক করো');
+    showAdmToast('⚠️ Save হয়নি, internet চেক করো', 'warn');
   });
 }
 
@@ -3349,14 +3457,10 @@ function leAddPanel() {
   var sub  = document.getElementById('le-ep-sub').value.trim();
   var cont = document.getElementById('le-ep-content').value.trim();
   if (!title) { showAdmToast('Title দাও!'); return; }
-  var panels = SITE_CONFIG.extraPanels || [];
+  var panels = (SITE_CONFIG.extraPanels || []).slice();
   panels.push({eyebrow:eye, title:title, subtitle:sub, content:cont});
-  SITE_CONFIG.extraPanels = panels;
-  fetch(FIREBASE_URL + '/site-config.json', {
-    method: 'PATCH',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({extraPanels: panels})
-  }).then(function() {
+  fbWrite(FIREBASE_URL + '/site-config.json', 'PATCH', {extraPanels: panels}).then(function() {
+    SITE_CONFIG.extraPanels = panels;
     renderExtraPanels();
     renderLePanelsList();
     document.getElementById('le-ep-eye').value = '';
@@ -3364,22 +3468,23 @@ function leAddPanel() {
     document.getElementById('le-ep-sub').value = '';
     document.getElementById('le-ep-content').value = '';
     showAdmToast('✅ Panel যোগ হয়েছে!');
+  }).catch(function() {
+    showAdmToast('⚠️ Panel save হয়নি, internet চেক করো', 'warn');
   });
 }
 
 function leDeletePanel(idx) {
   if (!confirm('এই panel মুছবেন?')) return;
-  var panels = SITE_CONFIG.extraPanels || [];
+  var panels = (SITE_CONFIG.extraPanels || []).slice();
   panels.splice(idx, 1);
-  SITE_CONFIG.extraPanels = panels;
-  fetch(FIREBASE_URL + '/site-config.json', {
-    method: 'PATCH',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({extraPanels: panels})
-  }).then(function() {
+  // Firebase drops empty arrays on PATCH, so send null to actually clear it.
+  fbWrite(FIREBASE_URL + '/site-config.json', 'PATCH', {extraPanels: panels.length ? panels : null}).then(function() {
+    SITE_CONFIG.extraPanels = panels;
     renderExtraPanels();
     renderLePanelsList();
     showAdmToast('🗑 Panel মুছে গেছে!');
+  }).catch(function() {
+    showAdmToast('⚠️ মুছতে পারিনি, internet চেক করো', 'warn');
   });
 }
 
@@ -3388,81 +3493,78 @@ function leDeletePanel(idx) {
 function loadSiteEditorValues() {
   // Winners admin
   loadWinnersAdmin();
-  // Contest
-  var ct = document.querySelector('#contest .sec-ti');
-  if (ct) document.getElementById('se-contest-title').value = ct.textContent;
-  var cs = document.querySelector('#contest .sec-no');
-  if (cs) document.getElementById('se-contest-sub').value = cs.textContent;
-  var dt = document.querySelector('.deadline-title');
-  if (dt) document.getElementById('se-deadline-title').value = dt.textContent;
-  var ds = document.querySelector('.deadline-sub');
-  if (ds) document.getElementById('se-deadline-sub').value = ds.textContent;
+  function val(id, v) { var el = document.getElementById(id); if (el) el.value = v == null ? '' : v; }
+  function txt(sel) { var el = document.querySelector(sel); return el ? el.textContent.trim() : ''; }
+  // Contest (now the winners section)
+  val('se-contest-title', txt('#contest .cw-title'));
+  val('se-contest-sub',   txt('#contest .cw-header p'));
+  val('se-deadline-title', txt('.deadline-title'));
+  val('se-deadline-sub',   txt('.deadline-sub'));
   // Prize
-  var pt = document.querySelector('#prize-wrap h3');
-  if (pt) document.getElementById('se-prize-title').value = pt.innerText;
-  var pd = document.querySelector('#prize-wrap p');
-  if (pd) document.getElementById('se-prize-desc').value = pd.textContent;
+  val('se-prize-title', txt('#prize-wrap h3'));
+  val('se-prize-desc',  txt('#prize-wrap p'));
   // Birthday
-  var bt = document.querySelector('#birthday .sec-ti');
-  if (bt) document.getElementById('se-bday-title').value = bt.textContent;
-  var bd = document.querySelector('.bday-top p');
-  if (bd) document.getElementById('se-bday-desc').value = bd.textContent;
-  var bp = document.querySelector('#bd-result .bday-result-sub');
-  if (bp) document.getElementById('se-bday-pending').value = bp.textContent;
+  val('se-bday-title',   txt('#birthday .sec-ti'));
+  val('se-bday-desc',    txt('.bday-top p'));
+  val('se-bday-pending', txt('#bd-result .bday-result-sub'));
+  // Announcement
+  var bar = document.getElementById('ann-bar');
+  val('se-ann-text', bar ? bar.textContent : (SITE_CONFIG.announcement && SITE_CONFIG.announcement.text) || '');
+  var sh = document.getElementById('se-ann-show');
+  if (sh) sh.value = (bar && bar.style.display !== 'none') ? 'show' : 'hide';
+}
+
+// Set text on the first element matching selector. Returns true if something was changed.
+function applyText(sel, value) {
+  if (!value) return false;
+  var el = document.querySelector(sel);
+  if (!el) return false;
+  el.textContent = value;
+  return true;
+}
+function reportApplied(label, applied, wanted) {
+  if (applied > 0) showAdmToast(label + ' আপডেট হয়েছে ✅ (শুধু এই browser-এ)');
+  else if (wanted === 0) showAdmToast('⚠️ কিছু লেখা হয়নি', 'warn');
+  else showAdmToast('⚠️ ' + label + ' এখন সাইটে নেই, তাই কিছু বদলায়নি', 'warn');
 }
 
 function applyContestEdits() {
-  var title = document.getElementById('se-contest-title').value;
-  var sub   = document.getElementById('se-contest-sub').value;
-  var dtitle = document.getElementById('se-deadline-title').value;
-  var dsub   = document.getElementById('se-deadline-sub').value;
-  if (title) { var el = document.querySelector('#contest .sec-ti'); if(el) el.textContent = title; }
-  if (sub)   { var el = document.querySelector('#contest .sec-no'); if(el) el.textContent = sub; }
-  if (dtitle){ var el = document.querySelector('.deadline-title');  if(el) el.textContent = dtitle; }
-  if (dsub)  { var el = document.querySelector('.deadline-sub');    if(el) el.textContent = dsub; }
-  showAdmToast('Contest section আপডেট হয়েছে ✅');
+  var f = function(id) { return document.getElementById(id).value.trim(); };
+  var jobs = [['#contest .cw-title', f('se-contest-title')], ['#contest .cw-header p', f('se-contest-sub')],
+              ['.deadline-title', f('se-deadline-title')], ['.deadline-sub', f('se-deadline-sub')]];
+  var wanted = jobs.filter(function(j){ return j[1]; }).length, applied = 0;
+  jobs.forEach(function(j){ if (applyText(j[0], j[1])) applied++; });
+  reportApplied('Contest section', applied, wanted);
 }
 
 function applyPrizeEdits() {
-  var title = document.getElementById('se-prize-title').value;
-  var desc  = document.getElementById('se-prize-desc').value;
-  if (title){ var el = document.querySelector('#prize-wrap h3'); if(el) el.innerHTML = title; }
-  if (desc) { var el = document.querySelector('#prize-wrap p');  if(el) el.textContent = desc; }
-  showAdmToast('Prize section আপডেট হয়েছে ✅');
+  var title = document.getElementById('se-prize-title').value.trim();
+  var desc  = document.getElementById('se-prize-desc').value.trim();
+  var wanted = (title ? 1 : 0) + (desc ? 1 : 0), applied = 0;
+  if (applyText('#prize-wrap h3', title)) applied++;
+  if (applyText('#prize-wrap p', desc)) applied++;
+  reportApplied('Prize section', applied, wanted);
 }
 
 function applyBdayEdits() {
-  var title   = document.getElementById('se-bday-title').value;
-  var desc    = document.getElementById('se-bday-desc').value;
-  var pending = document.getElementById('se-bday-pending').value;
-  if (title)  { var el = document.querySelector('#birthday .sec-ti'); if(el) el.textContent = title; }
-  if (desc)   { var el = document.querySelector('.bday-top p');       if(el) el.textContent = desc; }
-  if (pending){ var el = document.querySelector('#bd-result .bday-result-sub'); if(el) el.textContent = pending; }
-  showAdmToast('Birthday section আপডেট হয়েছে ✅');
+  var title   = document.getElementById('se-bday-title').value.trim();
+  var desc    = document.getElementById('se-bday-desc').value.trim();
+  var pending = document.getElementById('se-bday-pending').value.trim();
+  var wanted = (title ? 1 : 0) + (desc ? 1 : 0) + (pending ? 1 : 0), applied = 0;
+  if (applyText('#birthday .sec-ti', title)) applied++;
+  if (applyText('.bday-top p', desc)) applied++;
+  if (applyText('#bd-result .bday-result-sub', pending)) applied++;
+  reportApplied('Birthday section', applied, wanted);
 }
 
 function applyAnnouncement() {
-  var show = document.getElementById('se-ann-show').value;
-  var text = document.getElementById('se-ann-text').value;
-  var bar  = document.getElementById('ann-bar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'ann-bar';
-    bar.style.cssText = 'background:linear-gradient(90deg,#7c3aed,#a78bfa);color:#fff;text-align:center;padding:10px 20px;font-size:13px;font-weight:600;position:relative;z-index:100';
-    document.body.insertBefore(bar, document.body.children[2]);
-  }
-  if (text) bar.textContent = text;
-  bar.style.display = show === 'show' ? 'block' : 'none';
-  showAdmToast('Announcement আপডেট হয়েছে ✅');
+  var show = document.getElementById('se-ann-show').value === 'show';
+  var text = document.getElementById('se-ann-text').value.trim();
+  setAnnouncement(show, text);
+  showAdmToast('Announcement আপডেট হয়েছে ✅ (শুধু এই browser-এ — স্থায়ী করতে Live Editor ব্যবহার করুন)');
 }
 
-function showAdmToast(msg) {
-  var t = document.createElement('div');
-  t.textContent = msg;
-  t.style.cssText = 'position:fixed;bottom:28px;right:28px;background:#7c3aed;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:opacity .4s';
-  document.body.appendChild(t);
-  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 2500);
-}
+function showAdmToast(msg, kind) { siteToast(msg, kind); }
 
 
 var ADMIN_PASS = '2024'; // পাসওয়ার্ড এখানে পরিবর্তন করো
@@ -3492,8 +3594,10 @@ function adminLogin() {
 // ── PRE-ORDER ──
 function openPreOrder() {
   var m = document.getElementById('preorder-modal');
+  if (!m) { window.open('https://docs.google.com/forms/d/1hzW6mYK-QxOrx9R00CSEruNeR1BnjWTep7KmugyMfu8/viewform', '_blank', 'noopener'); return; }
   m.classList.add('open');
   document.body.style.overflow = 'hidden';
+  var first = document.getElementById('po-name'); if (first) setTimeout(function(){ first.focus(); }, 60);
 }
 function closePreOrder() {
   var m = document.getElementById('preorder-modal');
@@ -3513,17 +3617,15 @@ function submitPreOrder() {
   var faculty = document.getElementById('po-faculty').value;
   var btn     = document.getElementById('po-btn');
   if (!name || !phone || !email) {
-    showAdmToast('⚠️ নাম, নম্বর এবং Gmail দিন!');
+    showAdmToast('⚠️ নাম, নম্বর এবং Gmail দিন!', 'warn');
     return;
   }
+  if (!/^\+?[0-9][0-9\s-]{8,14}$/.test(phone)) { showAdmToast('⚠️ সঠিক মোবাইল নম্বর দিন', 'warn'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAdmToast('⚠️ সঠিক Gmail/Email দিন', 'warn'); return; }
   btn.disabled = true;
   btn.textContent = 'Saving...';
   var entry = { name: name, phone: phone, email: email, faculty: faculty, product: 'Zipper Bag', timestamp: new Date().toISOString() };
-  fetch(FIREBASE_URL + '/pre-orders.json', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(entry)
-  }).then(function() {
+  fbWrite(FIREBASE_URL + '/pre-orders.json', 'POST', entry).then(function() {
     btn.disabled = false;
     btn.textContent = '✅ Pre-Order নিশ্চিত করুন';
     document.getElementById('po-form').style.display = 'none';
@@ -3531,9 +3633,12 @@ function submitPreOrder() {
   }).catch(function() {
     btn.disabled = false;
     btn.textContent = '✅ Pre-Order নিশ্চিত করুন';
-    showAdmToast('⚠️ সমস্যা হয়েছে, আবার চেষ্টা করুন');
+    showAdmToast('⚠️ সমস্যা হয়েছে, আবার চেষ্টা করুন', 'warn');
   });
 }
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { var m = document.getElementById('preorder-modal'); if (m && m.classList.contains('open')) closePreOrder(); }
+});
 
 function adminLogout() {
   document.getElementById('admin-panel').classList.remove('visible');
@@ -3543,16 +3648,17 @@ function adminLogout() {
 
 function loadAdminData() {
   document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr>';
-  fetch(FIREBASE_URL + '/birthday-mates.json')
-    .then(function(r){ return r.json(); })
+  fbJson(FIREBASE_URL + '/birthday-mates.json')
     .then(function(data) {
-      adminData = data || {};
+      adminData = (data && typeof data === 'object') ? data : {};
       renderAdminTable(adminData);
       updateStats(adminData);
+    })
+    .catch(function() {
+      document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="6" class="adm-empty">ডাটা লোড করতে সমস্যা হয়েছে। ↻ Refresh চাপুন।</td></tr>';
     });
   // Photo likes total (admin-only display)
-  fetch(FIREBASE_URL + '/photo-votes.json')
-    .then(function(r){ return r.json(); })
+  fbJson(FIREBASE_URL + '/photo-votes.json')
     .then(function(votes){
       var total = 0;
       if (votes && typeof votes === 'object') {
@@ -3569,8 +3675,8 @@ function loadAdminData() {
 
 function updateStats(data) {
   var keys   = Object.keys(data);
-  var today  = new Date().toISOString().slice(0,10);
-  var todayCt = keys.filter(function(k){ return data[k].timestamp && data[k].timestamp.slice(0,10) === today; }).length;
+  var todayStr = new Date().toDateString();   // local day, not UTC
+  var todayCt = keys.filter(function(k){ return data[k].timestamp && new Date(data[k].timestamp).toDateString() === todayStr; }).length;
 
   // count entries that have at least one match
   var mdMap = {};
@@ -3608,15 +3714,15 @@ function renderAdminTable(data) {
   tbody.innerHTML = keys.map(function(k, i) {
     var p   = data[k];
     var dt  = p.timestamp ? new Date(p.timestamp).toLocaleString('bn-BD') : '—';
-    return '<tr id="row-'+k+'">'
-      + '<td style="color:rgba(255,255,255,.3)">' + (i+1) + '</td>'
-      + '<td><strong>' + (p.name||'—') + '</strong></td>'
-      + '<td style="color:rgba(255,255,255,.55);font-size:12px">' + (p.faculty||'—') + '</td>'
-      + '<td>' + (p.birthday||'—') + '</td>'
-      + '<td style="color:rgba(255,255,255,.35);font-size:12px">' + dt + '</td>'
+    return '<tr id="row-'+esc(k)+'">'
+      + '<td class="adm-dim">' + (i+1) + '</td>'
+      + '<td><strong>' + esc(p.name||'—') + '</strong></td>'
+      + '<td class="adm-dim2">' + esc(p.faculty||'—') + '</td>'
+      + '<td>' + esc(p.birthday||'—') + '</td>'
+      + '<td class="adm-dim3">' + esc(dt) + '</td>'
       + '<td>'
-      + '<button class="adm-edit-btn" onclick="openEdit(\'' + k + '\')">✏ Edit</button>'
-      + '<button class="adm-del-btn" onclick="deleteEntry(\'' + k + '\')">🗑</button>'
+      + '<button class="adm-edit-btn" onclick="openEdit(\'' + esc(k) + '\')">✏ Edit</button>'
+      + '<button class="adm-del-btn" onclick="deleteEntry(\'' + esc(k) + '\')" aria-label="Delete entry">🗑</button>'
       + '</td>'
       + '</tr>';
   }).join('');
@@ -3637,25 +3743,30 @@ function filterTable() {
 
 function deleteEntry(key) {
   if (!confirm('এই এন্ট্রি ডিলিট করবেন?')) return;
-  fetch(FIREBASE_URL + '/birthday-mates/' + key + '.json', { method: 'DELETE' })
-    .then(function(){ delete adminData[key]; renderAdminTable(adminData); updateStats(adminData); });
+  fbWrite(FIREBASE_URL + '/birthday-mates/' + encodeURIComponent(key) + '.json', 'DELETE')
+    .then(function(){ delete adminData[key]; filterTable(); updateStats(adminData); showAdmToast('🗑 এন্ট্রি মুছে গেছে'); })
+    .catch(function(){ showAdmToast('⚠️ মুছতে পারিনি, internet চেক করো', 'warn'); });
 }
 
 function openEdit(key) {
   var p   = adminData[key];
+  if (!p) return;
+  var old = document.getElementById('adm-edit-modal'); if (old) old.remove();
+  var faculties = ['Agriculture','Fisheries','Veterinary, Animal and Biomedical Sciences','Agricultural Economics & Business Studies','Agricultural Engineering & Technology','Biotechnology & Genetic Engineering'];
+  // keep an unknown/legacy faculty selectable so saving never silently changes it
+  if (p.faculty && faculties.indexOf(p.faculty) < 0) faculties.push(p.faculty);
   var box = document.createElement('div');
   box.className = 'adm-edit-modal';
   box.id = 'adm-edit-modal';
   box.innerHTML = '<div class="adm-edit-box">'
     + '<div class="adm-edit-title">✏️ তথ্য সম্পাদনা</div>'
-    + '<div class="adm-edit-field"><label>নাম</label><input id="edit-name" value="' + (p.name||'') + '"/></div>'
+    + '<div class="adm-edit-field"><label>নাম</label><input id="edit-name" value="' + esc(p.name||'') + '"/></div>'
     + '<div class="adm-edit-field"><label>Faculty</label><select id="edit-fac">'
-    + ['Agriculture','Fisheries','Veterinary, Animal and Biomedical Sciences','Agricultural Economics & Business Studies','Agricultural Engineering & Technology','Biotechnology & Genetic Engineering']
-      .map(function(f){ return '<option' + (p.faculty===f?' selected':'') + '>' + f + '</option>'; }).join('')
+    + faculties.map(function(f){ return '<option' + (p.faculty===f?' selected':'') + '>' + esc(f) + '</option>'; }).join('')
     + '</select></div>'
-    + '<div class="adm-edit-field"><label>জন্মতারিখ</label><input type="date" id="edit-bday" value="' + (p.birthday||'') + '"/></div>'
+    + '<div class="adm-edit-field"><label>জন্মতারিখ</label><input type="date" id="edit-bday" value="' + esc(p.birthday||'') + '"/></div>'
     + '<div class="adm-edit-btns">'
-    + '<button class="adm-save-btn" onclick="saveEdit(\'' + key + '\')">সেভ করুন</button>'
+    + '<button class="adm-save-btn" onclick="saveEdit(\'' + esc(key) + '\')">সেভ করুন</button>'
     + '<button class="adm-cancel-btn" onclick="document.getElementById(\'adm-edit-modal\').remove()">বাতিল</button>'
     + '</div></div>';
   document.body.appendChild(box);
@@ -3668,16 +3779,14 @@ function saveEdit(key) {
     birthday:  document.getElementById('edit-bday').value,
     timestamp: adminData[key].timestamp
   };
-  fetch(FIREBASE_URL + '/birthday-mates/' + key + '.json', {
-    method: 'PATCH',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(updated)
-  }).then(function(){
-    adminData[key] = updated;
-    document.getElementById('adm-edit-modal').remove();
-    renderAdminTable(adminData);
+  if (!updated.name || !updated.birthday) { showAdmToast('⚠️ নাম আর জন্মতারিখ দিন', 'warn'); return; }
+  fbWrite(FIREBASE_URL + '/birthday-mates/' + encodeURIComponent(key) + '.json', 'PATCH', updated).then(function(){
+    adminData[key] = Object.assign({}, adminData[key], updated);
+    var m = document.getElementById('adm-edit-modal'); if (m) m.remove();
+    filterTable();
     updateStats(adminData);
-  });
+    showAdmToast('✅ সেভ হয়েছে');
+  }).catch(function(){ showAdmToast('⚠️ সেভ হয়নি, internet চেক করো', 'warn'); });
 }
 
 function exportExcel() {
@@ -3694,7 +3803,8 @@ function exportExcel() {
   var url  = URL.createObjectURL(blob);
   var a    = document.createElement('a');
   a.href = url; a.download = 'birthday-mates-' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click(); URL.revokeObjectURL(url);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
 }
 
 
@@ -3702,6 +3812,7 @@ function toggleMenu() {
   var m = document.getElementById("mob-menu");
   var b = document.getElementById("mob-btn");
   m.classList.toggle("open");
+  b.setAttribute("aria-expanded", m.classList.contains("open") ? "true" : "false");
   var spans = b.querySelectorAll("span");
   if (m.classList.contains("open")) {
     spans[0].style.transform = "rotate(45deg) translate(5px,5px)";
@@ -3738,10 +3849,16 @@ function toggleMenu() {
     document.querySelectorAll(sel).forEach(function(g){g.setAttribute('data-stagger','')});
   });
 
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}});
-  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
-  document.querySelectorAll('[data-reveal],[data-stagger]').forEach(function(el){io.observe(el)});
+  // threshold 0: a tall block can never reach "12% visible" on a short phone viewport and would stay invisible forever
+  var revealEls=document.querySelectorAll('[data-reveal],[data-stagger]');
+  if(!('IntersectionObserver' in window)){
+    revealEls.forEach(function(el){el.classList.add('in')});
+  }else{
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}});
+    },{threshold:0,rootMargin:'0px 0px -40px 0px'});
+    revealEls.forEach(function(el){io.observe(el)});
+  }
 
   // subtle parallax on hero glow / logo
   var glow=document.querySelector('.hero-glow');
@@ -3763,6 +3880,7 @@ function toggleMenu() {
 
   // count-up for stats
   document.querySelectorAll('.stat-num').forEach(function(n){
+    if(n.id==='fcount')return; // follower count has its own roller animation
     var txt=n.textContent.trim();var m=txt.match(/(\d[\d,]*)/);if(!m)return;
     var target=parseInt(m[1].replace(/,/g,''),10);if(!isFinite(target))return;
     var suffix=txt.slice(m.index+m[0].length);var prefix=txt.slice(0,m.index);
@@ -3790,7 +3908,8 @@ function toggleMenu() {
   const root=document.documentElement;
   const saved=(()=>{try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch(e){return{}}})();
   const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const state={theme:saved.theme||'forest',mode:saved.mode||'light'};
+  // The colour-theme swatches are hidden in the current design, so always use the forest palette; only light/dark is user-switchable.
+  const state={theme:'forest',mode:saved.mode==='dark'?'dark':'light'};
   function apply(){root.setAttribute('data-theme',state.theme);root.setAttribute('data-mode',state.mode);try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}refresh()}
   function refresh(){
     document.querySelectorAll('.theme-bar button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.theme===state.theme?'true':'false'));
@@ -3845,7 +3964,7 @@ function toggleMenu() {
     const mobBtn=document.getElementById('mob-btn');if(mobBtn){mobBtn.setAttribute('aria-label','Toggle mobile menu');mobBtn.setAttribute('aria-expanded','false');mobBtn.setAttribute('aria-controls','mob-menu')}
     document.querySelectorAll('img:not([alt])').forEach(i=>i.setAttribute('alt',''));
     // Keyboard: Esc closes mobile menu
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=document.getElementById('mob-menu');if(m&&m.classList.contains('active')&&typeof toggleMenu==='function')toggleMenu()}});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=document.getElementById('mob-menu');if(m&&m.classList.contains('open')&&typeof toggleMenu==='function')toggleMenu()}});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
@@ -3856,16 +3975,16 @@ function toggleMenu() {
 (function(){
   function loadTodayBdays(){
     var FB = (typeof FIREBASE_URL !== 'undefined') ? FIREBASE_URL : 'https://aesthetic-sau-default-rtdb.firebaseio.com';
-    fetch(FB + '/birthday-mates.json').then(function(r){return r.json()}).then(function(data){
-      if(!data) return;
+    fetch(FB + '/birthday-mates.json').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(data){
+      if(!data || typeof data !== 'object') return;
       var now = new Date();
       var todayMD = String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
       var seen = {};
       var today = [];
       Object.keys(data).forEach(function(k){
         var p = data[k];
-        if(!p || !p.birthday || !p.name) return;
-        var pp = p.birthday.split('-');
+        if(!p || typeof p !== 'object' || !p.birthday || !p.name) return;
+        var pp = String(p.birthday).split('-');
         if(pp.length < 3) return;
         var md = String(parseInt(pp[1],10)).padStart(2,'0') + '-' + String(parseInt(pp[2],10)).padStart(2,'0');
         if(md !== todayMD) return;
@@ -3898,10 +4017,22 @@ function toggleMenu() {
 })();
 </script>
 
+<script>
+// Fallbacks: the Firebase SDK for live games is an ES module loaded from gstatic. If it is blocked/offline the
+// game buttons used to throw "ReferenceError"; now they explain what is wrong. The module overrides these when it loads.
+(function(){
+  function unavailable(){ siteToast('🎮 Live games এখন connect হচ্ছে না — internet চেক করে page reload করুন', 'warn'); }
+  ['openGameLobby','sendGameRequest','cancelRequest','makeRPSChoice','playAgainRPS','playAgainTTT','sendChatMsg'].forEach(function(n){ if(typeof window[n] !== 'function') window[n] = unavailable; });
+  if(typeof window.dismissNotify !== 'function') window.dismissNotify = function(){ var el=document.getElementById('game-notify'); if(el) el.style.display='none'; };
+  if(typeof window.closeGameModal !== 'function') window.closeGameModal = function(){ var m=document.getElementById('game-modal'); if(m) m.style.display='none'; };
+  if(typeof window.closeGameFloat !== 'function') window.closeGameFloat = function(){};
+})();
+</script>
+
 <!-- Firebase: Presence + Visits + Games + Chat -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, onValue, set, remove, push, onDisconnect, runTransaction, get, off, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getDatabase, ref, onValue, set, remove, push, onDisconnect, runTransaction, get, off, update, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 const FIREBASE_CONFIG = { databaseURL: "https://aesthetic-sau-default-rtdb.firebaseio.com" };
 const app = initializeApp(FIREBASE_CONFIG, 'sau-main');
@@ -4001,6 +4132,18 @@ let myRole = null;
 let activeRequestId = null;
 let gameListenerOff = null;
 let shownNotifyIds = new Set();
+let reqTimer = null, reqUnsub = null, chatUnsub = null;
+
+function stopRequestWatch() {
+  if (reqTimer) { clearInterval(reqTimer); reqTimer = null; }
+  if (reqUnsub) { reqUnsub(); reqUnsub = null; }
+}
+// Remove my pending request (if any) and stop its countdown/listener.
+async function dropActiveRequest() {
+  stopRequestWatch();
+  const id = activeRequestId; activeRequestId = null;
+  if (id) await remove(ref(db, 'game-requests/' + id)).catch(() => {});
+}
 
 window.closeGameFloat = function() {
   const el = document.getElementById('game-float');
@@ -4043,15 +4186,20 @@ window.dismissNotify = function() {
 
 async function acceptRequest(rid, req) {
   dismissNotify();
+  // Claim the whole request atomically. Returning undefined aborts the transaction when somebody else was faster
+  // (the old code also "committed" in that case, so two guests could both think they had joined).
   let claimed = false;
-  const reqStatusRef = ref(db, 'game-requests/' + rid + '/status');
-  await runTransaction(reqStatusRef, (current) => {
-    if (current === 'waiting') { claimed = true; return 'matched'; }
-    return current;
-  }).then(res => { claimed = res.committed; }).catch(() => {});
+  try {
+    const res = await runTransaction(ref(db, 'game-requests/' + rid), (cur) => {
+      if (cur && cur.status === 'waiting') {
+        cur.status = 'matched'; cur.guestSid = MY_SID; cur.guestName = MY_NAME;
+        return cur;
+      }
+      return; // abort
+    });
+    claimed = res.committed;
+  } catch (e) { claimed = false; }
   if (!claimed) { showToast('আরেকজন আগেই join করেছেন!'); return; }
-  await set(ref(db, 'game-requests/' + rid + '/guestSid'), MY_SID);
-  await set(ref(db, 'game-requests/' + rid + '/guestName'), MY_NAME);
   currentGameId = rid;
   currentGameType = req.gameType;
   myRole = 'guest';
@@ -4067,6 +4215,7 @@ async function acceptRequest(rid, req) {
 
 window.openGameLobby = function(gameType) {
   closeGameFloat();
+  dropActiveRequest();
   const modal = document.getElementById('game-modal');
   const gmBody = document.getElementById('gm-body');
   const gmTitle = document.getElementById('gm-title');
@@ -4084,6 +4233,7 @@ window.openGameLobby = function(gameType) {
 
 window.sendGameRequest = async function(gameType) {
   const gmBody = document.getElementById('gm-body');
+  await dropActiveRequest();
   gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;">
     <div style="font-size:40px;margin-bottom:16px;">⏳</div>
     <p style="color:rgba(255,255,255,.7);font-size:14px;margin-bottom:6px;font-weight:600;">Matching হচ্ছে...</p>
@@ -4092,35 +4242,57 @@ window.sendGameRequest = async function(gameType) {
     <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;">সেকেন্ড বাকি</p>
     <button onclick="cancelRequest()" style="margin-top:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);padding:8px 24px;border-radius:8px;font-size:12px;cursor:pointer;">Cancel</button>
   </div>`;
-  const reqRef = ref(db, 'game-requests');
-  const newReq = await push(reqRef, { fromSid: MY_SID, fromName: MY_NAME, gameType, status: 'waiting', ts: Date.now() });
+  let newReq;
+  try {
+    newReq = await push(ref(db, 'game-requests'), { fromSid: MY_SID, fromName: MY_NAME, gameType, status: 'waiting', ts: Date.now() });
+  } catch (e) {
+    gmBody.innerHTML = '<p style="text-align:center;color:#f87171;padding:36px 0;font-size:14px;">Request পাঠানো যায়নি। Internet চেক করে আবার চেষ্টা করুন।</p>';
+    return;
+  }
   activeRequestId = newReq.key;
   currentGameType = gameType;
   myRole = 'host';
   let secs = 30;
   const timerEl = document.getElementById('req-timer');
-  const countdown = setInterval(() => {
+  reqTimer = setInterval(() => {
     secs--;
-    if (timerEl) timerEl.textContent = secs;
-    if (secs <= 0) { clearInterval(countdown); cancelRequest(true); }
+    if (timerEl) timerEl.textContent = Math.max(secs, 0);
+    if (secs <= 0) requestTimedOut(gameType);
   }, 1000);
   const thisReqRef = ref(db, 'game-requests/' + activeRequestId);
-  onValue(thisReqRef, (snap) => {
+  reqUnsub = onValue(thisReqRef, (snap) => {
     if (!snap.exists()) return;
     const data = snap.val();
-    if (data.status === 'matched' && data.guestSid) {
-      clearInterval(countdown);
-      off(thisReqRef);
-      currentGameId = activeRequestId;
-      if (gmBody) gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;"><div style="font-size:48px;margin-bottom:12px;">🎉</div><p style="color:#4caf50;font-size:16px;font-weight:700;margin-bottom:4px;">${data.guestName} join করেছেন!</p><p style="color:rgba(255,255,255,.5);font-size:12px;">Game শুরু হচ্ছে...</p></div>`;
-      setTimeout(() => openGameRoom(currentGameId, gameType), 1200);
+    // the guest claims the request atomically, so status/guestSid/guestName arrive together
+    if (data.status === 'matched' && data.guestSid && data.guestName) {
+      const rid = activeRequestId;
+      stopRequestWatch();
+      activeRequestId = null;
+      currentGameId = rid;
+      gmBody.innerHTML = `<div style="text-align:center;padding:30px 0;"><div style="font-size:48px;margin-bottom:12px;">🎉</div><p style="color:#4caf50;font-size:16px;font-weight:700;margin-bottom:4px;">${escHtml(data.guestName)} join করেছেন!</p><p style="color:rgba(255,255,255,.5);font-size:12px;">Game শুরু হচ্ছে...</p></div>`;
+      remove(thisReqRef).catch(() => {}); // the request has done its job; don't let them pile up in the DB
+      setTimeout(() => openGameRoom(rid, gameType), 1200);
     }
   });
 };
 
-window.cancelRequest = async function(auto = false) {
-  if (activeRequestId) { await remove(ref(db, 'game-requests/' + activeRequestId)).catch(() => {}); activeRequestId = null; }
-  if (!auto) closeGameModal();
+// Nobody accepted in time: say so instead of leaving a frozen "0" on screen.
+function requestTimedOut(gameType) {
+  dropActiveRequest();
+  const gmBody = document.getElementById('gm-body');
+  if (!gmBody) return;
+  gmBody.innerHTML = `<div style="text-align:center;padding:26px 0;">
+    <div style="font-size:44px;margin-bottom:14px;">😴</div>
+    <p style="color:rgba(255,255,255,.75);font-size:14px;font-weight:600;margin-bottom:6px;">এই মুহূর্তে কেউ accept করেননি</p>
+    <p style="color:rgba(255,255,255,.4);font-size:12px;line-height:1.7;margin-bottom:20px;">আরও কিছু visitor online এলে আবার চেষ্টা করুন।</p>
+    <button onclick="openGameLobby('${gameType}')" style="background:#4caf50;border:none;color:#000;padding:12px 30px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;">🔄 আবার চেষ্টা করুন</button>
+    <button onclick="closeGameModal()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);padding:10px 24px;border-radius:10px;font-size:13px;cursor:pointer;width:100%;">বন্ধ করুন</button>
+  </div>`;
+}
+
+window.cancelRequest = async function() {
+  await dropActiveRequest();
+  closeGameModal();
 };
 
 function openGameRoom(gameId, gameType) {
@@ -4146,9 +4318,14 @@ function renderTTT(gameId) {
   renderChatArea(gameId);
   const gameRef = ref(db, 'game-rooms/' + gameId);
   if (gameListenerOff) gameListenerOff();
-  gameListenerOff = () => off(gameRef);
-  onValue(gameRef, (snap) => {
-    if (!snap.exists()) { gmBody.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.4);padding:40px 0;">Game শেষ হয়ে গেছে।</p>'; return; }
+  let roomSeen = false;
+  gameListenerOff = onValue(gameRef, (snap) => {
+    if (!snap.exists()) {
+      // The host can open the room a moment before the guest finished creating it: wait instead of declaring it over.
+      if (roomSeen) gmBody.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,.4);padding:40px 0;">Game শেষ হয়ে গেছে।</p>';
+      return;
+    }
+    roomSeen = true;
     const g = snap.val();
     const board = g.board || Array(9).fill('');
     const isMyTurn = g.turn === MY_SID;
@@ -4157,7 +4334,7 @@ function renderTTT(gameId) {
     const oppName = amHost ? (g.guestName || '...') : (g.hostName || '...');
     const oppSid = amHost ? g.guest : g.host;
     const info = document.getElementById('ttt-info');
-    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${mySymbol} · ${MY_NAME}</b></span><span>vs <b style="color:#f2f2ee">${oppName}</b></span>`;
+    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${mySymbol} · ${MY_NAME}</b></span><span>vs <b style="color:#f2f2ee">${escHtml(oppName)}</b></span>`;
     const statusEl = document.getElementById('ttt-status');
     const winner = checkWinnerTTT(board);
     if (winner || !board.includes('')) {
@@ -4180,7 +4357,11 @@ function renderTTT(gameId) {
       btn.style.color = cell === 'X' ? '#4caf50' : '#f87171';
       if (cell) btn.setAttribute('data-filled', '1');
       if (!cell && isMyTurn && !winner && board.includes(''))
-        btn.onclick = () => makeTTTMove(gameId, board, i, mySymbol, oppSid);
+        btn.onclick = () => {
+          // lock the board straight away so a double-click can't place two marks
+          boardEl.querySelectorAll('button').forEach(b => { b.onclick = null; });
+          makeTTTMove(gameId, board, i, mySymbol, oppSid);
+        };
       boardEl.appendChild(btn);
     });
   });
@@ -4193,15 +4374,14 @@ function checkWinnerTTT(b) {
 }
 async function makeTTTMove(gameId, board, idx, symbol, oppSid) {
   const newBoard = [...board]; newBoard[idx] = symbol;
-  await set(ref(db, 'game-rooms/' + gameId + '/board'), newBoard);
-  await set(ref(db, 'game-rooms/' + gameId + '/turn'), oppSid);
+  // one atomic write: two separate writes briefly showed the board with the turn still on me
+  await update(ref(db, 'game-rooms/' + gameId), { board: newBoard, turn: oppSid });
 }
 window.playAgainTTT = async function(gameId) {
   const snap = await get(ref(db, 'game-rooms/' + gameId));
   if (!snap.exists()) return;
   const g = snap.val();
-  await set(ref(db, 'game-rooms/' + gameId + '/board'), Array(9).fill(''));
-  await set(ref(db, 'game-rooms/' + gameId + '/turn'), g.guest);
+  await update(ref(db, 'game-rooms/' + gameId), { board: Array(9).fill(''), turn: g.guest });
   document.getElementById('ttt-result').style.display = 'none';
   document.getElementById('ttt-again').style.display = 'none';
 };
@@ -4223,8 +4403,7 @@ function renderRPS(gameId) {
   renderChatArea(gameId);
   const gameRef = ref(db, 'game-rooms/' + gameId);
   if (gameListenerOff) gameListenerOff();
-  gameListenerOff = () => off(gameRef);
-  onValue(gameRef, (snap) => {
+  gameListenerOff = onValue(gameRef, (snap) => {
     if (!snap.exists()) return;
     const g = snap.val();
     const amHost = g.host === MY_SID;
@@ -4234,7 +4413,7 @@ function renderRPS(gameId) {
     const myChoice = g[myKey];
     const oppChoice = g[oppKey];
     const info = document.getElementById('rps-info');
-    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${MY_NAME}</b></span><span>vs <b style="color:#f2f2ee">${oppName}</b></span>`;
+    if (info) info.innerHTML = `<span>আপনি: <b style="color:#4caf50">${MY_NAME}</b></span><span>vs <b style="color:#f2f2ee">${escHtml(oppName)}</b></span>`;
     const statusEl = document.getElementById('rps-status');
     const btns = document.querySelectorAll('.rps-btn');
     const resultEl = document.getElementById('rps-result');
@@ -4269,8 +4448,7 @@ window.makeRPSChoice = async function(gameId, choice) {
   document.querySelectorAll('.rps-btn').forEach((b,i) => { const map={rock:0,paper:1,scissors:2}; b.classList.toggle('chosen', i===map[choice]); });
 };
 window.playAgainRPS = async function(gameId) {
-  await set(ref(db, 'game-rooms/' + gameId + '/hostChoice'), null);
-  await set(ref(db, 'game-rooms/' + gameId + '/guestChoice'), null);
+  await update(ref(db, 'game-rooms/' + gameId), { hostChoice: null, guestChoice: null });
   document.getElementById('rps-result').style.display = 'none';
   document.getElementById('rps-again').style.display = 'none';
   document.querySelectorAll('.rps-btn').forEach(b => { b.disabled=false; b.style.opacity='1'; b.classList.remove('chosen'); });
@@ -4296,18 +4474,19 @@ function renderChatArea(gameId) {
     </div>`;
   // Listen for chat messages
   const chatRef = ref(db, 'game-chat/' + gameId);
-  onValue(chatRef, (snap) => {
+  if (chatUnsub) chatUnsub();   // every new game used to stack another live listener
+  chatUnsub = onValue(chatRef, (snap) => {
     const container = document.getElementById('chat-messages');
     if (!container) return;
     container.innerHTML = '';
     if (!snap.exists()) { container.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,.25);text-align:center;margin-top:20px;">এখনো কোনো message নেই</div>'; return; }
     const msgs = snap.val();
-    Object.values(msgs).sort((a,b) => a.ts - b.ts).forEach(msg => {
+    Object.values(msgs).filter(m => m && typeof m === 'object').sort((a,b) => (a.ts||0) - (b.ts||0)).forEach(msg => {
       const isMe = msg.sid === MY_SID;
       const div = document.createElement('div');
       div.style.cssText = `display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};`;
       div.innerHTML = `
-        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:2px;${isMe?'text-align:right':''}">${isMe?'আপনি':msg.name}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:2px;${isMe?'text-align:right':''}">${isMe?'আপনি':escHtml(msg.name)}</div>
         <div style="background:${isMe?'rgba(76,175,80,.2)':'rgba(255,255,255,.07)'};border:1px solid ${isMe?'rgba(76,175,80,.3)':'rgba(255,255,255,.1)'};border-radius:${isMe?'12px 12px 2px 12px':'12px 12px 12px 2px'};padding:7px 11px;font-size:13px;color:#f2f2ee;max-width:220px;word-break:break-word;line-height:1.5;">${escHtml(msg.text)}</div>`;
       container.appendChild(div);
     });
@@ -4316,7 +4495,7 @@ function renderChatArea(gameId) {
 }
 
 function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 window.sendChatMsg = async function(gameId) {
@@ -4334,8 +4513,13 @@ window.closeGameModal = function() {
   const modal = document.getElementById('game-modal');
   if (modal) modal.style.display = 'none';
   if (gameListenerOff) { gameListenerOff(); gameListenerOff = null; }
-  if (activeRequestId) cancelRequest(true);
+  if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+  dropActiveRequest();
 };
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('game-modal');
+  if (e.key === 'Escape' && modal && modal.style.display !== 'none' && modal.style.display !== '') closeGameModal();
+});
 
 // ── Toast ──
 function showToast(msg) {
@@ -4641,4 +4825,91 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 </style>
 
+<style id="unified-theme-v5">
+html{scroll-padding-top:76px}
+html:root[data-mode="light"]{--bg:#f7faf8;--bg2:#eef4f0;--cardc:#fff;--tx:#0f1a14;--tx2:#3f4f46;--tx3:#5f6f66;--ln:rgba(15,26,20,.12);--ac:#1f6b45;--acs:#e6f2ea;
+ --black:#f7faf8;--deep:#eef4f0;--card:#fff;--border:#dfe7e2;--green:#1f6b45;--gl:#2a8556;--gg:#e6f2ea;--white:#0f1a14;--muted:#5f6f66;--accent:#1f6b45;
+ --ink-1:#0f1a14;--ink-2:#3f4f46;--ink-3:#5f6f66;--ink-4:#6f7d75;--surface:#fff;--surface-strong:#f1f5f2;--line:rgba(15,26,20,.12);--line-strong:rgba(15,26,20,.2);
+ --brand-300:#1f6b45;--brand-400:#1f6b45;--brand-500:#1f6b45;--brand-600:#154b31;--brand-glow:rgba(31,107,69,.25);--grad-brand:linear-gradient(135deg,#1f6b45,#2a8556);
+ --e-card:0 1px 2px rgba(15,26,20,.05),0 8px 24px -12px rgba(15,26,20,.12);--e-lift:0 18px 40px -16px rgba(15,26,20,.22);--theme-bg:#f7faf8;--theme-surface:#fff;--theme-text:#0f1a14;--theme-muted:#5f6f66}
+html:root[data-mode="dark"]{--bg:#0a110d;--bg2:#0e1812;--cardc:#121c16;--tx:#f1f8f4;--tx2:#bccbc2;--tx3:#8fa297;--ln:rgba(255,255,255,.1);--ac:#34d399;--acs:rgba(52,211,153,.12);
+ --black:#0a110d;--deep:#0e1812;--card:#121c16;--border:rgba(255,255,255,.1);--green:#34d399;--gl:#6ee7b7;--gg:rgba(52,211,153,.12);--white:#f1f8f4;--muted:#8fa297;--accent:#34d399;
+ --ink-1:#f1f8f4;--ink-2:#bccbc2;--ink-3:#8fa297;--ink-4:#6f8076;--surface:rgba(255,255,255,.05);--surface-strong:rgba(255,255,255,.09);--line:rgba(255,255,255,.1);--line-strong:rgba(255,255,255,.18);
+ --theme-bg:#0a110d;--theme-surface:#121c16;--theme-text:#f1f8f4;--theme-muted:#8fa297}
+html[data-mode] body{background:var(--bg)!important;color:var(--tx)!important}
+html[data-mode] body::after{display:none}
+html[data-mode] .h-title,html[data-mode] .sec-ti,html[data-mode] .stat-num,html[data-mode] .stat-num *{background:none!important;-webkit-text-fill-color:var(--tx)!important;color:var(--tx)!important}
+html[data-mode] .h-title span,html[data-mode] .stat-num span{-webkit-text-fill-color:var(--ac)!important;color:var(--ac)!important}
+html[data-mode] .sec-ey,html[data-mode] .cw-eyebrow,html[data-mode] .h-eyebrow{color:var(--ac)!important;-webkit-text-fill-color:var(--ac)!important}
+html[data-mode] .sec-no,html[data-mode] .stat-lbl{color:var(--tx3)!important}
+html[data-mode] p{color:var(--tx2)}
+html[data-mode] section,html[data-mode] footer{color:var(--tx)!important}
+html[data-mode] .sec-dark,html[data-mode] .cw-section,html[data-mode] .bday-sec,html[data-mode] .product-sec,html[data-mode] .team-sec{background:var(--bg2)!important}
+html[data-mode] nav{background:color-mix(in srgb,var(--bg) 88%,transparent)!important;border-bottom:1px solid var(--ln)!important}
+html[data-mode] .nav-brand,html[data-mode] .nav-logo span{color:var(--tx)!important;-webkit-text-fill-color:var(--tx)!important}
+html[data-mode] .nav-links a{color:var(--tx2)!important}
+html[data-mode] .nav-links a:hover{color:var(--tx)!important;background:var(--acs)!important}
+html[data-mode] .nav-links a.nav-strong{color:var(--ac)!important;background:var(--acs)!important}
+html[data-mode="dark"] .nav-fb,html[data-mode="dark"] .nav-fb *{color:#04140d!important}
+html[data-mode="dark"] .nav-fb,html[data-mode="dark"] .btn-fill,html[data-mode="dark"] .participate-big-btn{background:var(--ac)!important}
+html[data-mode] .nav-mobile-menu{background:var(--cardc)!important;border-bottom:1px solid var(--ln)!important}
+html[data-mode] .nav-mobile-menu a{color:var(--tx)!important}
+html[data-mode] .nav-mobile-btn span{background:var(--tx)!important}
+.theme-mode-toggle{color:var(--tx)!important;background:var(--acs)!important;border:1px solid var(--ln)!important;width:32px!important;height:32px!important}
+html[data-mode] .stats-bar,html[data-mode] .feat-card,html[data-mode] #visitor-bar,html[data-mode] #game-section{background:var(--cardc)!important;border-color:var(--ln)!important}
+html[data-mode] .feat-card h3,html[data-mode] .feat-card{color:var(--tx)}
+html[data-mode] .feat-card p,html[data-mode] .h-sub{color:var(--tx2)!important;-webkit-text-fill-color:var(--tx2)!important}
+html[data-mode] .feat-tag,html[data-mode] .feat-cta{color:var(--ac)}
+html[data-mode] .feat-tag{background:var(--acs)}
+html[data-mode] #visitor-bar *,html[data-mode] #game-section>span{color:var(--tx3)!important}
+html[data-mode] #visitor-bar #daily-visitor-count{color:var(--tx)!important}
+html[data-mode] #game-section button{background:var(--acs)!important;color:var(--ac)!important;border-color:var(--ln)!important}
+html[data-mode] .btn-ghost{background:var(--cardc)!important;color:var(--tx)!important;-webkit-text-fill-color:var(--tx)!important;border-color:var(--ln)!important}
+html[data-mode] .gc-card,html[data-mode] .fan-card,html[data-mode] .tm-card,html[data-mode] .ev-card,html[data-mode] .product-card,html[data-mode] .bday-card,html[data-mode] .cwm-wrap,html[data-mode] .chithi-box,html[data-mode] .how-card{background:var(--cardc)!important;border:1px solid var(--ln)!important;color:var(--tx)!important}
+html[data-mode] .product-name,html[data-mode] .gc-title,html[data-mode] .fan-name,html[data-mode] .tm-name,html[data-mode] .ev-name,html[data-mode] .cwm-name,html[data-mode] .bday-top h3{color:var(--tx)!important}
+html[data-mode] .product-sub,html[data-mode] .product-feat,html[data-mode] .product-note,html[data-mode] .bday-top p,html[data-mode] .gc-credit,html[data-mode] .tm-bio,html[data-mode] .fan-tag,html[data-mode] .cwm-meta,html[data-mode] .ev-desc,html[data-mode] .ev-val,html[data-mode] .product-colors-lbl{color:var(--tx2)!important}
+html[data-mode] .product-name span{color:var(--ac)!important}
+html[data-mode] .bday-top{background:var(--acs)!important}
+html[data-mode] .bday-field label,html[data-mode] .bday-field label span{color:var(--tx3)!important}
+html[data-mode] .bday-field input,html[data-mode] .bday-field select{background:var(--bg)!important;color:var(--tx)!important;border:1px solid var(--ln)!important}
+html[data-mode] .bday-field input::placeholder{color:var(--tx3)}
+html[data-mode] .bday-submit,html[data-mode] .product-order-btn{background:var(--ac)!important;color:#fff!important}
+html[data-mode="dark"] .bday-submit,html[data-mode="dark"] .product-order-btn{color:#04140d!important}
+html[data-mode] .cwm-badge{color:#8a6500!important}
+html[data-mode="dark"] .cwm-badge{color:#f5c842!important}
+.cw-empty{text-align:center;padding:60px;color:var(--tx3)}
+.cw-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.35}
+html[data-mode="light"] .gc-img,html[data-mode="light"] .product-img-wrap,html[data-mode="light"] .cwm-photo,html[data-mode="light"] .ev-gitem{background:#e8eeea!important;animation:none!important}
+.tm-fb{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--acs);color:var(--ac);flex-shrink:0}
+#aesthetic-tab .wrap>.rv:not(.sec-head),#today-bday-card{--white:#f4faf7;--muted:#b4c2ba;--green:#34d399;color:#f4faf7}
+#aesthetic-tab .wrap>.rv:not(.sec-head) h3{color:#f4faf7!important}
+.extra-panel{padding:60px 0;border-top:1px solid var(--ln)}.extra-panel-body{margin-top:24px;color:var(--tx2);line-height:1.8}
+.adm-dim{color:rgba(255,255,255,.3)}.adm-dim2{color:rgba(255,255,255,.55);font-size:12px}.adm-dim3{color:rgba(255,255,255,.35);font-size:12px}
+#ann-bar{position:absolute;top:60px;left:0;right:0;z-index:250;display:none;background:var(--ac);color:#fff;text-align:center;padding:9px 16px;font-size:13px;font-weight:600}
+html[data-mode="dark"] #ann-bar{color:#04140d}
+.site-toast{position:fixed;bottom:28px;left:50%;transform:translate(-50%,12px);opacity:0;background:var(--ac);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 28px rgba(0,0,0,.25);transition:opacity .3s,transform .3s;max-width:calc(100vw - 32px);text-align:center}
+.site-toast.show{opacity:1;transform:translate(-50%,0)}.site-toast.warn{background:#b45309;color:#fff}
+html[data-mode="dark"] .site-toast:not(.warn){color:#04140d}
+.po-backdrop{position:absolute;inset:0;background:rgba(5,12,8,.7);backdrop-filter:blur(4px)}
+.preorder-box{background:var(--cardc)!important;border:1px solid var(--ln)!important;color:var(--tx);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.po-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:1px solid var(--ln);background:var(--bg2);color:var(--tx);cursor:pointer}
+.po-head{text-align:center;margin-bottom:20px}.po-ico{font-size:40px}.po-head h3,.po-done-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--tx);margin:6px 0}.po-head p,.po-done-sub{color:var(--tx2);font-size:13px;line-height:1.7}
+.po-field label{color:var(--tx3)!important}.po-field input,.po-field select{background:var(--bg)!important;color:var(--tx)!important;border:1px solid var(--ln)!important}
+.po-submit{width:100%;background:var(--ac);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+html[data-mode="dark"] .po-submit{color:#04140d}.po-submit:disabled{opacity:.5}
+@media(max-width:900px){.team-grid{grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:700px){#aesthetic-tab .wrap>.rv:not(.sec-head)>div[style*="grid-template-columns"]{grid-template-columns:1fr!important}
+ #aesthetic-tab .wrap>.rv:not(.sec-head) div[style*="padding:48px 44px"]{padding:28px 20px!important;border-right:0!important}
+ .sec-head{flex-direction:column;align-items:flex-start!important;gap:8px}
+ #game-notify{left:12px;right:12px;max-width:none;top:68px}}
+@media(max-width:560px){.team-grid{grid-template-columns:1fr!important}.stats-bar{gap:10px!important;padding:16px 8px!important}.stat-num{font-size:26px!important}}
+html[data-mode] .cw-title{color:var(--tx)!important}html[data-mode] .cw-title span{color:var(--ac)!important}
+html[data-mode] .cw-header p{color:var(--tx3)!important}
+html[data-mode] .tm-name-blur .tm-blur-text{color:var(--tx)!important;font-size:17px;font-weight:700}
+.tm-card{cursor:pointer}
+.tm-card.revealed .tm-blur-text{filter:blur(0)!important}
+.tm-card.revealed .tm-bio{filter:none!important;user-select:text;-webkit-user-select:text}
+html[data-mode] .tm-card.revealed .tm-bio{color:var(--tx2)!important}
+.tm-card:not(.revealed) .tm-name-blur::after{content:"Tap to reveal";display:block;font-size:10px;letter-spacing:.5px;color:var(--tx3);margin-top:4px}
+</style>
 </html>
