@@ -4911,5 +4911,28 @@ html[data-mode] .tm-name-blur .tm-blur-text{color:var(--tx)!important;font-size:
 .tm-card.revealed .tm-bio{filter:none!important;user-select:text;-webkit-user-select:text}
 html[data-mode] .tm-card.revealed .tm-bio{color:var(--tx2)!important}
 .tm-card:not(.revealed) .tm-name-blur::after{content:"Tap to reveal";display:block;font-size:10px;letter-spacing:.5px;color:var(--tx3);margin-top:4px}
+/* ===== light-mode contrast pass (every text >= 4.5:1) ===== */
+html[data-mode="light"] .btn-fill,html[data-mode="light"] .nav-fb,html[data-mode="light"] .participate-big-btn,html[data-mode="light"] .ch-btn,html[data-mode="light"] .gc-teaser-btn,html[data-mode="light"] .gc-cat{background:#1f6b45!important;background-image:none!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+html[data-mode="light"] .nav-fb *,html[data-mode="light"] .ch-btn *{color:#fff!important}
+html[data-mode="light"] .btn-fill:hover,html[data-mode="light"] .nav-fb:hover,html[data-mode="light"] .ch-btn:hover{background:#154b31!important}
+html[data-mode="light"] .bday-top h3 span{color:#6d28d9!important}
+html[data-mode="light"] .product-tag{color:#5b21b6!important;background:#ede9fe!important;border-color:#c4b5fd!important}
+html[data-mode="light"] .product-tag[style*="color:#aaa"]{color:#4b5563!important;background:#f1f5f2!important;border-color:#d5ddd8!important}
+html[data-mode="light"] #news-portal p,html[data-mode="light"] #news-portal .sec-no{color:var(--tx2)!important}
+html[data-mode="light"] #news-portal [style*="rgba(255,255,255"]{color:var(--tx2)!important}
+html[data-mode="light"] #aesthetic-tab .sec-no{color:#14532d!important;background:#dcfce7!important}
+#aesthetic-tab .wrap>.rv:not(.sec-head) [style*="color:rgba(255,255,255"]{color:rgba(255,255,255,.78)!important}
+html[data-mode="light"] .chithi-box a:not(.ch-btn),html[data-mode="light"] .ch-url a,html[data-mode="light"] .ch-url-ico{color:#1f6b45!important}
+html[data-mode="light"] .chithi-box p,html[data-mode="light"] .ch-left p,html[data-mode="light"] .ch-right p{color:var(--tx2)!important}
+html[data-mode="light"] footer span:not(.ftv-count),html[data-mode="light"] footer p,html[data-mode="light"] .foot-copy{color:var(--tx2)!important}
+html[data-mode="light"] footer .ftv-count{color:#1f6b45!important}
+html[data-mode="light"] .cwm-nav{background:#0f1a14!important;color:#fff!important}
+/* every remaining hard-coded white/grey text on a light surface */
+html[data-mode="light"] .ev-card [style*="color:rgba(255,255,255"],html[data-mode="light"] .product-card [style*="color:rgba(255,255,255"],html[data-mode="light"] #content [style*="color:rgba(255,255,255"],html[data-mode="light"] #fans [style*="color:rgba(255,255,255"],html[data-mode="light"] #team [style*="color:rgba(255,255,255"],html[data-mode="light"] .bday-card [style*="color:rgba(255,255,255"],html[data-mode="light"] #contest [style*="color:rgba(255,255,255"]{color:var(--tx3)!important}
+html[data-mode] .h-title span,html[data-mode] .stat-num span{background:none!important;background-image:none!important;-webkit-background-clip:border-box!important;background-clip:border-box!important}
+html[data-mode] footer span:not(.ftv-count){color:var(--tx2)!important}
+html[data-mode] .ch-url-ico{background:var(--acs)!important;color:var(--ac)!important}
+html[data-mode] .gc-teaser-icon{color:var(--tx3)!important;opacity:1}
+.skip-link{color:#fff!important;background:#1f6b45!important}
 </style>
 </html>
