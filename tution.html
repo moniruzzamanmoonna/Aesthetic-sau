@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAU TUITION by Aesthetic SAU — ডেমো প্রোটোটাইপ</title>
+<meta name="description" content="সিলেট কৃষি বিশ্ববিদ্যালয় ক্যাম্পাস ও সিলেট শহরের টিউটর এবং অভিভাবকদের সংযুক্ত করার একটি সহজ প্ল্যাটফর্ম। (ডেমো প্রোটোটাইপ)">
+<meta name="theme-color" content="#0b3d2e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');try{var _l=localStorage.getItem('sau-tuition-lang');document.documentElement.lang=_l==='en'?'en':'bn'}catch(e){document.documentElement.lang='bn'}</script>
+<style>
+:root{
+  --forest:#0b3d2e; --forest-2:#0f5a41; --forest-3:#072a20;
+  --emerald:#10b981; --emerald-d:#059669; --emerald-dd:#047857;
+  --mint:#d1fae5; --mint-2:#ecfdf5; --mint-3:#a7f3d0;
+  --ink:#0f1f1a; --muted:#5a6b64; --line:#e3ece8;
+  --bg:#f5faf7; --white:#fff; --gold:#f5c451; --amber-bg:#fff7e0; --amber:#8a5a00;
+  --r-lg:24px; --r-md:16px; --r-sm:12px;
+  --sh-sm:0 1px 2px rgba(11,61,46,.06),0 4px 14px rgba(11,61,46,.06);
+  --sh-md:0 10px 30px -8px rgba(11,61,46,.18);
+  --sh-lg:0 30px 60px -20px rgba(11,61,46,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{font-family:'Hind Siliguri','Noto Sans Bengali','Kalpurush','Nirmala UI','Vrinda',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body.lock{overflow:hidden}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+svg{display:block}
+.ico{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.container{width:min(1160px,100% - 40px);margin-inline:auto}
+:focus-visible{outline:3px solid rgba(16,185,129,.45);outline-offset:2px;border-radius:8px}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:600;font-size:1.02rem;line-height:1.2;transition:transform .2s,box-shadow .2s,background .2s,color .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-primary{color:#fff;background:linear-gradient(135deg,var(--emerald) 0%,var(--emerald-dd) 100%);box-shadow:0 10px 24px -8px rgba(5,150,105,.7)}
+.btn-primary:hover{box-shadow:0 14px 28px -8px rgba(5,150,105,.8)}
+.btn-ghost{background:#fff;color:var(--forest);border:1.5px solid var(--mint-3);box-shadow:var(--sh-sm)}
+.btn-ghost:hover{border-color:var(--emerald);background:var(--mint-2)}
+.btn-light{background:#fff;color:var(--forest);box-shadow:0 14px 30px -10px rgba(0,0,0,.4)}
+.btn-sm{padding:10px 18px;font-size:.95rem}
+.btn .ico{width:1.1em;height:1.1em}
+
+/* ---------- Demo strip ---------- */
+.demo-strip{background:var(--forest-3);color:#bff0dc;font-size:.88rem;text-align:center;padding:7px 16px}
+.demo-strip b{color:#fff;font-weight:600}
+
+/* ---------- Nav ---------- */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid rgba(11,61,46,.08)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--emerald),var(--forest));display:grid;place-items:center;box-shadow:0 8px 18px -6px rgba(11,61,46,.55)}
+.brand-mark svg{width:26px;height:26px}
+.brand-txt{display:flex;flex-direction:column;line-height:1.1}
+.brand-name{font-weight:700;font-size:1.28rem;letter-spacing:.04em;color:var(--forest)}
+.brand-name span{color:var(--emerald-d)}
+.brand-by{font-size:.74rem;color:var(--muted);letter-spacing:.02em;margin-top:3px}
+.brand-by b{color:var(--emerald-dd);font-weight:600}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a.lnk{padding:9px 16px;border-radius:999px;font-weight:500;color:#2c453b;transition:background .2s,color .2s}
+.nav-links a.lnk:hover,.nav-links a.lnk.active{background:var(--mint-2);color:var(--emerald-dd)}
+.nav-cta{display:flex;align-items:center;gap:10px}
+.burger{display:none;width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:#fff;place-items:center}
+.burger .ico{width:22px;height:22px}
+.mobile-menu{display:none}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;overflow:clip;background:
+  radial-gradient(900px 500px at 85% -10%,rgba(16,185,129,.22),transparent 60%),
+  radial-gradient(700px 420px at -10% 30%,rgba(167,243,208,.55),transparent 60%),
+  linear-gradient(180deg,#f0fbf6 0%,var(--bg) 100%)}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(11,61,46,.09) 1.2px,transparent 1.3px);background-size:26px 26px;mask-image:linear-gradient(180deg,#000 0%,transparent 75%);-webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 75%);pointer-events:none}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.02fr .98fr;gap:56px;align-items:center;padding:64px 0 150px}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:7px 16px 7px 10px;border-radius:999px;background:#fff;border:1px solid var(--mint-3);font-size:.9rem;font-weight:500;color:var(--emerald-dd);box-shadow:var(--sh-sm)}
+.pill i{width:22px;height:22px;border-radius:50%;background:var(--mint);display:grid;place-items:center}
+.pill i::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--emerald)}
+h1{font-size:clamp(2.25rem,4.9vw,3.7rem);line-height:1.22;font-weight:700;color:var(--forest);margin:22px 0 18px;letter-spacing:-.01em}
+h1 em{font-style:normal;background:linear-gradient(120deg,var(--emerald) 10%,var(--emerald-dd) 90%);-webkit-background-clip:text;background-clip:text;color:transparent;position:relative;white-space:nowrap}
+.hero-sub{font-size:1.14rem;color:var(--muted);max-width:540px}
+.hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px}
+.hero-btns .btn{padding:16px 30px;font-size:1.08rem}
+.trust{display:flex;flex-wrap:wrap;gap:12px 26px;margin-top:34px;color:#35564a;font-size:.96rem}
+.trust span{display:inline-flex;align-items:center;gap:8px}
+.trust .ico{color:var(--emerald-d);width:1.2em;height:1.2em;padding:3px;background:var(--mint);border-radius:50%;stroke-width:3}
+
+/* hero visual */
+.visual{position:relative;max-width:520px;width:100%;margin-inline:auto}
+.panel{position:relative;aspect-ratio:1/1.04;border-radius:36px;overflow:hidden;background:linear-gradient(150deg,#0b3d2e 0%,#0f6a4a 55%,#10b981 120%);box-shadow:var(--sh-lg)}
+.panel::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.14) 1.3px,transparent 1.4px);background-size:22px 22px;mask-image:radial-gradient(circle at 70% 25%,#000,transparent 70%);-webkit-mask-image:radial-gradient(circle at 70% 25%,#000,transparent 70%)}
+.panel svg{position:absolute;inset:0;width:100%;height:100%}
+.float{position:absolute;background:#fff;border-radius:18px;box-shadow:0 18px 40px -12px rgba(7,42,32,.35);padding:14px 16px;display:flex;gap:12px;align-items:center}
+.f-a{top:26px;left:-34px;max-width:270px;animation:bob 6s ease-in-out infinite}
+.f-b{bottom:42px;right:-26px;animation:bob 7s ease-in-out -2s infinite}
+.f-c{top:47%;right:-22px;padding:10px 14px;border-radius:14px;font-size:.88rem;font-weight:600;color:var(--forest);animation:bob 5.5s ease-in-out -1s infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.f-ico{width:42px;height:42px;border-radius:12px;background:var(--mint);color:var(--emerald-dd);display:grid;place-items:center;flex:none}
+.f-ico .ico{width:22px;height:22px}
+.f-t{font-weight:600;font-size:.96rem;line-height:1.3;color:var(--forest)}
+.f-s{font-size:.82rem;color:var(--muted);line-height:1.35;margin-top:2px}
+.tag-demo{display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--amber-bg);color:var(--amber);vertical-align:middle}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--emerald),var(--forest));color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+.live{width:9px;height:9px;border-radius:50%;background:var(--emerald);box-shadow:0 0 0 4px rgba(16,185,129,.2);flex:none}
+
+/* ---------- Stats ---------- */
+.stats{position:relative;margin-top:-92px;z-index:5}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.stat{background:#fff;border-radius:var(--r-lg);padding:26px 28px;display:flex;align-items:center;gap:20px;box-shadow:var(--sh-md);border:1px solid rgba(11,61,46,.06);transition:transform .25s}
+.stat:hover{transform:translateY(-4px)}
+.stat-ico{width:60px;height:60px;border-radius:18px;background:linear-gradient(145deg,var(--mint),var(--mint-3));color:var(--emerald-dd);display:grid;place-items:center;flex:none}
+.stat-ico .ico{width:28px;height:28px}
+.stat-num{font-size:2.4rem;font-weight:700;color:var(--forest);line-height:1.1}
+.stat-lbl{font-weight:500;color:#2f4a3f;line-height:1.35}
+.stat-lbl small{display:block;color:var(--muted);font-size:.78rem}
+.stats-note{text-align:center;font-size:.84rem;color:var(--muted);margin-top:14px}
+
+/* ---------- Sections ---------- */
+section{position:relative}
+.sec{padding:84px 0 0}
+.eyebrow{display:inline-block;font-size:.88rem;font-weight:600;color:var(--emerald-dd);background:var(--mint);padding:5px 14px;border-radius:999px;margin-bottom:14px}
+h2{font-size:clamp(1.7rem,3.4vw,2.5rem);line-height:1.3;font-weight:700;color:var(--forest)}
+.sec-sub{color:var(--muted);margin-top:10px;max-width:620px;font-size:1.05rem}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:30px}
+
+/* Search */
+.search{background:#fff;border-radius:28px;padding:26px;box-shadow:var(--sh-md);border:1px solid rgba(11,61,46,.06);display:grid;grid-template-columns:repeat(3,1fr) auto;gap:16px;align-items:end;margin-top:28px}
+.field label{display:block;font-size:.88rem;font-weight:600;color:#2f4a3f;margin-bottom:7px}
+.input,.select{width:100%;padding:14px 16px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:var(--bg);transition:border .2s,box-shadow .2s,background .2s;font-size:1rem;line-height:1.3}
+.select{appearance:none;-webkit-appearance:none;padding-right:42px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23047857' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center/16px}
+.input:hover,.select:hover{border-color:var(--mint-3)}
+.input:focus,.select:focus{outline:0;border-color:var(--emerald);background-color:#fff;box-shadow:0 0 0 4px rgba(16,185,129,.15)}
+.search-actions{display:flex;gap:10px}
+.search-actions .btn{padding:14px 24px}
+.result-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 4px 0;color:var(--muted)}
+.result-bar b{color:var(--forest)}
+.link-btn{color:var(--emerald-dd);font-weight:600;padding:4px 2px;border-bottom:2px solid var(--mint-3)}
+.link-btn:hover{border-color:var(--emerald)}
+
+/* Listings */
+.notice{display:flex;gap:12px;align-items:flex-start;background:var(--amber-bg);border:1px solid #f3dc9b;color:var(--amber);border-radius:var(--r-md);padding:12px 16px;font-size:.93rem;margin-bottom:26px}
+.notice .ico{margin-top:3px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.card{background:#fff;border-radius:var(--r-lg);border:1px solid rgba(11,61,46,.07);box-shadow:var(--sh-sm);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s}
+.card:hover{transform:translateY(-6px);box-shadow:var(--sh-md);border-color:var(--mint-3)}
+.card-top{padding:20px 22px 16px;background:linear-gradient(160deg,var(--mint-2),#fff 75%);position:relative}
+.card-top::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.16),transparent 70%)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font-size:.8rem;font-weight:600;padding:4px 12px;border-radius:999px;background:var(--forest);color:#fff}
+.chip.soft{background:var(--mint);color:var(--emerald-dd)}
+.chip.demo{margin-left:auto;background:var(--amber-bg);color:var(--amber);font-size:.7rem;letter-spacing:.04em;position:relative;z-index:1}
+.card h3{margin-top:14px;font-size:1.2rem;line-height:1.4;color:var(--forest);font-weight:700}
+.card-body{padding:6px 22px 4px;display:grid;gap:11px;flex:1}
+.row{display:flex;gap:12px;align-items:flex-start;color:#35493f;font-size:.96rem;line-height:1.5}
+.row .ico{margin-top:4px;color:var(--emerald-d);width:1.1em;height:1.1em}
+.row small{display:block;color:var(--muted);font-size:.82rem}
+.salary{display:flex;justify-content:space-between;align-items:center;margin:6px 22px 0;padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,var(--forest),var(--forest-2));color:#fff}
+.salary span{font-size:.85rem;color:#b8ecd6}
+.salary b{font-size:1.4rem;font-weight:700}
+.salary b small{font-size:.85rem;font-weight:500;color:#b8ecd6}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 22px 20px}
+.metrics{display:flex;gap:14px;color:var(--muted);font-size:.86rem}
+.metrics span{display:inline-flex;gap:6px;align-items:center}
+.empty{grid-column:1/-1;text-align:center;padding:56px 20px;background:#fff;border:1.5px dashed var(--mint-3);border-radius:var(--r-lg);color:var(--muted)}
+.empty .ico{width:44px;height:44px;margin:0 auto 12px;color:var(--emerald);stroke-width:1.6}
+.empty h3{color:var(--forest);margin-bottom:6px}
+
+/* How it works */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:40px;position:relative}
+.steps::before{content:"";position:absolute;top:58px;left:16%;right:16%;border-top:2px dashed var(--mint-3);z-index:0}
+.step{position:relative;z-index:1;background:#fff;border-radius:var(--r-lg);padding:34px 28px 30px;text-align:center;border:1px solid rgba(11,61,46,.07);box-shadow:var(--sh-sm);transition:transform .25s,box-shadow .25s}
+.step:hover{transform:translateY(-5px);box-shadow:var(--sh-md)}
+.step-ico{width:76px;height:76px;margin:0 auto 20px;border-radius:24px;background:linear-gradient(145deg,var(--emerald),var(--forest));color:#fff;display:grid;place-items:center;box-shadow:0 14px 26px -10px rgba(5,150,105,.8);position:relative}
+.step-ico .ico{width:34px;height:34px;stroke-width:1.8}
+.step-no{position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;background:#fff;color:var(--emerald-dd);font-weight:700;font-size:.9rem;display:grid;place-items:center;box-shadow:var(--sh-sm)}
+.step h3{font-size:1.25rem;color:var(--forest);margin-bottom:8px}
+.step p{color:var(--muted);font-size:.98rem}
+
+/* CTA */
+.cta{margin-top:96px}
+.cta-box{position:relative;overflow:hidden;border-radius:36px;padding:70px 56px;background:radial-gradient(600px 300px at 90% 0%,rgba(16,185,129,.45),transparent 65%),linear-gradient(135deg,var(--forest-3),var(--forest) 55%,var(--forest-2));color:#fff;display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center;box-shadow:var(--sh-lg)}
+.cta-box::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.12) 1.2px,transparent 1.3px);background-size:24px 24px;mask-image:linear-gradient(90deg,transparent 30%,#000);-webkit-mask-image:linear-gradient(90deg,transparent 30%,#000)}
+.cta-box>*{position:relative}
+.cta h2{color:#fff;font-size:clamp(1.7rem,3.6vw,2.6rem)}
+.cta p{color:#bfe9d6;margin-top:14px;max-width:520px;font-size:1.06rem}
+.cta-side{display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.cta .btn{padding:17px 32px;font-size:1.1rem}
+.cta ul{list-style:none;display:grid;gap:8px;color:#d6f5e7;font-size:.97rem}
+.cta li{display:flex;gap:10px;align-items:center}
+.cta li .ico{color:var(--mint-3);stroke-width:3;width:1em;height:1em}
+
+/* Footer */
+footer{margin-top:96px;background:var(--forest-3);color:#a9d8c3;padding:64px 0 28px}
+.foot-grid{display:grid;grid-template-columns:1.5fr .8fr .9fr;gap:40px}
+footer .brand-name{color:#fff}
+footer .brand-name span{color:var(--mint-3)}
+footer .brand-by{color:#8fc4ae}
+footer .brand-by b{color:var(--mint-3)}
+footer p{margin-top:16px;max-width:420px;font-size:.97rem}
+footer h4{color:#fff;font-size:1.02rem;margin-bottom:14px}
+footer ul{list-style:none;display:grid;gap:10px}
+footer ul a{transition:color .2s}
+footer ul a:hover{color:#fff}
+.foot-bottom{margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:.88rem;color:#7fb39d}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(7,42,32,.58);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.modal.open{opacity:1;visibility:visible}
+.sheet{position:relative;width:min(640px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:#fff;border-radius:28px;box-shadow:0 40px 80px -20px rgba(0,0,0,.5);transform:translateY(18px) scale(.98);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.modal.open .sheet{transform:none}
+.close{position:absolute;top:14px;right:14px;z-index:3;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.95);display:grid;place-items:center;color:var(--forest);box-shadow:var(--sh-sm);transition:transform .2s}
+.close:hover{transform:rotate(90deg)}
+.m-head{padding:34px 32px 26px;background:radial-gradient(300px 160px at 100% 0%,rgba(16,185,129,.4),transparent 70%),linear-gradient(145deg,var(--forest),var(--forest-2));color:#fff}
+.m-head .chip{background:rgba(255,255,255,.16)}
+.m-head .chip.demo{background:var(--amber-bg);margin-left:0}
+.m-head h3{font-size:1.65rem;line-height:1.35;margin-top:14px;padding-right:36px}
+.m-head p{color:#bfe9d6;margin-top:4px}
+.m-body{padding:26px 32px 32px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.info div{display:flex;gap:12px;padding:14px;border-radius:14px;background:var(--bg);border:1px solid var(--line)}
+.info .ico{color:var(--emerald-d);margin-top:3px}
+.info small{display:block;color:var(--muted);font-size:.8rem;line-height:1.3}
+.info b{font-weight:600;color:var(--forest);line-height:1.4;display:block}
+.m-sec{margin-top:22px}
+.m-sec h4{color:var(--forest);margin-bottom:6px}
+.m-sec p,.m-sec li{color:#3c5248}
+.m-sec ul{padding-left:20px;display:grid;gap:4px}
+.m-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.m-actions .btn{flex:1;min-width:150px}
+.inline-ok{margin-top:18px;padding:16px;border-radius:14px;background:var(--mint-2);border:1px solid var(--mint-3);color:var(--emerald-dd);display:flex;gap:12px;font-size:.96rem}
+.inline-ok .ico{margin-top:4px;stroke-width:3}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+.form-grid .full{grid-column:1/-1}
+.days{display:flex;flex-wrap:wrap;gap:8px}
+.days label{margin:0}
+.days input{position:absolute;opacity:0;pointer-events:none}
+.days span{display:inline-block;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);font-weight:500;font-size:.93rem;cursor:pointer;transition:all .2s;user-select:none}
+.days span:hover{border-color:var(--mint-3)}
+.days input:checked+span{background:var(--emerald);border-color:var(--emerald);color:#fff;box-shadow:0 6px 14px -6px rgba(5,150,105,.8)}
+.days input:focus-visible+span{outline:3px solid rgba(16,185,129,.4);outline-offset:2px}
+.money{position:relative}
+.money b{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--emerald-dd);font-weight:700}
+.money .input{padding-left:36px}
+.err{display:none;color:#b42318;font-size:.84rem;margin-top:5px}
+.field.bad .err{display:block}
+.field.bad .input,.field.bad .select{border-color:#f0a39b;background-color:#fff8f7}
+.hint{font-size:.84rem;color:var(--muted);margin-top:16px;display:flex;gap:8px;align-items:flex-start}
+.hint .ico{margin-top:4px;color:var(--emerald-d)}
+.success{text-align:center;padding:10px 0 4px}
+.success .tick{width:84px;height:84px;margin:0 auto 18px;border-radius:50%;background:linear-gradient(145deg,var(--emerald),var(--emerald-dd));color:#fff;display:grid;place-items:center;box-shadow:0 18px 30px -10px rgba(5,150,105,.75);animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+.success .tick .ico{width:40px;height:40px;stroke-width:3}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.success h3{font-size:1.5rem;color:var(--forest)}
+.success p{color:var(--muted);margin-top:8px}
+.summary{text-align:left;margin:22px 0 4px;padding:16px 18px;border-radius:16px;background:var(--bg);border:1px solid var(--line);display:grid;gap:8px;font-size:.96rem}
+.summary div{display:flex;justify-content:space-between;gap:16px}
+.summary span{color:var(--muted)}
+.summary b{color:var(--forest);font-weight:600;text-align:right}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:28px;z-index:200;transform:translate(-50%,30px);background:var(--forest);color:#fff;padding:14px 22px;border-radius:999px;box-shadow:var(--sh-lg);font-weight:500;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,.8,.2,1);max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Reveal */
+.js .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal.in{opacity:1;transform:none}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;gap:48px;padding-top:44px}
+  .hero-copy{text-align:center}
+  .hero-sub{margin-inline:auto}
+  .hero-btns,.trust{justify-content:center}
+  .visual{max-width:460px}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .search{grid-template-columns:1fr 1fr}
+  .search-actions{grid-column:1/-1}
+  .search-actions .btn-primary{flex:1}
+  .cta-box{grid-template-columns:1fr;padding:56px 36px}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .foot-grid>div:first-child{grid-column:1/-1}
+}
+@media (max-width:820px){
+  .nav-links,.nav-cta .btn{display:none}
+  .burger{display:grid}
+  .mobile-menu{display:block;position:absolute;left:0;right:0;top:100%;background:#fff;border-bottom:1px solid var(--line);box-shadow:var(--sh-md);padding:14px 20px 20px;transform-origin:top;transform:scaleY(.96);opacity:0;visibility:hidden;transition:all .2s}
+  .mobile-menu.open{opacity:1;visibility:visible;transform:none}
+  .mobile-menu a.lnk{display:block;padding:13px 14px;border-radius:12px;font-weight:500}
+  .mobile-menu a.lnk:hover{background:var(--mint-2)}
+  .mobile-menu .btn{width:100%;margin-top:10px}
+  .stats-grid{grid-template-columns:1fr}
+  .stat{padding:20px 22px}
+  .stats{margin-top:-80px}
+  .steps{grid-template-columns:1fr}
+  .steps::before{display:none}
+}
+@media (max-width:640px){
+  .container{width:min(100% - 32px,1160px)}
+  .demo-strip{font-size:.8rem}
+  .nav-in{height:64px}
+  .brand-mark{width:40px;height:40px}
+  .brand-name{font-size:1.15rem}
+  .hero-grid{padding:34px 0 130px;gap:40px}
+  h1{margin:18px 0 14px}
+  .hero-sub{font-size:1.04rem}
+  .hero-btns{flex-direction:column;gap:12px}
+  .hero-btns .btn{width:100%}
+  .trust{gap:10px 18px;font-size:.9rem}
+  .visual{max-width:360px}
+  .panel{border-radius:28px}
+  .f-a{left:-10px;top:14px;max-width:215px;padding:10px 12px}
+  .f-b{right:-8px;bottom:26px;padding:10px 12px}
+  .f-c{right:-8px}
+  .f-ico,.avatar{width:36px;height:36px}
+  .f-t{font-size:.86rem}.f-s{font-size:.74rem}
+  .sec{padding-top:64px}
+  .grid{grid-template-columns:1fr}
+  .search{grid-template-columns:1fr;padding:20px;border-radius:24px}
+  .cta{margin-top:72px}
+  .cta-box{padding:44px 24px;border-radius:28px}
+  .cta .btn{width:100%}
+  .foot-grid{grid-template-columns:1fr}
+  .modal{padding:0;place-items:end center}
+  .sheet{border-radius:26px 26px 0 0;max-height:94dvh}
+  .m-head{padding:30px 22px 22px}
+  .m-body{padding:22px}
+  .info,.form-grid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .js .reveal{opacity:1;transform:none}
+}
+
+/* ---------- Language system ---------- */
+html[lang=en] body{font-family:'Inter','Hind Siliguri',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+html[lang=en] h1{letter-spacing:-.025em;line-height:1.15}
+html[lang=en] h2{letter-spacing:-.015em;line-height:1.22}
+html[lang=en] .btn{letter-spacing:-.005em}
+html[lang=bn] h1{line-height:1.4;letter-spacing:0}
+html[lang=bn] h2,html[lang=bn] .m-head h3,html[lang=bn] .success h3{line-height:1.45}
+html[lang=bn] .card h3,html[lang=bn] .step h3{line-height:1.5}
+html[lang=bn] .eyebrow,html[lang=bn] .pill,html[lang=bn] .chip{letter-spacing:0}
+.lang{position:relative;display:inline-grid;grid-template-columns:1fr 1fr;align-items:center;height:42px;padding:4px;border-radius:999px;background:#fff;border:1.5px solid var(--mint-3);box-shadow:var(--sh-sm);isolation:isolate;flex:none}
+.lang::after{content:"";position:absolute;left:50%;top:50%;width:1px;height:16px;margin-top:-8px;background:rgba(11,61,46,.22);z-index:3;pointer-events:none;transition:opacity .25s}
+.lang-thumb{position:absolute;z-index:1;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:999px;background:linear-gradient(135deg,var(--emerald),var(--emerald-dd));box-shadow:0 6px 14px -6px rgba(5,150,105,.8);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.lang[data-active=bn] .lang-thumb{transform:translateX(100%)}
+.lang button{position:relative;z-index:2;height:100%;min-width:52px;padding:0 14px;border-radius:999px;font-weight:600;font-size:.92rem;line-height:1;color:var(--forest);transition:color .25s;white-space:nowrap}
+.lang button[lang=bn]{font-family:'Hind Siliguri','Noto Sans Bengali','Nirmala UI',sans-serif;font-size:.98rem}
+.lang button[lang=en]{font-family:'Inter',system-ui,sans-serif;letter-spacing:.03em}
+.lang button[aria-pressed=true]{color:#fff}
+.lang button:not([aria-pressed=true]):hover{color:var(--emerald-dd)}
+@media (max-width:640px){.nav-in{gap:10px}.nav-cta{gap:8px}.lang{height:38px}.lang button{min-width:44px;padding:0 10px;font-size:.85rem}.lang button[lang=bn]{font-size:.9rem}}
+@media (max-width:400px){.brand-by{display:none}.brand-mark{width:36px;height:36px}.brand{gap:8px}}
+</style>
+</head>
+<body>
+
+<div class="demo-strip"><b><span data-i18n="demo_prototype">ডেমো প্রোটোটাইপ</span></b> <span data-i18n="all_information_figures_and_tuitions">— এই পেজের সব তথ্য, সংখ্যা ও টিউশন কাল্পনিক। এখানে কোনো তথ্য সংরক্ষিত বা প্রেরিত হয় না।</span></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="top">
+  <div class="container nav-in">
+    <a href="#top" class="brand" aria-label="SAU TUITION by Aesthetic SAU">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 4.5 22 9.6 12 14.7 2 9.6z" fill="#fff"/>
+          <path d="M6 12.6v3.6c0 1.6 2.7 3.2 6 3.2s6-1.6 6-3.2v-3.6l-6 3.1z" fill="#a7f3d0"/>
+          <path d="M20.6 10.4v5" stroke="#f5c451" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-txt">
+        <span class="brand-name">SAU <span>TUITION</span></span>
+        <span class="brand-by">by <b>Aesthetic SAU</b></span>
+      </span>
+    </a>
+    <nav class="nav-links" aria-label="প্রধান মেনু" data-i18n-attr="aria-label:main_menu">
+      <a class="lnk active" href="#top" data-spy="top"><span data-i18n="home">হোম</span></a>
+      <a class="lnk" href="#find" data-spy="find"><span data-i18n="find_tuition">টিউশন খুঁজুন</span></a>
+      <a class="lnk" href="#how" data-spy="how"><span data-i18n="how_it_works">কীভাবে কাজ করে</span></a>
+    </nav>
+    <div class="nav-cta">
+      <div class="lang" data-active="bn" role="group" aria-label="Language" data-i18n-attr="aria-label:language">
+        <i class="lang-thumb" aria-hidden="true"></i>
+        <button type="button" data-lang="en" lang="en" title="English" aria-pressed="false">EN</button>
+        <button type="button" data-lang="bn" lang="bn" title="বাংলা" aria-pressed="true">বাংলা</button>
+      </div>
+      <button class="btn btn-primary btn-sm" data-action="post"><span data-i18n="post_a_tuition">টিউশন পোস্ট করুন</span></button>
+      <button class="burger" id="burger" aria-label="মেনু খুলুন" data-i18n-attr="aria-label:open_menu" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a class="lnk" href="#top"><span data-i18n="home">হোম</span></a>
+    <a class="lnk" href="#find"><span data-i18n="find_tuition">টিউশন খুঁজুন</span></a>
+    <a class="lnk" href="#how"><span data-i18n="how_it_works">কীভাবে কাজ করে</span></a>
+    <button class="btn btn-primary" data-action="post"><span data-i18n="post_a_tuition">টিউশন পোস্ট করুন</span></button>
+  </div>
+</header>
+
+<main>
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="pill"><i></i><span data-i18n="for_sylhet_agricultural_university_sylhet">সিলেট কৃষি বিশ্ববিদ্যালয় ও সিলেট শহরের জন্য</span></span>
+      <h1><span data-i18n="turn_your_talent_into">আপনার যোগ্যতায় গড়ুন</span> <em><span data-i18n="a_brighter_future">আগামীর ভবিষ্যৎ</span></em></h1>
+      <p class="hero-sub"><span data-i18n="a_simple_platform_connecting_tutors_11">সিলেট কৃষি বিশ্ববিদ্যালয় ক্যাম্পাস ও সিলেট শহরের টিউটর এবং অভিভাবকদের সংযুক্ত করার একটি সহজ প্ল্যাটফর্ম।</span></p>
+      <div class="hero-btns">
+        <a href="#find" class="btn btn-primary"><span data-i18n="find_tuition">টিউশন খুঁজুন</span> <svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <button class="btn btn-ghost" data-action="post"><span data-i18n="post_a_tuition">টিউশন পোস্ট করুন</span></button>
+      </div>
+      <div class="trust">
+        <span><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-i18n="completely_free">সম্পূর্ণ বিনামূল্যে</span></span>
+        <span><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-i18n="campuscentered">ক্যাম্পাস-কেন্দ্রিক</span></span>
+        <span><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-i18n="easy_applications">সহজ আবেদন</span></span>
+      </div>
+    </div>
+
+    <div class="visual" aria-hidden="true">
+      <div class="panel">
+        <svg viewBox="0 0 420 437" fill="none" preserveAspectRatio="xMidYMid slice">
+          <circle cx="330" cy="90" r="120" fill="rgba(255,255,255,.07)"/>
+          <circle cx="60" cy="380" r="150" fill="rgba(255,255,255,.06)"/>
+          <path d="M318 58c34-6 58 16 60 48-34 5-60-16-60-48z" fill="rgba(255,255,255,.18)"/>
+          <path d="M60 130c-26-4-44 14-45 38 26 4 46-12 45-38z" fill="rgba(255,255,255,.14)"/>
+          <circle cx="86" cy="76" r="4" fill="#a7f3d0"/><circle cx="372" cy="232" r="3.5" fill="#fff" opacity=".7"/>
+          <path d="M350 300l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#f5c451"/>
+          <ellipse cx="210" cy="372" rx="130" ry="14" fill="rgba(0,0,0,.22)"/>
+          <!-- books -->
+          <rect x="82" y="326" width="256" height="40" rx="10" fill="#ecfdf5"/>
+          <rect x="102" y="336" width="60" height="6" rx="3" fill="#10b981"/>
+          <rect x="106" y="284" width="214" height="40" rx="10" fill="#6ee7b7"/>
+          <rect x="300" y="294" width="8" height="20" rx="4" fill="#047857" opacity=".55"/>
+          <rect x="92" y="242" width="236" height="40" rx="10" fill="#fff"/>
+          <rect x="112" y="252" width="84" height="6" rx="3" fill="#0f6a4a"/>
+          <rect x="112" y="264" width="50" height="5" rx="2.5" fill="#a7f3d0"/>
+          <!-- cap -->
+          <path d="M210 108 318 156 210 204 102 156z" fill="#fff"/>
+          <path d="M210 108 318 156 210 204" fill="rgba(16,185,129,.12)"/>
+          <path d="M150 180v34c0 16 28 28 60 28s60-12 60-28v-34l-60 28z" fill="#a7f3d0"/>
+          <path d="M318 156v52" stroke="#f5c451" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="318" cy="214" r="7" fill="#f5c451"/>
+        </svg>
+      </div>
+
+      <div class="float f-a">
+        <div class="f-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg></div>
+        <div>
+          <div class="f-t"><span data-i18n="class_9_mathematics">নবম শ্রেণি · গণিত</span> <span class="tag-demo"><span data-i18n="demo">ডেমো</span></span></div>
+          <div class="f-s"><span data-i18n="tilagor_5000_month">টিলাগড় · ৳৫,০০০ / মাস</span></div>
+        </div>
+      </div>
+      <div class="float f-c"><svg class="ico" viewBox="0 0 24 24" style="color:var(--emerald-d)"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-i18n="3_days_a_week">সপ্তাহে ৩ দিন</span></div>
+      <div class="float f-b">
+        <div class="avatar"><span data-i18n="a">আ</span></div>
+        <div>
+          <div class="f-t"><span data-i18n="a_tutor_has_applied">টিউটর আবেদন করেছেন</span></div>
+          <div class="f-s" style="display:flex;align-items:center;gap:8px"><span class="live"></span><span data-i18n="just_now_demo">এইমাত্র · ডেমো</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats reveal">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg></div>
+        <div><div class="stat-num" data-count="128">০</div><div class="stat-lbl"><span data-i18n="available_tuitions">উপলব্ধ টিউশন</span><small><span data-i18n="demo_figure">ডেমো সংখ্যা</span></small></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></div>
+        <div><div class="stat-num" data-count="436">০</div><div class="stat-lbl"><span data-i18n="tutor_applications">টিউটর আবেদন</span><small><span data-i18n="demo_figure">ডেমো সংখ্যা</span></small></div></div>
+      </div>
+      <div class="stat">
+        <div class="stat-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg></div>
+        <div><div class="stat-num" data-count="57">০</div><div class="stat-lbl"><span data-i18n="successful_matches">সফল ম্যাচ</span><small><span data-i18n="demo_figure">ডেমো সংখ্যা</span></small></div></div>
+      </div>
+    </div>
+    <p class="stats-note"><span data-i18n="the_figures_above_are_entirely">* উপরের সংখ্যাগুলো সম্পূর্ণ কাল্পনিক, শুধু ডিজাইন প্রদর্শনের জন্য।</span></p>
+  </div>
+</section>
+
+<!-- ============ SEARCH + LISTINGS ============ -->
+<section class="sec" id="find">
+  <div class="container">
+    <div class="reveal">
+      <span class="eyebrow"><span data-i18n="find_tuition">টিউশন খুঁজুন</span></span>
+      <h2><span data-i18n="choose_the_tuition_that_suits">আপনার পছন্দের টিউশন বেছে নিন</span></h2>
+      <p class="sec-sub"><span data-i18n="filter_by_class_subject_and">শ্রেণি, বিষয় ও এলাকা অনুযায়ী ফিল্টার করে নিজের জন্য সবচেয়ে মানানসই টিউশন খুঁজে নিন।</span></p>
+    </div>
+
+    <form class="search reveal" id="searchForm" autocomplete="off">
+      <div class="field"><label for="fClass"><span data-i18n="class">শ্রেণি</span></label><select class="select" id="fClass"></select></div>
+      <div class="field"><label for="fSubject"><span data-i18n="subject">বিষয়</span></label><select class="select" id="fSubject"></select></div>
+      <div class="field"><label for="fLoc"><span data-i18n="area">এলাকা</span></label><select class="select" id="fLoc"></select></div>
+      <div class="search-actions">
+        <button type="submit" class="btn btn-primary"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span data-i18n="search">খুঁজুন</span></button>
+        <button type="button" class="btn btn-ghost" id="resetBtn"><span data-i18n="reset">রিসেট</span></button>
+      </div>
+    </form>
+
+    <div class="result-bar">
+      <span id="resultCount" aria-live="polite"></span>
+      <span style="font-size:.88rem"><span data-i18n="latest_demo_tuitions">সর্বশেষ ডেমো টিউশন</span></span>
+    </div>
+
+    <div class="notice" style="margin-top:16px">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+      <span><b><span data-i18n="demo_example">ডেমো উদাহরণ:</span></b> <span data-i18n="every_tuition_below_is_fictional">নিচের সব টিউশন কাল্পনিক। এগুলো আসল কোনো টিউশনের সুযোগ নয়, শুধু প্ল্যাটফর্মটি কেমন হতে পারে তা দেখানোর জন্য।</span></span>
+    </div>
+
+    <div class="grid" id="cards"></div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="sec" id="how">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <span class="eyebrow"><span data-i18n="how_it_works">কীভাবে কাজ করে</span></span>
+      <h2><span data-i18n="in_just_three_easy_steps">মাত্র তিনটি সহজ ধাপে</span></h2>
+      <p class="sec-sub" style="margin-inline:auto"><span data-i18n="no_complicated_process_search_apply">জটিল কোনো প্রক্রিয়া নেই। খুঁজুন, আবেদন করুন, আর নতুন সুযোগ তৈরি করুন।</span></p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="step-no" data-num="1">১</span></div>
+        <h3><span data-i18n="find_tuition">টিউশন খুঁজুন</span></h3>
+        <p><span data-i18n="filter_by_class_subject_and_39">শ্রেণি, বিষয় ও এলাকা দিয়ে ফিল্টার করে ক্যাম্পাসের কাছের টিউশনগুলো দেখে নিন।</span></p>
+      </div>
+      <div class="step reveal">
+        <div class="step-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg><span class="step-no" data-num="2">২</span></div>
+        <h3><span data-i18n="apply">আবেদন করুন</span></h3>
+        <p><span data-i18n="view_the_details_of_a">পছন্দের টিউশনের বিস্তারিত দেখে এক ক্লিকে আবেদন করুন, সময় ও বেতন আগেই জেনে নিন।</span></p>
+      </div>
+      <div class="step reveal">
+        <div class="step-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z"/><path d="M19 17l.8 1.9 1.9.8-1.9.8L19 22.4l-.8-1.9-1.9-.8 1.9-.8z"/></svg><span class="step-no" data-num="3">৩</span></div>
+        <h3><span data-i18n="create_opportunities">সুযোগ তৈরি করুন</span></h3>
+        <p><span data-i18n="open_a_new_path_to">পড়ানোর অভিজ্ঞতা ও আয়ের মাধ্যমে নিজের ভবিষ্যৎ গড়ার নতুন পথ খুলে নিন।</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GUARDIAN CTA ============ -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-box reveal">
+      <div>
+        <span class="pill" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#d6f5e7;box-shadow:none"><i style="background:rgba(255,255,255,.15)"></i><span data-i18n="for_guardians">অভিভাবকদের জন্য</span></span>
+        <h2 style="margin-top:18px"><span data-i18n="looking_for_a_qualified_tutor">আপনার সন্তানের জন্য যোগ্য টিউটর খুঁজছেন?</span></h2>
+        <p><span data-i18n="tell_us_what_you_need">আপনার প্রয়োজনের কথা জানান। ক্যাম্পাসের মেধাবী শিক্ষার্থীরা আপনার টিউশনে আবেদন করার সুযোগ পাবেন।</span></p>
+      </div>
+      <div class="cta-side">
+        <button class="btn btn-light" data-action="post"><span data-i18n="post_a_tuition">টিউশন পোস্ট করুন</span> <svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <ul>
+          <li><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-i18n="completely_free">সম্পূর্ণ বিনামূল্যে</span></li>
+          <li><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-i18n="form_takes_one_minute">এক মিনিটেই ফর্ম পূরণ</span></li>
+          <li><svg class="ico" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-i18n="tutors_close_to_campus">ক্যাম্পাসের কাছের টিউটর</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a href="#top" class="brand">
+          <span class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5 22 9.6 12 14.7 2 9.6z" fill="#fff"/><path d="M6 12.6v3.6c0 1.6 2.7 3.2 6 3.2s6-1.6 6-3.2v-3.6l-6 3.1z" fill="#a7f3d0"/><path d="M20.6 10.4v5" stroke="#f5c451" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </span>
+          <span class="brand-txt"><span class="brand-name">SAU <span>TUITION</span></span><span class="brand-by">by <b>Aesthetic SAU</b></span></span>
+        </a>
+        <p><span data-i18n="an_idea_for_a_free">সিলেট কৃষি বিশ্ববিদ্যালয় ক্যাম্পাস ও সিলেট শহরের টিউটর এবং অভিভাবকদের সংযুক্ত করার একটি বিনামূল্যের প্ল্যাটফর্মের ধারণা। বর্তমান পেজটি শুধুই একটি ডেমো প্রোটোটাইপ।</span></p>
+      </div>
+      <div>
+        <h4><span data-i18n="quick_links">দ্রুত লিংক</span></h4>
+        <ul>
+          <li><a href="#top"><span data-i18n="home">হোম</span></a></li>
+          <li><a href="#find"><span data-i18n="find_tuition">টিউশন খুঁজুন</span></a></li>
+          <li><a href="#how"><span data-i18n="how_it_works">কীভাবে কাজ করে</span></a></li>
+          <li><a href="#" data-action="post"><span data-i18n="post_a_tuition">টিউশন পোস্ট করুন</span></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Aesthetic SAU</h4>
+        <ul>
+          <li><span data-i18n="an_initiative_by_sau_students">SAU শিক্ষার্থীদের উদ্যোগ</span></li>
+          <li><span data-i18n="a_service_by_aesthetic_sau">একটি Aesthetic SAU সেবা</span></li>
+          <li><span data-i18n="demo_2026">ডেমো · ২০২৬</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span data-i18n="copyright">© ২০২৬ SAU TUITION · by Aesthetic SAU</span>
+      <span><span data-i18n="demo_prototype_all_information_is">ডেমো প্রোটোটাইপ — সব তথ্য কাল্পনিক</span></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ MODAL / TOAST ============ -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <button class="close" id="modalClose" aria-label="বন্ধ করুন" data-i18n-attr="aria-label:close"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  /* ---------- helpers ---------- */
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+
+  /* ---------- i18n: dictionary + helpers (frontend-only, no external APIs) ---------- */
+  const LS_KEY = 'sau-tuition-lang';
+  const I18N = {
+    en: {
+      "copyright": "© 2026 SAU TUITION · by Aesthetic SAU",
+      "sau_tuition_by_aesthetic_sau": "SAU TUITION by Aesthetic SAU — Demo Prototype",
+      "a_simple_platform_connecting_tutors": "A simple platform connecting tutors and guardians across the Sylhet Agricultural University campus and Sylhet city. (Demo prototype)",
+      "demo_prototype": "Demo Prototype",
+      "all_information_figures_and_tuitions": "— All information, figures and tuitions on this page are fictional. Nothing is saved or sent from here.",
+      "home": "Home",
+      "find_tuition": "Find Tuition",
+      "how_it_works": "How It Works",
+      "post_a_tuition": "Post a Tuition",
+      "for_sylhet_agricultural_university_sylhet": "For Sylhet Agricultural University & Sylhet city",
+      "turn_your_talent_into": "Turn your talent into",
+      "a_brighter_future": "a brighter future",
+      "a_simple_platform_connecting_tutors_11": "A simple platform connecting tutors and guardians across the Sylhet Agricultural University campus and Sylhet city.",
+      "completely_free": "Completely free",
+      "campuscentered": "Campus-centered",
+      "easy_applications": "Easy applications",
+      "class_9_mathematics": "Class 9 · Mathematics",
+      "demo": "Demo",
+      "tilagor_5000_month": "Tilagor · ৳5,000 / month",
+      "3_days_a_week": "3 days a week",
+      "a": "A",
+      "a_tutor_has_applied": "A tutor has applied",
+      "just_now_demo": "Just now · Demo",
+      "available_tuitions": "Available Tuitions",
+      "demo_figure": "Demo figure",
+      "tutor_applications": "Tutor Applications",
+      "successful_matches": "Successful Matches",
+      "the_figures_above_are_entirely": "* The figures above are entirely fictional, shown for design purposes only.",
+      "choose_the_tuition_that_suits": "Choose the tuition that suits you",
+      "filter_by_class_subject_and": "Filter by class, subject and area to find the tuition that fits you best.",
+      "class": "Class",
+      "subject": "Subject",
+      "area": "Area",
+      "search": "Search",
+      "reset": "Reset",
+      "latest_demo_tuitions": "Latest demo tuitions",
+      "demo_example": "Demo example:",
+      "every_tuition_below_is_fictional": "Every tuition below is fictional. These are not real opportunities — they only show how the platform could look.",
+      "in_just_three_easy_steps": "In just three easy steps",
+      "no_complicated_process_search_apply": "No complicated process. Search, apply and create new opportunities.",
+      "filter_by_class_subject_and_39": "Filter by class, subject and area to see tuitions near campus.",
+      "apply": "Apply",
+      "view_the_details_of_a": "View the details of a tuition you like, apply in one click, and know the schedule and pay upfront.",
+      "create_opportunities": "Create opportunities",
+      "open_a_new_path_to": "Open a new path to building your future through teaching experience and income.",
+      "for_guardians": "For guardians",
+      "looking_for_a_qualified_tutor": "Looking for a qualified tutor for your child?",
+      "tell_us_what_you_need": "Tell us what you need. Talented campus students will be able to apply for your tuition.",
+      "form_takes_one_minute": "Form takes one minute",
+      "tutors_close_to_campus": "Tutors close to campus",
+      "an_idea_for_a_free": "An idea for a free platform connecting tutors and guardians across the Sylhet Agricultural University campus and Sylhet city. This page is only a demo prototype.",
+      "quick_links": "Quick Links",
+      "an_initiative_by_sau_students": "An initiative by SAU students",
+      "a_service_by_aesthetic_sau": "A service by Aesthetic SAU",
+      "demo_2026": "Demo · 2026",
+      "demo_prototype_all_information_is": "Demo prototype — all information is fictional",
+      "main_menu": "Main menu",
+      "open_menu": "Open menu",
+      "close": "Close",
+      "views": "Views",
+      "applications": "Applications",
+      "eg_math_physics_chemistry": "e.g. Math, Physics, Chemistry",
+      "5000": "5000",
+      "sylhet": "{p0}, Sylhet",
+      "days_a_week": "{p0} days a week",
+      "monthly_salary": "Monthly salary",
+      "month": "/ month",
+      "view_details": "View details",
+      "no_tuitions_found": "No tuitions found",
+      "try_choosing_a_different_class": "Try choosing a different class, subject or area.",
+      "clear_all_filters": "Clear all filters",
+      "text": "{p0}",
+      "demo_example_71": "Demo example",
+      "time": "Time",
+      "student": "Student",
+      "preferred_tutor_medium": "Preferred tutor · Medium",
+      "guardians_requirement": "Guardian’s requirement",
+      "expectations": "Expectations",
+      "regular_attendance_at_the_scheduled": "Regular attendance at the scheduled time",
+      "monthly_progress_discussion_with_the": "Monthly progress discussion with the guardian",
+      "weekly_short_tests_or_practice": "Weekly short tests or practice",
+      "viewed_times": "Viewed {p0} times",
+      "tutors_applied": "{p0} tutors applied",
+      "maybe_later": "Maybe later",
+      "this_is_a_demo_example": "This is a demo example. No real application is sent or saved.",
+      "thank_you": "Thank you!",
+      "this_is_a_demo_so": "This is a demo, so nothing was sent. Once the platform launches, your application will reach the guardian from right here.",
+      "demo_form": "Demo form",
+      "tell_us_what_you_need_87": "Tell us what you need and campus tutors will apply.",
+      "students_class": "Student’s class",
+      "select_a_class": "Select a class",
+      "please_select_a_class": "Please select a class.",
+      "select_an_area": "Select an area",
+      "please_select_an_area": "Please select an area.",
+      "subjects": "Subjects",
+      "please_enter_at_least_one": "Please enter at least one subject.",
+      "which_days_of_the_week": "Which days of the week",
+      "please_choose_at_least_one": "Please choose at least one day.",
+      "select_a_time": "Select a time",
+      "please_select_a_time": "Please select a time.",
+      "expected_monthly_salary": "Expected monthly salary",
+      "please_enter_a_valid_amount": "Please enter a valid amount (minimum 500).",
+      "post": "Post",
+      "cancel": "Cancel",
+      "this_is_a_demo_form": "This is a demo form. Nothing you enter is saved or sent anywhere.",
+      "thank_you_your_demo_post": "Thank you! Your demo post is ready 🎉",
+      "this_is_how_your_tuition": "This is how your tuition post would reach campus students once the platform is live.",
+      "schedule": "Schedule",
+      "expected_salary": "Expected salary",
+      "month_108": "৳{p0} / month",
+      "ok": "OK",
+      "demo_no_information_was_saved": "Demo: no information was saved or sent.",
+      "all_classes": "All classes",
+      "all_subjects": "All subjects",
+      "all_areas": "All areas",
+      "demo_application_shown_successfully": "Demo: application shown successfully ✓",
+      "demo_post_shown_successfully": "Demo post shown successfully ✓",
+      "demo_tuitions_shown": "demo tuitions shown",
+      "language": "Language"
+    },
+    bn: {
+      "copyright": "© ২০২৬ SAU TUITION · by Aesthetic SAU",
+      "sau_tuition_by_aesthetic_sau": "SAU TUITION by Aesthetic SAU — ডেমো প্রোটোটাইপ",
+      "a_simple_platform_connecting_tutors": "সিলেট কৃষি বিশ্ববিদ্যালয় ক্যাম্পাস ও সিলেট শহরের টিউটর এবং অভিভাবকদের সংযুক্ত করার একটি সহজ প্ল্যাটফর্ম। (ডেমো প্রোটোটাইপ)",
+      "demo_prototype": "ডেমো প্রোটোটাইপ",
+      "all_information_figures_and_tuitions": "— এই পেজের সব তথ্য, সংখ্যা ও টিউশন কাল্পনিক। এখানে কোনো তথ্য সংরক্ষিত বা প্রেরিত হয় না।",
+      "home": "হোম",
+      "find_tuition": "টিউশন খুঁজুন",
+      "how_it_works": "কীভাবে কাজ করে",
+      "post_a_tuition": "টিউশন পোস্ট করুন",
+      "for_sylhet_agricultural_university_sylhet": "সিলেট কৃষি বিশ্ববিদ্যালয় ও সিলেট শহরের জন্য",
+      "turn_your_talent_into": "আপনার যোগ্যতায় গড়ুন",
+      "a_brighter_future": "আগামীর ভবিষ্যৎ",
+      "a_simple_platform_connecting_tutors_11": "সিলেট কৃষি বিশ্ববিদ্যালয় ক্যাম্পাস ও সিলেট শহরের টিউটর এবং অভিভাবকদের সংযুক্ত করার একটি সহজ প্ল্যাটফর্ম।",
+      "completely_free": "সম্পূর্ণ বিনামূল্যে",
+      "campuscentered": "ক্যাম্পাস-কেন্দ্রিক",
+      "easy_applications": "সহজ আবেদন",
+      "class_9_mathematics": "নবম শ্রেণি · গণিত",
+      "demo": "ডেমো",
+      "tilagor_5000_month": "টিলাগড় · ৳৫,০০০ / মাস",
+      "3_days_a_week": "সপ্তাহে ৩ দিন",
+      "a": "আ",
+      "a_tutor_has_applied": "টিউটর আবেদন করেছেন",
+      "just_now_demo": "এইমাত্র · ডেমো",
+      "available_tuitions": "উপলব্ধ টিউশন",
+      "demo_figure": "ডেমো সংখ্যা",
+      "tutor_applications": "টিউটর আবেদন",
+      "successful_matches": "সফল ম্যাচ",
+      "the_figures_above_are_entirely": "* উপরের সংখ্যাগুলো সম্পূর্ণ কাল্পনিক, শুধু ডিজাইন প্রদর্শনের জন্য।",
+      "choose_the_tuition_that_suits": "আপনার পছন্দের টিউশন বেছে নিন",
+      "filter_by_class_subject_and": "শ্রেণি, বিষয় ও এলাকা অনুযায়ী ফিল্টার করে নিজের জন্য সবচেয়ে মানানসই টিউশন খুঁজে নিন।",
+      "class": "শ্রেণি",
+      "subject": "বিষয়",
+      "area": "এলাকা",
+      "search": "খুঁজুন",
+      "reset": "রিসেট",
+      "latest_demo_tuitions": "সর্বশেষ ডেমো টিউশন",
+      "demo_example": "ডেমো উদাহরণ:",
+      "every_tuition_below_is_fictional": "নিচের সব টিউশন কাল্পনিক। এগুলো আসল কোনো টিউশনের সুযোগ নয়, শুধু প্ল্যাটফর্মটি কেমন হতে পারে তা দেখানোর জন্য।",
+      "in_just_three_easy_steps": "মাত্র তিনটি সহজ ধাপে",
+      "no_complicated_process_search_apply": "জটিল কোনো প্রক্রিয়া নেই। খুঁজুন, আবেদন করুন, আর নতুন সুযোগ তৈরি করুন।",
+      "filter_by_class_subject_and_39": "শ্রেণি, বিষয় ও এলাকা দিয়ে ফিল্টার করে ক্যাম্পাসের কাছের টিউশনগুলো দেখে নিন।",
+      "apply": "আবেদন করুন",
+      "view_the_details_of_a": "পছন্দের টিউশনের বিস্তারিত দেখে এক ক্লিকে আবেদন করুন, সময় ও বেতন আগেই জেনে নিন।",
+      "create_opportunities": "সুযোগ তৈরি করুন",
+      "open_a_new_path_to": "পড়ানোর অভিজ্ঞতা ও আয়ের মাধ্যমে নিজের ভবিষ্যৎ গড়ার নতুন পথ খুলে নিন।",
+      "for_guardians": "অভিভাবকদের জন্য",
+      "looking_for_a_qualified_tutor": "আপনার সন্তানের জন্য যোগ্য টিউটর খুঁজছেন?",
+      "tell_us_what_you_need": "আপনার প্রয়োজনের কথা জানান। ক্যাম্পাসের মেধাবী শিক্ষার্থীরা আপনার টিউশনে আবেদন করার সুযোগ পাবেন।",
+      "form_takes_one_minute": "এক মিনিটেই ফর্ম পূরণ",
+      "tutors_close_to_campus": "ক্যাম্পাসের কাছের টিউটর",
+      "an_idea_for_a_free": "সিলেট কৃষি বিশ্ববিদ্যালয় ক্যাম্পাস ও সিলেট শহরের টিউটর এবং অভিভাবকদের সংযুক্ত করার একটি বিনামূল্যের প্ল্যাটফর্মের ধারণা। বর্তমান পেজটি শুধুই একটি ডেমো প্রোটোটাইপ।",
+      "quick_links": "দ্রুত লিংক",
+      "an_initiative_by_sau_students": "SAU শিক্ষার্থীদের উদ্যোগ",
+      "a_service_by_aesthetic_sau": "একটি Aesthetic SAU সেবা",
+      "demo_2026": "ডেমো · ২০২৬",
+      "demo_prototype_all_information_is": "ডেমো প্রোটোটাইপ — সব তথ্য কাল্পনিক",
+      "main_menu": "প্রধান মেনু",
+      "open_menu": "মেনু খুলুন",
+      "close": "বন্ধ করুন",
+      "views": "দেখা হয়েছে",
+      "applications": "আবেদন",
+      "eg_math_physics_chemistry": "যেমন: গণিত, পদার্থবিজ্ঞান, রসায়ন",
+      "5000": "৫০০০",
+      "sylhet": "{p0}, সিলেট",
+      "days_a_week": "সপ্তাহে {p0} দিন",
+      "monthly_salary": "মাসিক বেতন",
+      "month": "/ মাস",
+      "view_details": "বিস্তারিত দেখুন",
+      "no_tuitions_found": "কোনো টিউশন পাওয়া যায়নি",
+      "try_choosing_a_different_class": "অন্য শ্রেণি, বিষয় বা এলাকা বেছে আবার চেষ্টা করুন।",
+      "clear_all_filters": "সব ফিল্টার মুছুন",
+      "text": "{p0}টি",
+      "demo_example_71": "ডেমো উদাহরণ",
+      "time": "সময়",
+      "student": "শিক্ষার্থী",
+      "preferred_tutor_medium": "পছন্দের টিউটর · মাধ্যম",
+      "guardians_requirement": "অভিভাবকের প্রয়োজন",
+      "expectations": "প্রত্যাশা",
+      "regular_attendance_at_the_scheduled": "নির্ধারিত সময়ে নিয়মিত উপস্থিতি",
+      "monthly_progress_discussion_with_the": "প্রতি মাসে অগ্রগতি নিয়ে অভিভাবকের সঙ্গে আলোচনা",
+      "weekly_short_tests_or_practice": "সাপ্তাহিক ছোট পরীক্ষা বা অনুশীলন",
+      "viewed_times": "{p0} বার দেখা হয়েছে",
+      "tutors_applied": "{p0} জন আবেদন করেছেন",
+      "maybe_later": "পরে দেখব",
+      "this_is_a_demo_example": "এটি একটি ডেমো উদাহরণ। কোনো আসল আবেদন পাঠানো বা সংরক্ষণ করা হয় না।",
+      "thank_you": "ধন্যবাদ!",
+      "this_is_a_demo_so": "এটি একটি ডেমো, তাই কিছু পাঠানো হয়নি। প্ল্যাটফর্মটি চালু হলে এখান থেকেই আপনার আবেদন অভিভাবকের কাছে পৌঁছে যাবে।",
+      "demo_form": "ডেমো ফর্ম",
+      "tell_us_what_you_need_87": "আপনার প্রয়োজনের কথা জানান, ক্যাম্পাসের টিউটররা আবেদন করবেন।",
+      "students_class": "শিক্ষার্থীর শ্রেণি",
+      "select_a_class": "শ্রেণি বেছে নিন",
+      "please_select_a_class": "শ্রেণি নির্বাচন করুন।",
+      "select_an_area": "এলাকা বেছে নিন",
+      "please_select_an_area": "এলাকা নির্বাচন করুন।",
+      "subjects": "বিষয়সমূহ",
+      "please_enter_at_least_one": "অন্তত একটি বিষয় লিখুন।",
+      "which_days_of_the_week": "সপ্তাহের কোন কোন দিন",
+      "please_choose_at_least_one": "অন্তত একটি দিন বেছে নিন।",
+      "select_a_time": "সময় বেছে নিন",
+      "please_select_a_time": "সময় নির্বাচন করুন।",
+      "expected_monthly_salary": "প্রত্যাশিত মাসিক বেতন",
+      "please_enter_a_valid_amount": "সঠিক পরিমাণ লিখুন (সর্বনিম্ন ৫০০)।",
+      "post": "পোস্ট করুন",
+      "cancel": "বাতিল",
+      "this_is_a_demo_form": "এটি ডেমো ফর্ম। আপনার দেওয়া কোনো তথ্য সংরক্ষণ বা কোথাও পাঠানো হয় না।",
+      "thank_you_your_demo_post": "ধন্যবাদ! আপনার ডেমো পোস্ট প্রস্তুত 🎉",
+      "this_is_how_your_tuition": "প্ল্যাটফর্মটি চালু হলে এভাবেই আপনার টিউশন পোস্ট ক্যাম্পাসের শিক্ষার্থীদের কাছে পৌঁছে যাবে।",
+      "schedule": "সময়সূচি",
+      "expected_salary": "প্রত্যাশিত বেতন",
+      "month_108": "৳{p0} / মাস",
+      "ok": "ঠিক আছে",
+      "demo_no_information_was_saved": "ডেমো: কোনো তথ্য সংরক্ষিত বা প্রেরিত হয়নি।",
+      "all_classes": "সব শ্রেণি",
+      "all_subjects": "সব বিষয়",
+      "all_areas": "সব এলাকা",
+      "demo_application_shown_successfully": "ডেমো: আবেদন সফলভাবে দেখানো হলো ✓",
+      "demo_post_shown_successfully": "ডেমো পোস্ট সফলভাবে দেখানো হলো ✓",
+      "demo_tuitions_shown": "ডেমো টিউশন দেখানো হচ্ছে",
+      "language": "ভাষা নির্বাচন"
+    }
+  };
+  let lang = 'bn';                                   // Bengali is the default
+  try { const saved = localStorage.getItem(LS_KEY); if (saved === 'bn' || saved === 'en') lang = saved; } catch (e) {}
+  const lookup = (l, k) => I18N[l] && I18N[l][k];
+  const t = (k, vars) => {
+    let s = lookup(lang, k); if (s == null) s = lookup('en', k); if (s == null) return k;
+    return vars ? s.replace(/\{(\w+)\}/g, (m, n) => n in vars ? vars[n] : m) : s;
+  };
+  const tr = v => lang === 'bn' ? v : (EN_VAL[v] || v);   // demo-data values are stored in Bengali; EN_VAL holds their English
+  const bn = n => new Intl.NumberFormat(lang === 'bn' ? 'bn-BD' : 'en-US').format(n);
+  function applyI18n(root = document) {
+    $$('[data-i18n]', root).forEach(el => { el.textContent = t(el.dataset.i18n); });
+    $$('[data-i18n-attr]', root).forEach(el => el.dataset.i18nAttr.split(';').forEach(p => { const [a, k] = p.split(':'); el.setAttribute(a, t(k)); }));
+    $$('[data-num]', root).forEach(el => { el.textContent = bn(+el.dataset.num); });
+  }
+  function setLang(l, opts = {}) {
+    lang = l === 'bn' ? 'bn' : 'en';
+    document.documentElement.lang = lang;
+    if (opts.persist !== false) { try { localStorage.setItem(LS_KEY, lang); } catch (e) {} }
+    document.title = t('sau_tuition_by_aesthetic_sau');
+    const md = $('meta[name="description"]'); if (md) md.setAttribute('content', t('a_simple_platform_connecting_tutors'));
+    applyI18n();
+    $('.lang').dataset.active = lang;
+    $$('.lang [data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
+    $$('[data-count]').forEach(el => { el.textContent = bn(el._cur || 0); });
+    buildFilters(); render(true);
+  }
+  $$('.lang [data-lang]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+    const ico = {
+    pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    cash:'<rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="12" cy="12" r="2.5"/>',
+    eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3c2.200.7 3.500 2.600 3.500 5.700"/>',
+    book:'<path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/>',
+    cal:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.500 8-6.500s8 2.500 8 6.500"/>',
+    check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/>',
+    search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+    shield:'<path d="M12 3l8 3v6c0 4.500-3.200 8-8 9-4.800-1-8-4.500-8-9V6z"/>',
+    grad:'<path d="M12 4.500 22 9.600 12 14.700 2 9.600z"/><path d="M6 12.600v3.600c0 1.600 2.700 3.200 6 3.200s6-1.600 6-3.200v-3.600"/>'
+  };
+  const I = (k, extra = '') => `<svg class="ico" viewBox="0 0 24 24" ${extra}>${ico[k]}</svg>`;
+
+  /* ---------- demo data (সব কাল্পনিক) ---------- */
+
+    const DATA = [
+    { id:1, cls:'নবম শ্রেণি', group:'বিজ্ঞান', subjects:['গণিত','পদার্থবিজ্ঞান','রসায়ন'], loc:'টিলাগড়', salary:5000,
+      days:['শনি','সোম','বুধ'], time:'সন্ধ্যা ৬:০০ – ৭:৩০', student:'ছাত্র', pref:'ছাত্র টিউটর', medium:'বাংলা মাধ্যম', views:214, apps:18,
+      note:'ছাত্রটি পড়াশোনায় মনোযোগী, তবে গণিত ও পদার্থবিজ্ঞানে বাড়তি সহায়তা প্রয়োজন। নিয়মিত হোমওয়ার্ক ও সাপ্তাহিক মডেল টেস্ট চাই।' },
+    { id:2, cls:'দশম শ্রেণি (SSC)', group:'ব্যবসায় শিক্ষা', subjects:['হিসাববিজ্ঞান','ফিন্যান্স ও ব্যাংকিং','ব্যবসায় উদ্যোগ'], loc:'আম্বরখানা', salary:4500,
+      days:['রবি','মঙ্গল','বৃহস্পতি'], time:'বিকাল ৫:০০ – ৬:০০', student:'ছাত্রী', pref:'ছাত্রী টিউটর', medium:'বাংলা মাধ্যম', views:168, apps:11,
+      note:'SSC পরীক্ষার প্রস্তুতির জন্য হিসাববিজ্ঞানের অনুশীলন ও পুনরাবৃত্তির ক্লাস প্রয়োজন। ধৈর্যশীল ও বোঝানোর দক্ষতা থাকা টিউটর কাম্য।' },
+    { id:3, cls:'অষ্টম শ্রেণি', group:'সাধারণ', subjects:['বাংলা','ইংরেজি','গণিত','বিজ্ঞান'], loc:'SAU ক্যাম্পাস এলাকা', salary:4000,
+      days:['শনি','রবি','সোম','মঙ্গল','বুধ'], time:'বিকাল ৪:০০ – ৫:০০', student:'ছাত্র', pref:'যেকোনো', medium:'বাংলা মাধ্যম', views:305, apps:27,
+      note:'ক্যাম্পাসের পাশেই বাসা, তাই হেঁটে আসা সম্ভব। সব বিষয়ে সাধারণ গাইডলাইন ও পড়ার অভ্যাস গড়ে তুলতে সহায়তা করতে হবে।' },
+    { id:4, cls:'একাদশ শ্রেণি (HSC)', group:'বিজ্ঞান', subjects:['জীববিজ্ঞান','রসায়ন'], loc:'উপশহর', salary:6000,
+      days:['শুক্র','রবি','মঙ্গল'], time:'রাত ৮:০০ – ৯:৩০', student:'ছাত্রী', pref:'ছাত্রী টিউটর', medium:'বাংলা মাধ্যম', views:189, apps:15,
+      note:'মেডিকেল ও কৃষি বিশ্ববিদ্যালয়ে ভর্তি প্রস্তুতির কথা মাথায় রেখে জীববিজ্ঞান ও রসায়নের শক্ত ভিত্তি তৈরি করতে চাই।' },
+    { id:5, cls:'ষষ্ঠ শ্রেণি', group:'সাধারণ', subjects:['ইংরেজি','গণিত','বাংলা'], loc:'মদিনা মার্কেট', salary:3500,
+      days:['শনি','সোম','বুধ'], time:'সন্ধ্যা ৭:০০ – ৮:০০', student:'ছাত্র', pref:'যেকোনো', medium:'ইংলিশ ভার্সন', views:97, apps:7,
+      note:'ইংরেজি বলা ও লেখার আত্মবিশ্বাস বাড়াতে সহজ ভাষায় পড়াতে পারেন এমন টিউটর খুঁজছি। গল্পের মাধ্যমে শেখানো গেলে ভালো হয়।' },
+    { id:6, cls:'দ্বাদশ শ্রেণি (HSC)', group:'মানবিক', subjects:['অর্থনীতি','ইংরেজি'], loc:'জিন্দাবাজার', salary:5500,
+      days:['রবি','মঙ্গল','বৃহস্পতি'], time:'বিকাল ৫:৩০ – ৭:০০', student:'ছাত্রী', pref:'যেকোনো', medium:'বাংলা মাধ্যম', views:142, apps:12,
+      note:'HSC চূড়ান্ত পরীক্ষার আগে অর্থনীতির তত্ত্ব ও সৃজনশীল প্রশ্নের উত্তর লেখার অনুশীলন করাতে হবে।' }
+  ];
+  const uniq = a => [...new Set(a)];
+  const CLASS_LIST = ['ষষ্ঠ শ্রেণি','সপ্তম শ্রেণি','অষ্টম শ্রেণি','নবম শ্রেণি','দশম শ্রেণি (SSC)','একাদশ শ্রেণি (HSC)','দ্বাদশ শ্রেণি (HSC)'];
+  const LOC_LIST = ['SAU ক্যাম্পাস এলাকা','টিলাগড়','মদিনা মার্কেট','আম্বরখানা','জিন্দাবাজার','উপশহর','শিবগঞ্জ','সুবিদবাজার','অন্যান্য এলাকা'];
+  const DAYS = ['শনি','রবি','সোম','মঙ্গল','বুধ','বৃহস্পতি','শুক্র'];
+  const EN_VAL = {
+    "নবম শ্রেণি": "Class 9",
+    "বিজ্ঞান": "Science",
+    "গণিত": "Mathematics",
+    "পদার্থবিজ্ঞান": "Physics",
+    "রসায়ন": "Chemistry",
+    "টিলাগড়": "Tilagor",
+    "শনি": "Sat",
+    "সোম": "Mon",
+    "বুধ": "Wed",
+    "সন্ধ্যা ৬:০০ – ৭:৩০": "6:00 – 7:30 PM",
+    "ছাত্র": "Male student",
+    "ছাত্র টিউটর": "Male tutor",
+    "বাংলা মাধ্যম": "Bangla Medium",
+    "ছাত্রটি পড়াশোনায় মনোযোগী, তবে গণিত ও পদার্থবিজ্ঞানে বাড়তি সহায়তা প্রয়োজন। নিয়মিত হোমওয়ার্ক ও সাপ্তাহিক মডেল টেস্ট চাই।": "The student is attentive but needs extra support in mathematics and physics. Regular homework and a weekly model test are required.",
+    "দশম শ্রেণি (SSC)": "Class 10 (SSC)",
+    "ব্যবসায় শিক্ষা": "Business Studies",
+    "হিসাববিজ্ঞান": "Accounting",
+    "ফিন্যান্স ও ব্যাংকিং": "Finance & Banking",
+    "ব্যবসায় উদ্যোগ": "Business Entrepreneurship",
+    "আম্বরখানা": "Amborkhana",
+    "রবি": "Sun",
+    "মঙ্গল": "Tue",
+    "বৃহস্পতি": "Thu",
+    "বিকাল ৫:০০ – ৬:০০": "5:00 – 6:00 PM",
+    "ছাত্রী": "Female student",
+    "ছাত্রী টিউটর": "Female tutor",
+    "SSC পরীক্ষার প্রস্তুতির জন্য হিসাববিজ্ঞানের অনুশীলন ও পুনরাবৃত্তির ক্লাস প্রয়োজন। ধৈর্যশীল ও বোঝানোর দক্ষতা থাকা টিউটর কাম্য।": "Needs accounting practice and revision classes for SSC exam preparation. A patient tutor who explains concepts clearly is preferred.",
+    "অষ্টম শ্রেণি": "Class 8",
+    "সাধারণ": "General",
+    "বাংলা": "Bangla",
+    "ইংরেজি": "English",
+    "SAU ক্যাম্পাস এলাকা": "SAU Campus Area",
+    "বিকাল ৪:০০ – ৫:০০": "4:00 – 5:00 PM",
+    "যেকোনো": "Any",
+    "ক্যাম্পাসের পাশেই বাসা, তাই হেঁটে আসা সম্ভব। সব বিষয়ে সাধারণ গাইডলাইন ও পড়ার অভ্যাস গড়ে তুলতে সহায়তা করতে হবে।": "Home is right next to campus, so the tutor can walk over. Needs general guidance in all subjects and help building a study habit.",
+    "একাদশ শ্রেণি (HSC)": "Class 11 (HSC)",
+    "জীববিজ্ঞান": "Biology",
+    "উপশহর": "Upashahar",
+    "শুক্র": "Fri",
+    "রাত ৮:০০ – ৯:৩০": "8:00 – 9:30 PM",
+    "মেডিকেল ও কৃষি বিশ্ববিদ্যালয়ে ভর্তি প্রস্তুতির কথা মাথায় রেখে জীববিজ্ঞান ও রসায়নের শক্ত ভিত্তি তৈরি করতে চাই।": "Looking to build a strong foundation in biology and chemistry with medical and agricultural university admission preparation in mind.",
+    "ষষ্ঠ শ্রেণি": "Class 6",
+    "মদিনা মার্কেট": "Modina Market",
+    "সন্ধ্যা ৭:০০ – ৮:০০": "7:00 – 8:00 PM",
+    "ইংলিশ ভার্সন": "English Version",
+    "ইংরেজি বলা ও লেখার আত্মবিশ্বাস বাড়াতে সহজ ভাষায় পড়াতে পারেন এমন টিউটর খুঁজছি। গল্পের মাধ্যমে শেখানো গেলে ভালো হয়।": "Looking for a tutor who can teach in simple language to build confidence in speaking and writing English. Teaching through stories would be ideal.",
+    "দ্বাদশ শ্রেণি (HSC)": "Class 12 (HSC)",
+    "মানবিক": "Humanities",
+    "অর্থনীতি": "Economics",
+    "জিন্দাবাজার": "Zindabazar",
+    "বিকাল ৫:৩০ – ৭:০০": "5:30 – 7:00 PM",
+    "HSC চূড়ান্ত পরীক্ষার আগে অর্থনীতির তত্ত্ব ও সৃজনশীল প্রশ্নের উত্তর লেখার অনুশীলন করাতে হবে।": "Needs practice with economic theory and writing creative-question answers before the final HSC exam.",
+    "সপ্তম শ্রেণি": "Class 7",
+    "শিবগঞ্জ": "Shibganj",
+    "সুবিদবাজার": "Subidbazar",
+    "অন্যান্য এলাকা": "Other Areas",
+    "সকাল (৭:০০ – ১০:০০)": "Morning (7:00 – 10:00 AM)",
+    "বিকাল (৪:০০ – ৬:০০)": "Afternoon (4:00 – 6:00 PM)",
+    "সন্ধ্যা (৬:০০ – ৮:০০)": "Evening (6:00 – 8:00 PM)",
+    "রাত (৮:০০ – ১০:০০)": "Night (8:00 – 10:00 PM)"
+  };
+  const SLOTS = ["সকাল (৭:০০ – ১০:০০)", "বিকাল (৪:০০ – ৬:০০)", "সন্ধ্যা (৬:০০ – ৮:০০)", "রাত (৮:০০ – ১০:০০)"];
+
+
+  /* ---------- search ---------- */
+  const fClass = $('#fClass'), fSubject = $('#fSubject'), fLoc = $('#fLoc');
+  const fill = (sel, label, items) => { sel.innerHTML = `<option value="">${label}</option>` + items.map(v => `<option value="${v}">${tr(v)}</option>`).join(''); };
+  function buildFilters() {
+    const keep = [fClass.value, fSubject.value, fLoc.value];
+  fill(fClass, t('all_classes'), uniq(DATA.map(d => d.cls)));
+  fill(fSubject, t('all_subjects'), uniq(DATA.flatMap(d => d.subjects)));
+  fill(fLoc, t('all_areas'), uniq(DATA.map(d => d.loc)));
+    [fClass.value, fSubject.value, fLoc.value] = keep;
+  }
+
+  function cardHTML(d, instant) {
+    return `
+    <article class="card reveal${instant ? ' in' : ''}">
+      <div class="card-top">
+        <div class="chips"><span class="chip">${tr(d.cls)}</span><span class="chip soft">${tr(d.group)}</span><span class="chip demo">${t('demo')}</span></div>
+        <h3>${d.subjects.map(tr).join(' · ')}</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">${I('pin')}<div>${t('sylhet',{p0:tr(d.loc)})}</div></div>
+        <div class="row">${I('cal')}<div>${t('days_a_week',{p0:bn(d.days.length)})}<small>${d.days.map(tr).join(', ')} · ${tr(d.time)}</small></div></div>
+      </div>
+      <div class="salary"><span>${t('monthly_salary')}</span><b>৳${bn(d.salary)}<small> ${t('month')}</small></b></div>
+      <div class="card-foot">
+        <div class="metrics"><span title="${t('views')}">${I('eye')}${bn(d.views)}</span><span title="${t('applications')}">${I('users')}${bn(d.apps)}</span></div>
+        <button class="btn btn-primary btn-sm" data-detail="${d.id}">${t('view_details')}</button>
+      </div>
+    </article>`;
+  }
+
+  function render(instant) {
+    const c = fClass.value, s = fSubject.value, l = fLoc.value;
+    const list = DATA.filter(d => (!c || d.cls === c) && (!s || d.subjects.includes(s)) && (!l || d.loc === l));
+    const grid = $('#cards');
+    grid.innerHTML = list.length ? list.map(d => cardHTML(d, instant)).join('') : `
+      <div class="empty">${I('search')}<h3>${t('no_tuitions_found')}</h3><p>${t('try_choosing_a_different_class')}</p>
+      <p style="margin-top:14px"><button class="link-btn" id="emptyReset">${t('clear_all_filters')}</button></p></div>`;
+    $('#resultCount').innerHTML = `<b>${t('text',{p0:bn(list.length)})}</b> ${t('demo_tuitions_shown')}`;
+    $$('.card', grid).forEach(el => requestAnimationFrame(() => el.classList.add('in')));
+  }
+  [fClass, fSubject, fLoc].forEach(el => el.addEventListener('change', () => render()));
+  $('#searchForm').addEventListener('submit', e => { e.preventDefault(); render(); $('#cards').scrollIntoView({behavior:'smooth', block:'start'}); });
+  const reset = () => { fClass.value = fSubject.value = fLoc.value = ''; render(); };
+  $('#resetBtn').addEventListener('click', reset);
+  document.addEventListener('click', e => { if (e.target.id === 'emptyReset') reset(); });
+
+  /* ---------- modal ---------- */
+  const modal = $('#modal'), sheet = $('.sheet', modal), sheetBody = $('#sheetBody');
+  let lastFocus = null;
+  function openModal(html) {
+    lastFocus = document.activeElement;
+    sheetBody.innerHTML = html;
+    modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('lock'); sheet.scrollTop = 0;
+    setTimeout(() => $('#modalClose').focus(), 60);
+  }
+  function closeModal() {
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('lock');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  $('#modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('mousedown', e => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (!modal.classList.contains('open')) return;
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Tab') {
+      const f = $$('button, input, select, a[href], textarea', sheet).filter(x => !x.disabled && x.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  let toastT;
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  /* detail modal */
+  function openDetail(id) {
+    const d = DATA.find(x => x.id === +id); if (!d) return;
+    openModal(`
+      <div class="m-head">
+        <div class="chips"><span class="chip">${tr(d.cls)}</span><span class="chip">${tr(d.group)}</span><span class="chip demo">${t('demo_example_71')}</span></div>
+        <h3 id="mTitle">${d.subjects.map(tr).join(' · ')}</h3>
+        <p>${t('sylhet',{p0:tr(d.loc)})}</p>
+      </div>
+      <div class="m-body">
+        <div class="info">
+          <div>${I('cash')}<span><small>${t('monthly_salary')}</small><b>৳${bn(d.salary)}</b></span></div>
+          <div>${I('pin')}<span><small>${t('area')}</small><b>${tr(d.loc)}</b></span></div>
+          <div>${I('cal')}<span><small>${t('days_a_week',{p0:bn(d.days.length)})}</small><b>${d.days.map(tr).join(', ')}</b></span></div>
+          <div>${I('clock')}<span><small>${t('time')}</small><b>${tr(d.time)}</b></span></div>
+          <div>${I('user')}<span><small>${t('student')}</small><b>${tr(d.student)}</b></span></div>
+          <div>${I('grad')}<span><small>${t('preferred_tutor_medium')}</small><b>${tr(d.pref)} · ${tr(d.medium)}</b></span></div>
+        </div>
+        <div class="m-sec"><h4>${t('guardians_requirement')}</h4><p>${tr(d.note)}</p></div>
+        <div class="m-sec"><h4>${t('expectations')}</h4>
+          <ul><li>${t('regular_attendance_at_the_scheduled')}</li><li>${t('monthly_progress_discussion_with_the')}</li><li>${t('weekly_short_tests_or_practice')}</li></ul>
+        </div>
+        <div class="metrics" style="margin-top:20px;gap:22px"><span>${I('eye')}${t('viewed_times',{p0:bn(d.views)})}</span><span>${I('users')}${t('tutors_applied',{p0:bn(d.apps)})}</span></div>
+        <div id="applyArea">
+          <div class="m-actions">
+            <button class="btn btn-primary" id="applyBtn">${t('apply')} ${I('arrow')}</button>
+            <button class="btn btn-ghost" data-close>${t('maybe_later')}</button>
+          </div>
+        </div>
+        <p class="hint">${I('info')}<span>${t('this_is_a_demo_example')}</span></p>
+      </div>`);
+    $('#applyBtn').addEventListener('click', () => {
+      $('#applyArea').innerHTML = `<div class="inline-ok">${I('check')}<span><b>${t('thank_you')}</b> ${t('this_is_a_demo_so')}</span></div>`;
+      toast(t('demo_application_shown_successfully'));
+    });
+  }
+
+  /* post modal */
+  function openPost() {
+    const opt = a => a.map(v => `<option value="${v}">${tr(v)}</option>`).join('');
+    openModal(`
+      <div class="m-head">
+        <span class="chip demo tag-demo" style="background:var(--amber-bg);color:var(--amber)">${t('demo_form')}</span>
+        <h3 id="mTitle">${t('post_a_tuition')}</h3>
+        <p>${t('tell_us_what_you_need_87')}</p>
+      </div>
+      <form class="m-body" id="postForm" novalidate>
+        <div class="form-grid">
+          <div class="field" data-f="cls"><label for="pClass">${t('students_class')}</label>
+            <select class="select" id="pClass"><option value="">${t('select_a_class')}</option>${opt(CLASS_LIST)}</select><div class="err">${t('please_select_a_class')}</div></div>
+          <div class="field" data-f="loc"><label for="pLoc">${t('area')}</label>
+            <select class="select" id="pLoc"><option value="">${t('select_an_area')}</option>${opt(LOC_LIST)}</select><div class="err">${t('please_select_an_area')}</div></div>
+          <div class="field full" data-f="sub"><label for="pSub">${t('subjects')}</label>
+            <input class="input" id="pSub" placeholder="${t('eg_math_physics_chemistry')}"><div class="err">${t('please_enter_at_least_one')}</div></div>
+          <div class="field full" data-f="days"><label>${t('which_days_of_the_week')}</label>
+            <div class="days">${DAYS.map(d => `<label><input type="checkbox" name="day" value="${d}"><span>${tr(d)}</span></label>`).join('')}</div>
+            <div class="err">${t('please_choose_at_least_one')}</div></div>
+          <div class="field" data-f="time"><label for="pTime">${t('time')}</label>
+            <select class="select" id="pTime"><option value="">${t('select_a_time')}</option>${opt(SLOTS)}</select><div class="err">${t('please_select_a_time')}</div></div>
+          <div class="field" data-f="sal"><label for="pSal">${t('expected_monthly_salary')}</label>
+            <div class="money"><b>৳</b><input class="input" id="pSal" type="number" inputmode="numeric" min="500" step="100" placeholder="${t('5000')}"></div><div class="err">${t('please_enter_a_valid_amount')}</div></div>
+        </div>
+        <div class="m-actions">
+          <button type="submit" class="btn btn-primary">${t('post')} ${I('arrow')}</button>
+          <button type="button" class="btn btn-ghost" data-close>${t('cancel')}</button>
+        </div>
+        <p class="hint">${I('shield')}<span>${t('this_is_a_demo_form')}</span></p>
+      </form>`);
+
+    const form = $('#postForm');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const v = {
+        cls: $('#pClass').value, loc: $('#pLoc').value, sub: $('#pSub').value.trim(),
+        days: $$('input[name=day]:checked', form).map(x => x.value), time: $('#pTime').value, sal: +$('#pSal').value
+      };
+      const bad = { cls: !v.cls, loc: !v.loc, sub: !v.sub, days: !v.days.length, time: !v.time, sal: !(v.sal >= 500) };
+      $$('.field', form).forEach(f => f.classList.toggle('bad', !!bad[f.dataset.f]));
+      if (Object.values(bad).some(Boolean)) { const first = $('.field.bad', form); first && first.scrollIntoView({block:'center', behavior:'smooth'}); return; }
+      sheetBody.innerHTML = `
+        <div class="m-body" style="padding-top:44px">
+          <div class="success">
+            <div class="tick">${I('check')}</div>
+            <h3 id="mTitle">${t('thank_you_your_demo_post')}</h3>
+            <p>${t('this_is_how_your_tuition')}</p>
+            <div class="summary">
+              <div><span>${t('class')}</span><b>${tr(v.cls)}</b></div>
+              <div><span>${t('subject')}</span><b>${v.sub.replace(/</g,'&lt;')}</b></div>
+              <div><span>${t('area')}</span><b>${tr(v.loc)}</b></div>
+              <div><span>${t('schedule')}</span><b>${v.days.map(tr).join(', ')} · ${tr(v.time)}</b></div>
+              <div><span>${t('expected_salary')}</span><b>${t('month_108',{p0:bn(v.sal)})}</b></div>
+            </div>
+            <div class="m-actions"><button class="btn btn-primary" data-close>${t('ok')}</button></div>
+            <p class="hint" style="justify-content:center">${I('info')}<span>${t('demo_no_information_was_saved')}</span></p>
+          </div>
+        </div>`;
+      toast(t('demo_post_shown_successfully'));
+    });
+    form.addEventListener('input', e => { const f = e.target.closest('.field'); f && f.classList.remove('bad'); });
+    form.addEventListener('change', e => { const f = e.target.closest('.field'); f && f.classList.remove('bad'); });
+    setTimeout(() => $('#pClass').focus(), 80);
+  }
+
+  /* ---------- global click delegation ---------- */
+  document.addEventListener('click', e => {
+    const post = e.target.closest('[data-action="post"]');
+    if (post) { e.preventDefault(); closeMenu(); openPost(); return; }
+    const det = e.target.closest('[data-detail]');
+    if (det) { openDetail(det.dataset.detail); return; }
+    if (e.target.closest('[data-close]')) closeModal();
+  });
+
+  /* ---------- mobile menu ---------- */
+  const burger = $('#burger'), menu = $('#mobileMenu');
+  function closeMenu() { menu.classList.remove('open'); burger.setAttribute('aria-expanded', 'false'); }
+  burger.addEventListener('click', () => { const o = menu.classList.toggle('open'); burger.setAttribute('aria-expanded', o); });
+  $$('a.lnk', menu).forEach(a => a.addEventListener('click', closeMenu));
+
+  /* ---------- scroll spy ---------- */
+  const spy = $$('[data-spy]');
+  const targets = { top: $('#top'), find: $('#find'), how: $('#how') };
+  function onScroll() {
+    const y = window.scrollY + 140; let cur = 'top';
+    if (y > targets.find.offsetTop) cur = 'find';
+    if (y > targets.how.offsetTop) cur = 'how';
+    spy.forEach(a => a.classList.toggle('active', a.dataset.spy === cur));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  /* ---------- reveal + count-up ---------- */
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => {
+    es.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold: .12 }) : null;
+  const observe = () => $$('.reveal:not(.in)').forEach(el => io ? io.observe(el) : el.classList.add('in'));
+
+  function countUp(el) {
+    const to = +el.dataset.count, dur = 1400, t0 = performance.now();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { el._cur = to; el.textContent = bn(to); return; }
+    (function tick(t) {
+      const p = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+      el._cur = Math.round(to * e); el.textContent = bn(el._cur);
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+  const cio = 'IntersectionObserver' in window ? new IntersectionObserver(es => {
+    es.forEach(en => { if (en.isIntersecting) { countUp(en.target); cio.unobserve(en.target); } });
+  }, { threshold: .6 }) : null;
+  $$('[data-count]').forEach(el => { el._cur = cio ? 0 : +el.dataset.count; el.textContent = bn(el._cur); if (cio) cio.observe(el); });
+
+  setLang(lang, { persist: false }); observe();
+})();
+</script>
+</body>
+</html>
