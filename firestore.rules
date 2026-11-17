@@ -103,11 +103,15 @@ service cloud.firestore {
     // ── /scans (QR scan tracker: /qr/ page) ───────────────────────
     // Anyone can add one scan record; only the admin emails can read.
     match /scans/{scanId} {
-      allow create: if request.resource.data.keys().hasOnly(['t','device','first','src'])
+      allow create: if request.resource.data.keys().hasOnly(['t','device','first','src','browser','model','city','country'])
         && request.resource.data.t == request.time
         && request.resource.data.device is string && request.resource.data.device.size() < 20
         && request.resource.data.first is bool
-        && request.resource.data.src is string && request.resource.data.src.size() <= 30;
+        && request.resource.data.src is string && request.resource.data.src.size() <= 30
+        && request.resource.data.get('browser','') is string && request.resource.data.get('browser','').size() <= 30
+        && request.resource.data.get('model','') is string && request.resource.data.get('model','').size() <= 40
+        && request.resource.data.get('city','') is string && request.resource.data.get('city','').size() <= 40
+        && request.resource.data.get('country','') is string && request.resource.data.get('country','').size() <= 40;
       allow read: if isAuth() && request.auth.token.email in ['aestheticsau3100@gmail.com', 'moniruzzamanmoonna@gmail.com'];
       allow update, delete: if false;
     }
