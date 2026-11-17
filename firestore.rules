@@ -38,40 +38,29 @@ service cloud.firestore {
 
     // ── /users ────────────────────────────────────────────────────
     match /users/{uid} {
-      // Anyone authenticated can create their OWN profile (first login)
       allow create: if isAuth() && request.auth.uid == uid;
 
-      // Users can always read their own profile
-      // Admins can read all profiles (covers both get + list)
       allow read: if isAuth() && (
         request.auth.uid == uid || isAdmin()
       );
 
-      // Users can update their own profile BUT cannot change role/active
       allow update: if isAuth() && request.auth.uid == uid
         && !('role'   in request.resource.data.diff(resource.data).affectedKeys())
         && !('active' in request.resource.data.diff(resource.data).affectedKeys());
 
-      // Super Admin can update anything (including role assignment)
       allow update: if isSuperAdmin();
 
-      // Only super_admin can delete
       allow delete: if isSuperAdmin();
     }
 
     // ── /articles ─────────────────────────────────────────────────
     match /articles/{articleId} {
-      // Published articles: public read
-      // Staff: can read all
       allow read: if resource.data.get('status','draft') == 'published'
                   || (isAuth() && isJournalist());
 
-      // Create: journalist+, must set own email as author
       allow create: if isJournalist()
         && request.resource.data.get('authorEmail','') == request.auth.token.email;
 
-      // Edit any: editor+
-      // Edit own draft only: journalist (cannot self-publish)
       allow update: if isEditor()
         || (
           isJournalist()
@@ -79,7 +68,6 @@ service cloud.firestore {
           && request.resource.data.get('status','draft') != 'published'
         );
 
-      // Delete: admin+
       allow delete: if isAdmin();
     }
 
@@ -98,12 +86,6 @@ service cloud.firestore {
     }
 
     // ── /siteStats ────────────────────────────────────────────────
-    // NOTE: left unchanged from your version — allow create/update: if true
-    // is wide open to ANY visitor, not just staff. This is probably
-    // intentional (anonymous homepage visit counters can't be behind
-    // auth), but it also means anyone can write arbitrary junk into this
-    // collection with no field validation. Flagging this — see message
-    // below for a safer alternative if you want it tightened.
     match /siteStats/{docId} {
       allow read:   if true;
       allow create: if true;
@@ -114,6 +96,18 @@ service cloud.firestore {
     // ── /sau_campus_rep_2026 (Campus Rep Program '26 applications) ──
     match /sau_campus_rep_2026/{doc} {
       allow create: if true;
+      allow read: if isAuth() && request.auth.token.email == 'aestheticsau3100@gmail.com';
+      allow update, delete: if false;
+    }
+
+    // ── /scans (QR scan tracker: /qr/ page) ───────────────────────
+    // Anyone can add one scan record; only the admin email can read.
+    match /scans/{scanId} {
+      allow create: if request.resource.data.keys().hasOnly(['t','device','first','src'])
+        && request.resource.data.t == request.time
+        && request.resource.data.device is string && request.resource.data.device.size() < 20
+        && request.resource.data.first is bool
+        && request.resource.data.src is string && request.resource.data.src.size() <= 30;
       allow read: if isAuth() && request.auth.token.email == 'aestheticsau3100@gmail.com';
       allow update, delete: if false;
     }
