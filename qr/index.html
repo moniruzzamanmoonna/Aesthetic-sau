@@ -40,7 +40,7 @@ h1{font-size:1.25rem;margin:0 0 4px}
 .mini span{color:var(--mut);font-size:.82rem}
 section{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:12px}
 h2{font-size:.95rem;margin:0 0 10px}
-.b{display:grid;grid-template-columns:84px 1fr 40px;align-items:center;gap:8px;font-size:.88rem;margin:6px 0}
+.b{display:grid;grid-template-columns:120px 1fr 40px;align-items:center;gap:8px;font-size:.88rem;margin:6px 0}
 .b i{display:block;height:10px;background:var(--bar);border-radius:5px;overflow:hidden}
 .b i u{display:block;height:100%;background:var(--ac);text-decoration:none}
 .b em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
@@ -63,6 +63,7 @@ button.g{background:none;color:var(--mut);padding:4px 0;text-decoration:underlin
   <h1>QR স্ক্যান ট্র্যাকার</h1>
   <p class="sub" id="who"></p>
   <div id="login"><button id="in">Google দিয়ে লগইন</button></div>
+  <button id="rf" hidden style="margin-bottom:12px">রিফ্রেশ</button>
   <p id="msg"></p>
   <div id="out"></div>
   <button class="g" id="so" hidden>লগআউট</button>
@@ -95,21 +96,42 @@ if (params.has('admin')) dashboard(); else track();
 async function track() {
   const t0 = Date.now();
   $('fl').href = TARGET;
-  setTimeout(() => $('fb').classList.add('show'), 3000);
+  setTimeout(() => $('fb').classList.add('show'), 4000);
   const ua = navigator.userAgent;
   const device = /android/i.test(ua) ? 'Android' : /iphone|ipad|ipod/i.test(ua) ? 'iOS' : /windows|macintosh|linux/i.test(ua) ? 'Desktop' : 'Other';
   let first = true;
   try { first = !localStorage.getItem('qr_seen'); localStorage.setItem('qr_seen', '1'); } catch (e) {}
   const src = (params.get('src') || 'qr').slice(0, 30);
+  const browser = /FBAN|FBAV|FB_IAB/i.test(ua) ? 'Facebook/Messenger' : /Instagram/i.test(ua) ? 'Instagram' : /; wv\)/i.test(ua) ? 'In-app browser' : /SamsungBrowser/i.test(ua) ? 'Samsung Internet' : /Edg\//i.test(ua) ? 'Edge' : /OPR\/|Opera/i.test(ua) ? 'Opera' : /Firefox|FxiOS/i.test(ua) ? 'Firefox' : /CriOS|Chrome/i.test(ua) ? 'Chrome' : /Safari/i.test(ua) ? 'Safari' : 'Other';
+  const extra = {};
+  await Promise.race([collectExtra(extra, device, ua), new Promise(r => setTimeout(r, 1500))]);
   try {
     await Promise.race([
-      addDoc(collection(db, 'scans'), {t: serverTimestamp(), device, first, src}),
-      new Promise(r => setTimeout(r, 1800))
+      addDoc(collection(db, 'scans'), {t: serverTimestamp(), device, first, src, browser, ...extra}),
+      new Promise(r => setTimeout(r, 5000))
     ]);
   } catch (e) {}
   const left = 1600 - (Date.now() - t0);
   if (left > 0) await new Promise(r => setTimeout(r, left));
   location.replace(TARGET);
+}
+
+/* ফোনের মডেল + আনুমানিক শহর (IP থেকে, IP সেভ হয় না) */
+async function collectExtra(out, device, ua) {
+  const model = async () => {
+    let m = '';
+    try { m = (await navigator.userAgentData.getHighEntropyValues(['model'])).model || ''; } catch (e) {}
+    if (!m) { const x = ua.match(/Android[^;)]*;\s*([^;)]+?)\s*(?:Build|\))/); if (x && x[1] !== 'K') m = x[1]; }
+    if (!m && device === 'iOS') m = /ipad/i.test(ua) ? 'iPad' : 'iPhone';
+    if (m) out.model = m.slice(0, 40);
+  };
+  const geo = async () => {
+    try {
+      const j = await (await fetch('https://ipwho.is/?fields=success,city,country')).json();
+      if (j.success) { if (j.city) out.city = String(j.city).slice(0, 40); if (j.country) out.country = String(j.country).slice(0, 40); }
+    } catch (e) {}
+  };
+  await Promise.all([model(), geo()]);
 }
 
 /* ---------- ড্যাশবোর্ড ---------- */
@@ -120,27 +142,31 @@ function dashboard() {
   const auth = getAuth(app);
   $('in').onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => $('msg').textContent = 'লগইন হয়নি: ' + e.code);
   $('so').onclick = () => signOut(auth);
-  onAuthStateChanged(auth, async u => {
-    $('login').hidden = !!u; $('so').hidden = !u; $('out').innerHTML = '';
-    $('who').textContent = u ? u.email : '';
-    if (!u) { $('msg').textContent = ''; return; }
+  const load = async () => {
+    $('out').innerHTML = '';
     $('msg').textContent = 'লোড হচ্ছে…';
     try {
       const snap = await getDocs(query(collection(db, 'scans'), orderBy('t', 'desc'), limit(5000)));
       $('msg').textContent = '';
-      render(snap.docs.map(d => { const x = d.data(); return {t: x.t ? x.t.toDate() : new Date(), device: x.device, first: x.first, src: x.src}; }));
+      render(snap.docs.map(d => { const x = d.data(); return {t: x.t ? x.t.toDate() : new Date(), device: x.device, first: x.first, src: x.src, browser: x.browser || 'অজানা', model: x.model || 'অজানা', city: x.city ? x.city + (x.country ? ', ' + x.country : '') : (x.country || 'অজানা')}; }));
     } catch (e) {
       $('msg').textContent = 'এই অ্যাকাউন্টে ডাটা দেখার অনুমতি নেই (firestore.rules এ ইমেইল ঠিক আছে?)';
     }
+  };
+  $('rf').onclick = load;
+  onAuthStateChanged(auth, u => {
+    $('login').hidden = !!u; $('so').hidden = !u; $('rf').hidden = !u; $('out').innerHTML = '';
+    $('who').textContent = u ? u.email : '';
+    if (!u) { $('msg').textContent = ''; return; }
+    load();
   });
 }
 
-  
 function bars(map) {
   const e = Object.entries(map), max = Math.max(1, ...e.map(x => x[1]));
   return e.map(([k, v]) => `<div class="b"><s>${esc(k)}</s><i><u style="width:${v / max * 100}%"></u></i><em>${v}</em></div>`).join('') || '<span class="sub">এখনো কিছু নেই</span>';
 }
-function count(rows, key) { const m = {}; rows.forEach(r => m[r[key]] = (m[r[key]] || 0) + 1); return m; }
+function count(rows, key) { const m = {}; rows.forEach(r => m[r[key]] = (m[r[key]] || 0) + 1); return Object.fromEntries(Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 8)); }
 
 function render(rows) {
   const day = d => d.toLocaleDateString('en-CA');
@@ -156,6 +182,9 @@ function render(rows) {
     </div>
     <section><h2>গত ৭ দিন</h2>${bars(days)}</section>
     <section><h2>ডিভাইস</h2>${bars(count(rows, 'device'))}</section>
+    <section><h2>ব্রাউজার</h2>${bars(count(rows, 'browser'))}</section>
+    <section><h2>ফোনের মডেল</h2>${bars(count(rows, 'model'))}</section>
+    <section><h2>আনুমানিক এলাকা (IP থেকে)</h2>${bars(count(rows, 'city'))}</section>
     <section><h2>QR এর উৎস (?src=)</h2>${bars(count(rows, 'src'))}</section>`;
 }
 </script>
