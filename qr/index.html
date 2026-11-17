@@ -135,6 +135,7 @@ function dashboard() {
   });
 }
 
+  
 function bars(map) {
   const e = Object.entries(map), max = Math.max(1, ...e.map(x => x[1]));
   return e.map(([k, v]) => `<div class="b"><s>${esc(k)}</s><i><u style="width:${v / max * 100}%"></u></i><em>${v}</em></div>`).join('') || '<span class="sub">এখনো কিছু নেই</span>';
