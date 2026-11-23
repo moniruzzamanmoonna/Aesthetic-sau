@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SNapp Privacy Policy | Aesthetic SAU</title>
+<meta name="description" content="How SNapp handles your data: slides stay on your PC; optional Google Drive backup only touches files SNapp creates."/>
+<meta name="theme-color" content="#0a0a0a"/>
+<link rel="icon" type="image/png" href="snapp/snapp.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--black:#0a0a0a;--card:#151515;--border:#252525;--white:#f2f2ee;--muted:#9a9a94;--green:#4caf50;--blue:#4361EE;--blue-l:#6f86ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;line-height:1.75}
+nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;
+  background:rgba(10,10,10,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--white)}
+.nav-logo img{width:36px;height:36px;border-radius:50%;border:2px solid var(--green);object-fit:cover}
+.nav-brand{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+.back{color:var(--blue-l);text-decoration:none;font-size:14px;font-weight:600}
+main{max-width:780px;margin:0 auto;padding:56px 20px 80px}
+.head{display:flex;align-items:center;gap:16px}
+.head img{width:56px;height:56px;border-radius:14px}
+h1{font-family:'Playfair Display',serif;font-size:clamp(32px,6vw,46px);font-weight:900;line-height:1.1}
+.updated{color:var(--muted);font-size:14px;margin-top:6px}
+h2{font-size:20px;margin-top:38px;margin-bottom:8px}
+p,li{color:#d6d6d0;font-size:15.5px}
+ul{padding-left:22px;margin-top:6px}
+li{margin:5px 0}
+a{color:var(--blue-l)}
+.box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-top:26px}
+code{background:#1e1e1e;border:1px solid #2c2c2c;border-radius:5px;padding:1px 6px;font-size:14px}
+footer{border-top:1px solid var(--border);padding:30px 20px;text-align:center;color:var(--muted);font-size:13px}
+@media (max-width:640px){nav{padding:0 16px}.nav-brand{display:none}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/"><img src="https://i.imgur.com/aRxuSTw.jpeg" alt="Aesthetic SAU"/><span class="nav-brand">Aesthetic SAU</span></a>
+  <a class="back" href="snapp.html">← SNapp</a>
+</nav>
+<main>
+  <div class="head"><img src="snapp/snapp.png" alt=""/><div><h1>SNapp Privacy Policy</h1><div class="updated">Last updated: 23 November 2026</div></div></div>
+
+  <div class="box"><p><b>In short:</b> SNapp is a Windows app that saves lecture slides from your screen. Your slides are stored on your own computer.
+    If you choose to connect Google Drive, SNapp uploads your slides to a <code>SNapp</code> folder in <em>your</em> Drive. SNapp has no servers of its own, collects no analytics and sends nothing to its developer.</p></div>
+
+  <h2>1. What SNapp stores on your computer</h2>
+  <ul>
+    <li><b>Captured slides</b> as PNG images in <code>Documents\LectureSnap\&lt;date&gt;\</code>.</li>
+    <li><b>Settings</b> (schedules, startup choice) in your Windows user registry.</li>
+    <li>If Google Drive is connected: a <b>sign-in token</b> encrypted with Windows (DPAPI), so only your Windows account can use it, and a small upload queue. These are in <code>%LOCALAPPDATA%\LectureSnap\</code>.</li>
+  </ul>
+  <p>Screen images are only taken while capture is running (started by you or by a schedule you set) or when you press Capture Now.</p>
+
+  <h2>2. Google Drive backup (optional)</h2>
+  <p>If you click <b>Connect Google Drive</b>, you sign in on Google's own page. SNapp never sees your password. SNapp requests only these permissions:</p>
+  <ul>
+    <li><code>drive.file</code>: to create the <code>SNapp</code> folder and upload your slides into it. With this permission SNapp can only access files and folders it created itself. It <b>cannot</b> see, change or delete anything else in your Drive.</li>
+    <li><code>openid</code> and <code>email</code>: to show which Google account is connected (for example, “Connected as you@gmail.com”). This is shown only inside the app on your computer.</li>
+  </ul>
+  <p>Data from Google is used only to provide this backup to you. It is not sold, shared, or used for advertising, and it is not transferred to anyone else, including the developer.</p>
+  <p>SNapp's use and transfer of information received from Google APIs will adhere to the
+    <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+
+  <h2>3. Phone remote</h2>
+  <p>The phone remote is a small web page served by SNapp on your own computer, reachable only on your local network and only with the pairing code shown in the app.
+    It shows capture counts and small previews of your latest slides. Nothing goes through the internet.</p>
+
+  <h2>4. What SNapp does not do</h2>
+  <ul>
+    <li>No accounts, no tracking, no analytics, no ads.</li>
+    <li>No data is sent to the developer or to any server other than Google (only if you connect Drive).</li>
+  </ul>
+
+  <h2>5. Removing your data</h2>
+  <ul>
+    <li><b>Disconnect Google:</b> SNapp Settings → <b>Disconnect</b>. This revokes SNapp's access and deletes the token. You can also remove access at <a href="https://myaccount.google.com/permissions" rel="noopener">myaccount.google.com/permissions</a>.</li>
+    <li><b>Slides in Drive</b> stay in your Drive until you delete them.</li>
+    <li><b>Uninstall</b> from Windows Settings → Apps. Your saved slides in Documents are kept, and you can delete them yourself.</li>
+  </ul>
+
+  <h2>6. Children</h2>
+  <p>SNapp is intended for students and is not directed at children under 13.</p>
+
+  <h2>7. Changes and contact</h2>
+  <p>If this policy changes, the date above will be updated. Questions or concerns: open an issue at
+    <a href="https://github.com/moniruzzamanmoonna/SNapp/issues" rel="noopener">github.com/moniruzzamanmoonna/SNapp/issues</a>.</p>
+</main>
+<footer>SNapp · Every Slide. One Place. · <a href="snapp.html">Download</a></footer>
+</body>
+</html>
