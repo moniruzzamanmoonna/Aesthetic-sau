@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google Analytics (Aesthetic SAU): page visits + SNapp download/video events -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LQLGBQPVHR"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-LQLGBQPVHR');
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-dl]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      gtag('event', 'snapp_download_' + a.getAttribute('data-dl'), { version: '1.0.0' });
+    });
+  });
+  var v = document.getElementById('promo'), sent = {};
+  if (v) v.addEventListener('play', function () {
+    var lang = /promo_(\w+)\.mp4/.exec(v.currentSrc || '') || [0, 'bn'];
+    if (!sent[lang[1]]) { sent[lang[1]] = 1; gtag('event', 'snapp_video_play_' + lang[1]); }
+  });
+});
+</script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>SNapp — Every Slide. One Place. | Aesthetic SAU</title>
