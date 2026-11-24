@@ -3972,6 +3972,7 @@ function toggleMenu() {
     if(mob&&!mob.querySelector('.theme-controls-mobile')){
       const m=buildBar();m.className='theme-controls theme-controls-mobile';m.style.display='flex';mob.appendChild(m);
     }
+    refresh(); // show the sun/moon icon now that the buttons exist
     // Skip link
     if(!document.querySelector('.skip-link')){
       const sk=document.createElement('a');sk.href='#main-content';sk.className='skip-link';sk.textContent='Skip to main content';
