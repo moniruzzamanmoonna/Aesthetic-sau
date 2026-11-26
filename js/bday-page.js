@@ -63,6 +63,25 @@ function membersNote() {
   if (!ACCESS.sharing) return '<p class="bm-note">🔒 Your birthday is private, so members-only birthdays are hidden from you too. <a href="#profile">Share yours (Public or SAU Members Only) →</a></p>';
   return '';
 }
+/** "🔒 N more birthdays — sign in to see them" (counts come from bday-marks, never names). */
+function lockedHtml(n, more) {
+  if (!n) return '';
+  const what = n + (more ? ' more' : '') + ' birthday' + (n > 1 ? 's' : '');
+  let text, action;
+  if (!ACCESS.signedIn) {
+    text = 'Please sign in to see others\' birthdays.';
+    action = '<button type="button" class="bm-btn bm-btn-google bm-btn-sm" data-signin>' + GOOGLE_G + 'Sign in with Google</button>';
+  } else if (!ACCESS.hasProfile) {
+    text = 'Create your profile and share your birthday to see them.';
+    action = '<a class="bm-btn bm-btn-primary bm-btn-sm" href="#profile">Create my profile</a>';
+  } else {
+    text = 'Your birthday is private. Share yours (Public or SAU Members Only) to see them.';
+    action = '<a class="bm-btn bm-btn-primary bm-btn-sm" href="#profile">Change visibility</a>';
+  }
+  return '<div class="bm-locked"><span class="bm-locked-icon" aria-hidden="true">🔒</span>'
+    + '<span class="bm-locked-text"><b>' + what + '</b><small>' + text + '</small></span>' + action + '</div>';
+}
+
 function after(seq) {
   if (stale(seq)) return;
   bindWishButtons(main);
@@ -73,18 +92,19 @@ function after(seq) {
 async function viewToday(seq) {
   const now = new Date();
   main.innerHTML = head('🎉 Birthday Today', esc(C.formatLongDate(now)), 'Happy Birthday! 🎂') + skeleton(3);
-  const items = await B.birthdaysOn(now);
+  const [items, hiddenN] = await Promise.all([B.birthdaysOn(now), B.hiddenOn(C.celebrationKeys(now))]);
   if (stale(seq)) return;
+  const total = items.length + hiddenN;
   const leapNote = items.some(function (i) { return i.md === '02-29'; }) && !(now.getMonth() === 1 && now.getDate() === 29)
     ? '<p class="bm-note">🐸 Leap-day babies (29 February) are celebrated today because this year has no 29 February.</p>' : '';
   main.innerHTML = head('🎉 Birthday Today', esc(C.formatLongDate(now)),
-    items.length ? 'Happy Birthday! 🎂 ' + items.length + ' SAU ' + (items.length === 1 ? 'student is' : 'students are') + ' celebrating today.' : 'Happy Birthday! 🎂')
+    total ? 'Happy Birthday! 🎂 ' + total + ' SAU ' + (total === 1 ? 'student is' : 'students are') + ' celebrating today.' : 'Happy Birthday! 🎂')
     + leapNote
-    + (items.length
-      ? '<div class="bm-grid">' + items.map(function (i) { return personCard(i, { showDate: false }); }).join('') + '</div>'
-      : emptyState('🎈', 'No Birthday Mates today.', 'Tomorrow is another day to celebrate! 💚',
+    + (items.length ? '<div class="bm-grid">' + items.map(function (i) { return personCard(i, { showDate: false }); }).join('') + '</div>' : '')
+    + (hiddenN ? lockedHtml(hiddenN, items.length > 0) : '')
+    + (total ? '' : emptyState('🎈', 'No Birthday Mates today.', 'Tomorrow is another day to celebrate! 💚',
         '<a class="bm-btn" href="#calendar">🗓️ Open the calendar</a>'))
-    + membersNote();
+    + (hiddenN ? '' : membersNote());
   after(seq);
 }
 
@@ -100,23 +120,25 @@ async function viewTwins(seq) {
     after(seq);
     return;
   }
+  const hiddenN = await B.hiddenOn([res.md]);
+  if (stale(seq)) return;
   const dateTxt = esc(C.formatMd(res.md));
-  const n = res.items.length;
+  const n = res.items.length + hiddenN;
   const sub = n
     ? 'You share your birthday (<strong>' + dateTxt + '</strong>) with ' + n + ' other SAU ' + (n === 1 ? 'student' : 'students') + '.'
     : 'Your birthday: <strong>' + dateTxt + '</strong>';
   const leap = res.md === '02-29' ? '<p class="bm-note">🐸 Leap-day birthday! Your twins are others born on 29 February.</p>' : '';
   main.innerHTML = head('🎂 Birthday Twins', 'Your Birthday Twins', sub) + leap
-    + (n
-      ? '<div class="bm-grid">' + res.items.map(function (i) { return personCard(i); }).join('') + '</div>'
-      : emptyState('🌱', "No Birthday Twins found yet. Maybe you're the first one!", 'Maybe someone with the same birthday will join soon! 🎂'))
-    + membersNote();
+    + (res.items.length ? '<div class="bm-grid">' + res.items.map(function (i) { return personCard(i); }).join('') + '</div>' : '')
+    + (hiddenN ? lockedHtml(hiddenN, res.items.length > 0) : '')
+    + (n ? '' : emptyState('🌱', "No Birthday Twins found yet. Maybe you're the first one!", 'Maybe someone with the same birthday will join soon! 🎂'))
+    + (hiddenN ? '' : membersNote());
   after(seq);
 }
 
 // ── 🗓️ Calendar ───────────────────────────────────────────────────────
 const cal = { year: 0, month: 0, selected: '', cache: {} };
-function calKey(y, m) { return y + '-' + m + '-' + (B.user() ? 'm' : 'p'); }
+function calKey(y, m) { return y + '-' + m + '-' + (ACCESS.sharing ? 'm' : B.user() ? 's' : 'p'); }
 
 async function viewCalendar(seq) {
   const today = new Date();
@@ -138,7 +160,8 @@ async function viewCalendar(seq) {
     if (stale(seq)) return;
     cal.cache[key] = data;
   }
-  main.innerHTML = shell(calendarGrid(data, today) + '<div class="bm-cal-day" id="bm-cal-day" aria-live="polite"></div>' + membersNote());
+  const anyHidden = Object.keys(data.hidden).length > 0;
+  main.innerHTML = shell(calendarGrid(data, today) + '<div class="bm-cal-day" id="bm-cal-day" aria-live="polite"></div>' + (anyHidden ? '' : membersNote()));
   bindCalNav(seq);
   main.querySelectorAll('[data-md]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -179,7 +202,7 @@ function calendarGrid(data, today) {
     w.forEach(function (c) {
       if (!c) { h += '<span class="bm-cal-cell bm-cal-pad" role="gridcell"></span>'; return; }
       let count = 0;
-      if (data) c.keys.forEach(function (k) { count += (data[k] || []).length; });
+      if (data) c.keys.forEach(function (k) { count += (data.byMd[k] || []).length + (data.hidden[k] || 0); });
       const label = c.day + ' ' + C.MONTHS[cal.month - 1] + (count ? ', ' + count + ' birthday' + (count > 1 ? 's' : '') : '');
       h += '<button type="button" role="gridcell" class="bm-cal-cell' + (c.isToday ? ' today' : '') + (count ? ' has' : '') + '" data-md="' + c.md + '" data-keys="' + c.keys.join(',') + '" aria-label="' + esc(label) + '" aria-pressed="false">'
         + '<span class="bm-cal-num">' + c.day + '</span>'
@@ -195,18 +218,19 @@ function showDay(data, keys, md) {
   const box = document.getElementById('bm-cal-day');
   if (!box) return;
   let items = [];
-  keys.forEach(function (k) { items = items.concat(data[k] || []); });
+  let hiddenN = 0;
+  keys.forEach(function (k) { items = items.concat(data.byMd[k] || []); hiddenN += data.hidden[k] || 0; });
+  const total = items.length + hiddenN;
   const title = '🎂 Birthdays on ' + esc(C.formatMd(md));
-  if (!items.length) {
+  if (!total) {
     box.innerHTML = '<h2 class="bm-h2">' + title + '</h2><p class="bm-muted">No visible birthdays on this day.</p>';
     return;
   }
-  box.innerHTML = '<h2 class="bm-h2">' + title + ' <span class="bm-pill">' + items.length + ' birthday' + (items.length > 1 ? 's' : '') + '</span></h2>'
-    + '<div class="bm-grid">' + items.map(function (i) {
-      const card = personCard(i, { showDate: i.md !== md });
-      return card;
-    }).join('') + '</div>';
+  box.innerHTML = '<h2 class="bm-h2">' + title + ' <span class="bm-pill">' + total + ' birthday' + (total > 1 ? 's' : '') + '</span></h2>'
+    + (items.length ? '<div class="bm-grid">' + items.map(function (i) { return personCard(i, { showDate: i.md !== md }); }).join('') + '</div>' : '')
+    + lockedHtml(hiddenN, items.length > 0);
   bindWishButtons(box);
+  bindSignIn(box, render);
 }
 
 // ── 💌 My Wishes ──────────────────────────────────────────────────────

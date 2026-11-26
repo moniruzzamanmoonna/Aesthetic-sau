@@ -66,7 +66,8 @@ function indexNode(vis, readRule) {
   const md = {
     '.validate': '$md.matches(' + MD_RE + ')',
       '$key': {
-        '.write': [ADMIN, ownProfile, guestCreate, claimDelete].join(' || '),
+        // ...and the public count marker (bday-marks) must stay in step with the rows.
+        '.write': '(' + [ADMIN, ownProfile, guestCreate, claimDelete].join(' || ') + ') && ' + markConsistent(NR),
         '.validate': "newData.hasChildren(['n','f','t'])",
         n: { '.validate': str(1, 60) },
         f: { '.validate': str(1, 80) },
@@ -82,6 +83,24 @@ function indexNode(vis, readRule) {
     md['.read'] = SIGNED + " && root.child('profiles').child(auth.uid).child('md').val() === $md";
   }
   return { '.read': readRule, '$md': md };
+}
+
+// bday-marks/$md/$key mirrors "this key has a visible row on this day" (public or members-only).
+// It holds no names, so anyone can read it: that is how signed-out visitors see 🎂 counts on the
+// calendar. After every write the marker must exist exactly when a row exists.
+function markConsistent(NR) {
+  return '((' + NR + ".child('bday-public').child($md).child($key).exists() || " + NR +
+    ".child('bday-members').child($md).child($key).exists()) === " + NR + ".child('bday-marks').child($md).child($key).exists())";
+}
+function marksNode() {
+  const NR = 'newData.parent().parent().parent()';
+  return {
+    '.read': 'true',
+    '$md': {
+      '.validate': '$md.matches(' + MD_RE + ')',
+      '$key': { '.write': markConsistent(NR), '.validate': 'newData.val() === true' }
+    }
+  };
 }
 
 // Give-to-get: only people who share their own birthday (Public or SAU Members Only)
@@ -186,6 +205,8 @@ function wishesNode() {
     "&& " + META + ".child('from').val() === auth.uid",
     "&& " + META + ".child('to').val() === $rid",
     "&& " + RP + ".exists() && " + RP + ".child('visibility').val() !== 'private'",
+    // give-to-get for wishes too: members-only people can be wished only by people who share theirs
+    "&& (" + RP + ".child('visibility').val() === 'public' || root.child('profiles').child(auth.uid).child('visibility').val() === 'public' || root.child('profiles').child(auth.uid).child('visibility').val() === 'members')",
     "&& ((newData.child('anon').val() === true && !newData.child('fromName').exists())",
     "|| (newData.child('anon').val() === false && newData.child('fromName').val() === root.child('profiles').child(auth.uid).child('name').val())))"
   );
@@ -278,6 +299,7 @@ const rules = base.rules;
 rules['birthday-mates'] = birthdayMatesNode();
 rules['bday-public'] = indexNode('public', 'true');
 rules['bday-members'] = indexNode('members', SHARING);
+rules['bday-marks'] = marksNode();
 rules['profiles'] = profilesNode();
 rules['bday-claims'] = claimsNode();
 rules['wishes'] = wishesNode();

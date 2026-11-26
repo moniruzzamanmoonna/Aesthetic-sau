@@ -146,6 +146,7 @@ async function registerGuest(entry) {
   const upd = {};
   upd['birthday-mates/' + key] = full;
   upd['bday-members/' + md + '/' + key] = { n: full.name, f: full.faculty, t: 'g' };
+  upd['bday-marks/' + md + '/' + key] = true;
   await update(ref(db), upd);
   const local = { name: full.name, faculty: full.faculty, birthday: full.birthday, district: full.district, key: key, token: token };
   try { localStorage.setItem(GUEST_KEY, JSON.stringify(local)); } catch (e) {}
@@ -201,6 +202,7 @@ async function saveProfile(input) {
   upd['profiles/' + uid] = p;
   upd['bday-public/' + md + '/u_' + uid] = vis === 'public' ? indexRow(p) : null;
   upd['bday-members/' + md + '/u_' + uid] = vis === 'members' ? indexRow(p) : null;
+  upd['bday-marks/' + md + '/u_' + uid] = vis === 'private' ? null : true;
   await update(ref(db), upd);
   profileCache = Object.assign({}, p, { createdAt: old ? old.createdAt : Date.now(), updatedAt: Date.now() });
   let claimed = false;
@@ -225,6 +227,7 @@ async function claimGuest() {
   upd['bday-claims/' + g.key] = claim;
   upd['bday-members/' + md + '/' + g.key] = null;
   upd['bday-public/' + md + '/' + g.key] = null;
+  upd['bday-marks/' + md + '/' + g.key] = null;
   await update(ref(db), upd);
   g.claimedBy = currentUser.uid;
   try { localStorage.setItem(GUEST_KEY, JSON.stringify(g)); } catch (e) {}
@@ -258,6 +261,7 @@ async function claimEntry(key) {
   const upd = {};
   upd['bday-claims/' + key] = { uid: currentUser.uid, at: serverTimestamp() };
   upd['bday-members/' + p.md + '/' + key] = null;
+  upd['bday-marks/' + p.md + '/' + key] = null;
   try {
     await update(ref(db), upd);
   } catch (e) {
@@ -276,6 +280,7 @@ async function deleteProfile() {
   const upd = {};
   upd['bday-public/' + p.md + '/u_' + uid] = null;
   upd['bday-members/' + p.md + '/u_' + uid] = null;
+  upd['bday-marks/' + p.md + '/u_' + uid] = null;
   upd['profiles/' + uid] = null;
   await update(ref(db), upd);
   profileCache = null;
@@ -345,15 +350,36 @@ async function twins() {
   return { md: me.md, items: items, membersHidden: !(await canSeeMembers()), source: me.source };
 }
 
-/** All visible birthdays in one month: { 'MM-DD': [items] }. */
+/**
+ * How many birthdays on these days the viewer can't see (members-only rows while signed out,
+ * private, or without a profile). Uses bday-marks, which holds no names.
+ */
+async function hiddenOn(mdKeys, exclude) {
+  await ready;
+  if (await canSeeMembers()) return 0;
+  const ex = {};
+  (exclude || ownKeys()).forEach(function (k) { ex[k] = 1; });
+  let n = 0;
+  await Promise.all(mdKeys.map(async function (md) {
+    const [m, p] = await Promise.all([get(ref(db, 'bday-marks/' + md)), get(ref(db, 'bday-public/' + md))]);
+    const pub = p.val() || {};
+    Object.keys(m.val() || {}).forEach(function (k) { if (!pub[k] && !ex[k]) n++; });
+  }));
+  return n;
+}
+
+/**
+ * One month of birthdays: { byMd: { 'MM-DD': [visible items] }, hidden: { 'MM-DD': count } }.
+ * `hidden` counts birthdays the viewer can't see, so the calendar can still show 🎂 marks.
+ */
 async function month(year, monthNum) {
   await ready;
   const mm = (monthNum < 10 ? '0' : '') + monthNum;
+  const sharing = await canSeeMembers();
   const nodes = ['bday-public'];
-  if (await canSeeMembers()) nodes.push('bday-members');
-  const snaps = await Promise.all(nodes.map(function (n) {
-    return get(query(ref(db, n), orderByKey(), startAt(mm + '-01'), endAt(mm + '-31')));
-  }));
+  if (sharing) nodes.push('bday-members');
+  const range = function (n) { return get(query(ref(db, n), orderByKey(), startAt(mm + '-01'), endAt(mm + '-31'))); };
+  const [snaps, marksSnap] = await Promise.all([Promise.all(nodes.map(range)), sharing ? Promise.resolve(null) : range('bday-marks')]);
   const groups = [];
   snaps.forEach(function (s, i) {
     const v = s.val() || {};
@@ -364,9 +390,19 @@ async function month(year, monthNum) {
     markSelf(it);
     (byMd[it.md] = byMd[it.md] || []).push(it);
   });
-  return byMd;
+  const hidden = {};
+  if (marksSnap) {
+    const marks = marksSnap.val() || {};
+    const pub = snaps[0].val() || {};
+    const ex = {};
+    ownKeys().forEach(function (k) { ex[k] = 1; });
+    Object.keys(marks).forEach(function (md) {
+      const n = Object.keys(marks[md] || {}).filter(function (k) { return !(pub[md] || {})[k] && !ex[k]; }).length;
+      if (n) hidden[md] = n;
+    });
+  }
+  return { byMd: byMd, hidden: hidden };
 }
-
 // ── wishes ────────────────────────────────────────────────────────────
 let serverOffset = 0;
 onValue(ref(db, '.info/serverTimeOffset'), function (s) { serverOffset = s.val() || 0; });
@@ -507,7 +543,7 @@ async function adminDeleteEntry(key, birthday) {
   const md = C.mdFromDob(birthday);
   const upd = {};
   upd['birthday-mates/' + key] = null;
-  if (md) { upd['bday-members/' + md + '/' + key] = null; upd['bday-public/' + md + '/' + key] = null; }
+  if (md) { upd['bday-members/' + md + '/' + key] = null; upd['bday-public/' + md + '/' + key] = null; upd['bday-marks/' + md + '/' + key] = null; }
   await update(ref(db), upd);
 }
 /** Admin: edit a guest/legacy entry and keep its index row in sync. */
@@ -520,8 +556,9 @@ async function adminEditEntry(key, before, after, claimed) {
   upd['birthday-mates/' + key + '/faculty'] = after.faculty;
   upd['birthday-mates/' + key + '/birthday'] = after.birthday;
   if (!claimed) {
-    if (oldMd && oldMd !== newMd) upd['bday-members/' + oldMd + '/' + key] = null;
+    if (oldMd && oldMd !== newMd) { upd['bday-members/' + oldMd + '/' + key] = null; upd['bday-marks/' + oldMd + '/' + key] = null; }
     upd['bday-members/' + newMd + '/' + key] = { n: C.cleanName(after.name), f: after.faculty, t: 'g' };
+    upd['bday-marks/' + newMd + '/' + key] = true;
   }
   await update(ref(db), upd);
 }
@@ -529,7 +566,7 @@ async function adminEditEntry(key, before, after, claimed) {
 const api = {
   ready, onUser, user, signIn, signOut, getIdToken, isAdmin, inAppBrowser,
   guestEntry, registerGuest, getProfile, saveProfile, deleteProfile, claimGuest,
-  birthdaysOn, twins, month, myMd, access, claimCandidates, claimEntry,
+  birthdaysOn, twins, month, myMd, hiddenOn, access, claimCandidates, claimEntry,
   sendWish, myWishes, watchWishCount, markWishesSeen, reportWish, deleteWish,
   adminWishes, adminRemoveWish, adminBirthdayMates, adminDeleteEntry, adminEditEntry,
   core: C

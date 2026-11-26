@@ -1036,14 +1036,14 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
       <div class="adm-stat"><div class="adm-stat-num" id="stat-daily-visitors">—</div><div class="adm-stat-lbl">📅 আজ Visited</div></div>
       <div class="adm-stat"><div class="adm-stat-num" id="stat-games-played">—</div><div class="adm-stat-lbl">🎮 Games Played</div></div>
     </div>
-    <input type="text" class="adm-search" id="adm-search" placeholder="🔍 নাম বা Faculty দিয়ে খুঁজুন..." oninput="filterTable()"/>
+    <input type="text" class="adm-search" id="adm-search" placeholder="🔍 নাম, Faculty বা District দিয়ে খুঁজুন..." oninput="filterTable()"/>
     <div class="adm-table-wrap">
       <table class="adm-table">
         <thead>
-          <tr><th>#</th><th>নাম</th><th>Faculty</th><th>জন্মতারিখ</th><th>এন্ট্রির সময়</th><th>Action</th></tr>
+          <tr><th>#</th><th>নাম</th><th>Faculty</th><th>District</th><th>জন্মতারিখ</th><th>এন্ট্রির সময়</th><th>Action</th></tr>
         </thead>
         <tbody id="adm-tbody">
-          <tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr>
+          <tr><td colspan="7" class="adm-empty">লোড হচ্ছে...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1066,7 +1066,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
     <div class="adm-table-wrap">
       <table class="adm-table">
         <thead><tr><th>সময়</th><th>To</th><th>From (admin only)</th><th>Message</th><th>Flag</th><th>Action</th></tr></thead>
-        <tbody id="adm-wish-tbody"><tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr></tbody>
+        <tbody id="adm-wish-tbody"><tr><td colspan="7" class="adm-empty">লোড হচ্ছে...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -3673,7 +3673,7 @@ function adminLogout() {
 }
 
 function loadAdminData() {
-  document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr>';
+  document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="7" class="adm-empty">লোড হচ্ছে...</td></tr>';
   withBdayHome(function(H) {
     H.B.adminBirthdayMates()
     .then(function(res) {
@@ -3683,7 +3683,7 @@ function loadAdminData() {
       updateStats(adminData);
     })
     .catch(function() {
-      document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="6" class="adm-empty">ডাটা লোড করতে সমস্যা হয়েছে। ↻ Refresh চাপুন।</td></tr>';
+      document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="7" class="adm-empty">ডাটা লোড করতে সমস্যা হয়েছে। ↻ Refresh চাপুন।</td></tr>';
     });
   });
   // Photo likes total (admin-only display)
@@ -3733,7 +3733,7 @@ function renderAdminTable(data) {
   var keys = Object.keys(data);
   var tbody = document.getElementById('adm-tbody');
   if (!keys.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="adm-empty">কোনো ডাটা নেই</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="adm-empty">কোনো ডাটা নেই</td></tr>';
     return;
   }
   // Sort by timestamp desc
@@ -3747,6 +3747,7 @@ function renderAdminTable(data) {
       + '<td class="adm-dim">' + (i+1) + '</td>'
       + '<td><strong>' + esc(p.name||'—') + '</strong>' + (adminClaims[k] ? ' <span title="Google profile এর সাথে linked" style="font-size:11px">🔗</span>' : '') + '</td>'
       + '<td class="adm-dim2">' + esc(p.faculty||'—') + '</td>'
+      + '<td class="adm-dim2">' + esc(p.district||'—') + '</td>'
       + '<td>' + esc(p.birthday||'—') + '</td>'
       + '<td class="adm-dim3">' + esc(dt) + '</td>'
       + '<td>'
@@ -3763,7 +3764,7 @@ function filterTable() {
   var filtered = {};
   Object.keys(adminData).forEach(function(k){
     var p = adminData[k];
-    if ((p.name||'').toLowerCase().includes(q) || (p.faculty||'').toLowerCase().includes(q) || (p.birthday||'').includes(q)) {
+    if ((p.name||'').toLowerCase().includes(q) || (p.faculty||'').toLowerCase().includes(q) || (p.district||'').toLowerCase().includes(q) || (p.birthday||'').includes(q)) {
       filtered[k] = p;
     }
   });
@@ -3825,11 +3826,11 @@ function saveEdit(key) {
 
 function exportExcel() {
   var keys = Object.keys(adminData);
-  var rows = [['#','নাম','Faculty','জন্মতারিখ','এন্ট্রির সময়']];
+  var rows = [['#','নাম','Faculty','District','জন্মতারিখ','Gmail','এন্ট্রির সময়']];
   keys.sort(function(a,b){ return (adminData[b].timestamp||'') > (adminData[a].timestamp||'') ? 1:-1; });
   keys.forEach(function(k,i){
     var p = adminData[k];
-    rows.push([i+1, p.name||'', p.faculty||'', p.birthday||'', p.timestamp ? new Date(p.timestamp).toLocaleString() : '']);
+    rows.push([i+1, p.name||'', p.faculty||'', p.district||'', p.birthday||'', p.gmail||'', p.timestamp ? new Date(p.timestamp).toLocaleString() : '']);
   });
   var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
   var bom  = '\uFEFF';

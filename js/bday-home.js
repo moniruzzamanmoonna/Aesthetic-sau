@@ -21,20 +21,25 @@ async function mountTodayWidget() {
   const list = document.getElementById('bm-today-list');
   list.innerHTML = '<div class="bm-home-skel" aria-label="Loading"></div>';
   try {
-    const items = await B.birthdaysOn(now);
-    if (!items.length) {
+    const [items, hiddenN] = await Promise.all([B.birthdaysOn(now), B.hiddenOn(C.celebrationKeys(now))]);
+    const total = items.length + hiddenN;
+    const lockChip = hiddenN
+      ? '<a class="bm-chip bm-chip-lock" href="' + (B.user() ? 'birthday.html#profile' : 'birthday.html#today') + '"><span class="bm-avatar bm-avatar-sm" aria-hidden="true">🔒</span>'
+        + '<span><b>+' + hiddenN + ' more</b><small>' + (B.user() ? 'Share your birthday to see' : 'Sign in to see') + '</small></span></a>'
+      : '';
+    if (!total) {
       list.innerHTML = '<p class="bm-home-empty">No Birthday Mates today. Tomorrow is another day to celebrate! 💚</p>';
       return;
     }
     const shown = items.slice(0, MAX_CHIPS);
-    list.innerHTML = '<div class="bm-chips">' + shown.map(function (i) {
+    list.innerHTML = '<div class="bm-chips">' + lockChip + shown.map(function (i) {
       return '<a class="bm-chip" href="birthday.html#today">' + avatar(i, 'sm')
         + '<span><b>🎂 ' + esc(i.name) + '</b><small>' + esc([i.faculty, i.batch ? 'Batch ' + i.batch : ''].filter(Boolean).join(' · ')) + '</small></span></a>';
     }).join('')
       + (items.length > MAX_CHIPS ? '<a class="bm-chip" href="birthday.html#today"><span><b>+' + (items.length - MAX_CHIPS) + ' more</b><small>View all</small></span></a>' : '')
       + '</div>';
     const cnt = document.getElementById('bm-today-count');
-    if (cnt) cnt.textContent = ' · ' + (items.length === 1 ? '1 SAUian is celebrating' : items.length + ' SAUians are celebrating');
+    if (cnt) cnt.textContent = ' · ' + (total === 1 ? '1 SAUian is celebrating' : total + ' SAUians are celebrating');
   } catch (e) {
     list.innerHTML = '<p class="bm-home-empty">Couldn\'t load today\'s birthdays. Please check your connection.</p>';
   }

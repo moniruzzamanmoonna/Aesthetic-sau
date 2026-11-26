@@ -31,6 +31,7 @@ beforeEach(async () => {
     await ctx.database().ref().update({
       ['birthday-mates/' + LEGACY]: { name: 'Old Student', faculty: 'Agriculture', district: 'Sylhet', birthday: '2003-11-26', timestamp: '2025-01-01T00:00:00Z', gmail: 'old@example.com' },
       ['bday-members/11-26/' + LEGACY]: { n: 'Old Student', f: 'Agriculture', t: 'g' },
+      ['bday-marks/11-26/' + LEGACY]: true,
       'site-config/followerCount': 1
     });
   });
@@ -49,7 +50,8 @@ function profileUpdate(uid, p) {
   return {
     ['profiles/' + uid]: prof,
     ['bday-public/' + md + '/u_' + uid]: p.vis === 'public' ? row : null,
-    ['bday-members/' + md + '/u_' + uid]: p.vis === 'members' ? row : null
+    ['bday-members/' + md + '/u_' + uid]: p.vis === 'members' ? row : null,
+    ['bday-marks/' + md + '/u_' + uid]: p.vis === 'private' ? null : true
   };
 }
 async function seedProfiles() {
@@ -121,6 +123,33 @@ test('give-to-get: private users and users without a profile cannot see members-
   await assertSucceeds(as('carol').ref('bday-public/11-26').get());
 });
 
+test('count markers: readable by everyone, no names, always in step with rows', async () => {
+  await seedProfiles();
+  const marks = (await assertSucceeds(anon().ref('bday-marks/11-26').get())).val();
+  assert.deepEqual(Object.keys(marks).sort(), [LEGACY, 'u_alice', 'u_bob'].sort(), 'public + members rows counted, private carol not');
+  assert.ok(Object.values(marks).every((v) => v === true), 'markers carry no names');
+  await assertSucceeds(anon().ref('bday-marks').orderByKey().startAt('11-01').endAt('11-31').get());
+  await assertFails(anon().ref('bday-marks/11-26/u_fake').set(true), 'no phantom markers');
+  await assertFails(as('mallory').ref('bday-marks/11-26/u_bob').remove(), 'cannot hide someone');
+  await assertFails(anon().ref('bday-marks/11-26/x').set('Name'), 'value must be true');
+  // a visibility change that forgets the marker is rejected
+  const createdAt = (await as('bob').ref('profiles/bob/createdAt').get()).val();
+  const toPrivate = profileUpdate('bob', { name: 'Bob Barua', birthday: '1999-11-26', vis: 'private', createdAt });
+  await assertFails(as('bob').ref().update(Object.assign({}, toPrivate, { 'bday-marks/11-26/u_bob': true })));
+  await assertSucceeds(as('bob').ref().update(toPrivate));
+  assert.equal((await anon().ref('bday-marks/11-26/u_bob').get()).exists(), false);
+});
+
+test('wishes are give-to-get too', async () => {
+  await seedProfiles();
+  // carol is private: may wish public alice, not members-only bob
+  await assertFails(as('carol').ref().update(wishUpdate('carol', 'bob', 'g1', { msg: 'hi', anon: true })));
+  await assertSucceeds(as('carol').ref().update(wishUpdate('carol', 'alice', 'g2', { msg: 'hi', anon: true })));
+  // no profile at all: only public recipients
+  await assertFails(as('ghost').ref().update(wishUpdate('ghost', 'bob', 'g3', { msg: 'hi', anon: true })));
+  await assertSucceeds(as('ghost').ref().update(wishUpdate('ghost', 'alice', 'g4', { msg: 'hi', anon: true })));
+});
+
 // ── profiles ──────────────────────────────────────────────────────────
 test('profile + index must agree', async () => {
   const u = profileUpdate('eve', { name: 'Eve', birthday: '2001-05-05', vis: 'public' });
@@ -165,7 +194,7 @@ test('switching visibility moves the row atomically; private removes it', async 
 test('deleting a profile requires removing its index row in the same write', async () => {
   await seedProfiles();
   await assertFails(as('bob').ref('profiles/bob').remove());
-  await assertSucceeds(as('bob').ref().update({ 'profiles/bob': null, 'bday-members/11-26/u_bob': null }));
+  await assertSucceeds(as('bob').ref().update({ 'profiles/bob': null, 'bday-members/11-26/u_bob': null, 'bday-marks/11-26/u_bob': null }));
 });
 
 // ── guest (no-login) entries ──────────────────────────────────────────
@@ -177,7 +206,8 @@ test('guest registration: create-only, members-only, consistent', async () => {
   await assertFails(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-14/' + k]: { n: 'Other Name', f: 'Fisheries', t: 'g' } }), 'name mismatch');
   await assertFails(anon().ref().update({ ['birthday-mates/u_x']: entry }), 'bad key');
   await assertFails(anon().ref().update({ ['birthday-mates/' + k]: Object.assign({}, entry, { birthday: '2005-02-30' }) }), 'bad date');
-  await assertSucceeds(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-14/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' } }));
+  await assertFails(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-14/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' } }), 'row without its count marker');
+  await assertSucceeds(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-14/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' }, ['bday-marks/03-14/' + k]: true }));
   await assertFails(anon().ref('birthday-mates/' + k).update({ name: 'Changed' }), 'no overwrite');
   await assertFails(anon().ref('birthday-mates/' + LEGACY).remove(), 'no delete');
   await assertFails(anon().ref('bday-members/11-26/' + LEGACY).remove());
@@ -193,7 +223,7 @@ test('claiming a guest entry: name+birthday match (legacy) or token (new)', asyn
   // "this is me": full date of birth matches (name may differ, e.g. Google display name)
   await assertSucceeds(as('olds').ref().update(profileUpdate('olds', { name: 'Different Display Name', birthday: '2003-11-26', vis: 'private' })));
   await assertFails(as('olds').ref().update({ ['bday-claims/' + LEGACY]: { uid: 'someone-else', at: TS }, ['bday-members/11-26/' + LEGACY]: null }));
-  await assertSucceeds(as('olds').ref().update({ ['bday-claims/' + LEGACY]: { uid: 'olds', at: TS }, ['bday-members/11-26/' + LEGACY]: null }));
+  await assertSucceeds(as('olds').ref().update({ ['bday-claims/' + LEGACY]: { uid: 'olds', at: TS }, ['bday-members/11-26/' + LEGACY]: null, ['bday-marks/11-26/' + LEGACY]: null }));
   assert.equal((await as('dave').ref('bday-members/11-26/' + LEGACY).get()).exists(), false, 'private now applies to the old row too');
   await assertFails(anon().ref().update({ ['bday-members/11-26/' + LEGACY]: { n: 'Old Student', f: 'Agriculture', t: 'g' } }), 'claimed rows cannot be re-created');
 
@@ -202,11 +232,12 @@ test('claiming a guest entry: name+birthday match (legacy) or token (new)', asyn
   const tok = 'A'.repeat(32);
   await assertSucceeds(anon().ref().update({
     ['birthday-mates/' + k]: { name: 'Token Person', faculty: 'Fisheries', birthday: '2001-01-02', timestamp: 'x', claim: tok },
-    ['bday-members/01-02/' + k]: { n: 'Token Person', f: 'Fisheries', t: 'g' }
+    ['bday-members/01-02/' + k]: { n: 'Token Person', f: 'Fisheries', t: 'g' },
+    ['bday-marks/01-02/' + k]: true
   }));
   await assertSucceeds(as('tp').ref().update(profileUpdate('tp', { name: 'Different Display Name', birthday: '2001-01-02', vis: 'members' })));
   await assertFails(as('tp').ref().update({ ['bday-claims/' + k]: { uid: 'tp', token: 'B'.repeat(32), at: TS } }), 'wrong token');
-  await assertSucceeds(as('tp').ref().update({ ['bday-claims/' + k]: { uid: 'tp', token: tok, at: TS }, ['bday-members/01-02/' + k]: null }));
+  await assertSucceeds(as('tp').ref().update({ ['bday-claims/' + k]: { uid: 'tp', token: tok, at: TS }, ['bday-members/01-02/' + k]: null, ['bday-marks/01-02/' + k]: null }));
   await assertFails(as('tp').ref('bday-claims').get(), 'claims are admin-only');
 });
 
@@ -296,7 +327,7 @@ test('admin access requires a verified admin Google account', async () => {
   await assertSucceeds(as('alice').ref().update(wishUpdate('alice', 'bob', 'w9', { msg: 'bad', anon: true })));
   await assertSucceeds(adminDb().ref().update({ 'wishes/bob/w9': null, 'wish-meta/w9/removedAt': TS }));
   await assertSucceeds(adminDb().ref().update({ ['birthday-mates/' + LEGACY + '/name']: 'Old Student Edited', ['bday-members/11-26/' + LEGACY]: { n: 'Old Student Edited', f: 'Agriculture', t: 'g' } }));
-  await assertSucceeds(adminDb().ref().update({ ['birthday-mates/' + LEGACY]: null, ['bday-members/11-26/' + LEGACY]: null }));
+  await assertSucceeds(adminDb().ref().update({ ['birthday-mates/' + LEGACY]: null, ['bday-members/11-26/' + LEGACY]: null, ['bday-marks/11-26/' + LEGACY]: null }));
 });
 
 // ── regression: nodes that existed before Birthday Mate ────────────────
