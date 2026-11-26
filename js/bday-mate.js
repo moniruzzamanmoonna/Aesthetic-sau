@@ -21,7 +21,7 @@ import {
   onAuthStateChanged, signOut as fbSignOut, connectAuthEmulator
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import {
-  getDatabase, ref, get, update, push, query, orderByKey, startAt, endAt, serverTimestamp, onValue, connectDatabaseEmulator
+  getDatabase, ref, get, update, push, query, orderByKey, startAt, endAt, serverTimestamp, onValue, connectDatabaseEmulator, increment
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import './bday-core.js';
 
@@ -174,6 +174,30 @@ function indexRow(p) {
  * Create or update the signed-in user's profile and its index row in one
  * atomic write (the rules reject a profile whose index row does not match).
  */
+/**
+ * District rows + counts for a profile change (old -> next, either may be null).
+ * Rows follow the birthday visibility; counts include everyone who isn't private.
+ */
+function districtUpdates(upd, uid, old, next) {
+  const counted = function (p) { return !!(p && p.district && p.visibility !== 'private'); };
+  const oldDk = old && old.district ? C.districtKey(old.district) : '';
+  const newDk = next && next.district ? C.districtKey(next.district) : '';
+  if (oldDk && oldDk !== newDk) {
+    upd['district-public/' + oldDk + '/u_' + uid] = null;
+    upd['district-members/' + oldDk + '/u_' + uid] = null;
+  }
+  if (newDk) {
+    const row = { n: next.name, f: next.faculty };
+    if (next.batch) row.b = next.batch;
+    if (next.photo) row.p = next.photo;
+    upd['district-public/' + newDk + '/u_' + uid] = next.visibility === 'public' ? row : null;
+    upd['district-members/' + newDk + '/u_' + uid] = next.visibility === 'members' ? row : null;
+  }
+  const wasIn = counted(old), isIn = counted(next);
+  if (isIn && !(wasIn && oldDk === newDk)) upd['district-counts/' + newDk] = increment(1);
+  if (wasIn && !(isIn && oldDk === newDk)) upd['district-counts/' + oldDk] = increment(-1);
+}
+
 async function saveProfile(input) {
   await ready;
   if (!currentUser) throw new Error('Please sign in first.');
@@ -197,9 +221,13 @@ async function saveProfile(input) {
   };
   if (batch) p.batch = batch;
   if (photo) p.photo = photo;
+  const district = String(input.district || '').trim();
+  if (district && C.DISTRICTS.indexOf(district) < 0) throw new Error('Please pick your district from the list.');
+  if (district) p.district = district;
 
   const upd = {};
   upd['profiles/' + uid] = p;
+  districtUpdates(upd, uid, old, p);
   upd['bday-public/' + md + '/u_' + uid] = vis === 'public' ? indexRow(p) : null;
   upd['bday-members/' + md + '/u_' + uid] = vis === 'members' ? indexRow(p) : null;
   upd['bday-marks/' + md + '/u_' + uid] = vis === 'private' ? null : true;
@@ -282,6 +310,7 @@ async function deleteProfile() {
   upd['bday-members/' + p.md + '/u_' + uid] = null;
   upd['bday-marks/' + p.md + '/u_' + uid] = null;
   upd['profiles/' + uid] = null;
+  districtUpdates(upd, uid, p, null);
   await update(ref(db), upd);
   profileCache = null;
 }
@@ -403,6 +432,40 @@ async function month(year, monthNum) {
   }
   return { byMd: byMd, hidden: hidden };
 }
+// ── 📍 District Mates ─────────────────────────────────────────────────
+/**
+ * People per district: { total, live, legacy } maps of district key -> number.
+ * live = profiles (can be shown, per visibility); legacy = earlier registrations (always anonymous).
+ */
+async function districtCounts() {
+  const [liveS, legacyS] = await Promise.all([get(ref(db, 'district-counts')), get(ref(db, 'district-legacy'))]);
+  const live = liveS.val() || {}, legacy = legacyS.val() || {}, total = {};
+  [live, legacy].forEach(function (o) {
+    Object.keys(o).forEach(function (k) { total[k] = (total[k] || 0) + (+o[k] || 0); });
+  });
+  return { total: total, live: live, legacy: legacy };
+}
+/** Visible people from one district (public, plus members-only for people who share). */
+async function districtPeople(dk) {
+  await ready;
+  const nodes = ['district-public'];
+  if (await canSeeMembers()) nodes.push('district-members');
+  const snaps = await Promise.all(nodes.map(function (n) { return get(ref(db, n + '/' + dk)); }));
+  const me = currentUser ? 'u_' + currentUser.uid : '';
+  const out = [];
+  snaps.forEach(function (s) {
+    const v = s.val() || {};
+    Object.keys(v).forEach(function (k) {
+      const r = v[k];
+      if (!r || !r.n) return;
+      out.push({ key: k, name: String(r.n), faculty: String(r.f || ''), batch: r.b ? String(r.b) : '', photo: r.p ? String(r.p) : '',
+        uid: k.slice(2), canWish: true, isSelf: k === me, md: '' });
+    });
+  });
+  out.sort(function (a, b) { return a.isSelf - b.isSelf || a.name.localeCompare(b.name); });
+  return out;
+}
+
 // ── wishes ────────────────────────────────────────────────────────────
 let serverOffset = 0;
 onValue(ref(db, '.info/serverTimeOffset'), function (s) { serverOffset = s.val() || 0; });
@@ -566,7 +629,7 @@ async function adminEditEntry(key, before, after, claimed) {
 const api = {
   ready, onUser, user, signIn, signOut, getIdToken, isAdmin, inAppBrowser,
   guestEntry, registerGuest, getProfile, saveProfile, deleteProfile, claimGuest,
-  birthdaysOn, twins, month, myMd, hiddenOn, access, claimCandidates, claimEntry,
+  birthdaysOn, twins, month, myMd, hiddenOn, districtCounts, districtPeople, access, claimCandidates, claimEntry,
   sendWish, myWishes, watchWishCount, markWishesSeen, reportWish, deleteWish,
   adminWishes, adminRemoveWish, adminBirthdayMates, adminDeleteEntry, adminEditEntry,
   core: C

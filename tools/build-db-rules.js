@@ -103,10 +103,68 @@ function marksNode() {
   };
 }
 
+// district-<vis>/$dk/u_<uid>: {n,f,b?,p?} — only signed-in profiles, never earlier guests.
+function districtRowsNode(vis, readRule) {
+  const NR = 'newData.parent().parent().parent()';
+  const P = NR + ".child('profiles').child(auth.uid)";
+  const own = j(
+    "(" + SIGNED + " && $key === 'u_' + auth.uid && (!newData.exists() || (",
+    P + ".child('district').exists() && " + DK(P) + " === $dk",
+    "&& " + P + ".child('visibility').val() === '" + vis + "'",
+    "&& newData.child('n').val() === " + P + ".child('name').val()",
+    "&& newData.child('f').val() === " + P + ".child('faculty').val()",
+    "&& ((!newData.child('b').exists() && !" + P + ".child('batch').exists()) || newData.child('b').val() === " + P + ".child('batch').val())",
+    "&& ((!newData.child('p').exists() && !" + P + ".child('photo').exists()) || newData.child('p').val() === " + P + ".child('photo').val())",
+    ')))'
+  );
+  return {
+    '.read': readRule,
+    '$dk': {
+      '.validate': '$dk.matches(' + DK_RE + ')',
+      '$key': {
+        '.write': ADMIN + ' || ' + own,
+        '.validate': "newData.hasChildren(['n','f'])",
+        n: { '.validate': str(1, 60) },
+        f: { '.validate': str(1, 80) },
+        b: { '.validate': str(1, 20) },
+        p: { '.validate': PHOTO_OK },
+        $other: { '.validate': false }
+      }
+    }
+  };
+}
+
+// district-counts/$dk: how many (non-private) profiles list this district. Changes only by
+// exactly one, and only together with the writer's own profile joining/leaving the district.
+function districtCountsNode() {
+  const NR = 'newData.parent().parent()';
+  const O = "root.child('profiles').child(auth.uid)";
+  const N = NR + ".child('profiles').child(auth.uid)";
+  const inNew = '(' + COUNTED(N) + ' && ' + DK(N) + ' === $dk)';
+  const inOld = '(' + COUNTED(O) + ' && ' + DK(O) + ' === $dk)';
+  return {
+    '.read': 'true',
+    '$dk': {
+      '.write': ADMIN + ' || (' + SIGNED + ' && ((' + inNew + ' && !' + inOld + ' && newData.val() === ' + CVAL('data') + ' + 1)' +
+        ' || (' + inOld + ' && !' + inNew + ' && newData.val() === ' + CVAL('data') + ' - 1)))',
+      '.validate': '$dk.matches(' + DK_RE + ') && newData.isNumber() && newData.val() >= 0'
+    }
+  };
+}
+
 // Give-to-get: only people who share their own birthday (Public or SAU Members Only)
 // can see members-only birthdays. Private users and signed-in users without a profile cannot.
 const SHARING = '(' + SIGNED + " && (root.child('profiles').child(auth.uid).child('visibility').val() === 'public'" +
   " || root.child('profiles').child(auth.uid).child('visibility').val() === 'members'))";
+
+// ── District Mates helpers ────────────────────────────────────────────
+// A profile's district key: "Cox's Bazar" -> "cox-s-bazar" (RTDB replace() replaces every match).
+const DISTRICT_KEYS = ['bagerhat','bandarban','barguna','barishal','bhola','bogura','brahmanbaria','chandpur','chapai-nawabganj','chattogram','chuadanga','cox-s-bazar','cumilla','dhaka','dinajpur','faridpur','feni','gaibandha','gazipur','gopalganj','habiganj','jamalpur','jashore','jhalokati','jhenaidah','joypurhat','khagrachhari','khulna','kishoreganj','kurigram','kushtia','lakshmipur','lalmonirhat','madaripur','magura','manikganj','meherpur','moulvibazar','munshiganj','mymensingh','naogaon','narail','narayanganj','narsingdi','natore','netrokona','nilphamari','noakhali','pabna','panchagarh','patuakhali','pirojpur','rajbari','rajshahi','rangamati','rangpur','satkhira','shariatpur','sherpur','sirajganj','sunamganj','sylhet','tangail','thakurgaon'];
+const DK_RE = '/^(' + DISTRICT_KEYS.join('|') + ')$/';
+function DK(src) { return '(' + src + ".child('district').val().toLowerCase().replace(' ', '-').replace(\"'\", '-'))"; }
+// A profile is counted in its district when it has one and is not private.
+function COUNTED(src) { return '(' + src + '.exists() && ' + src + ".child('district').exists() && " + src + ".child('visibility').val() !== 'private')"; }
+function CVAL(x) { return '(' + x + '.exists() ? ' + x + '.val() : 0)'; }
 
 // ── profiles/$uid ─────────────────────────────────────────────────────
 function profilesNode() {
@@ -118,6 +176,8 @@ function profilesNode() {
   const MEM = idx('members', 'newData');
   const NAME = "newData.child('name').val()";
   const vis = "newData.child('visibility').val()";
+  function dcnt(base, src) { return base + ".child('district-counts').child(" + DK(src) + ")"; }
+  function drow(base, v, src) { return base + ".child('district-" + v + "').child(" + DK(src) + ").child('u_' + $uid)"; }
   return {
     '.read': ADMIN,
     '$uid': {
@@ -125,7 +185,10 @@ function profilesNode() {
       // Deleting a profile is only allowed once its index rows are gone too.
       '.write': j(
         "((" + SIGNED + " && auth.uid === $uid) || " + ADMIN + ")",
-        "&& (newData.exists() || !data.exists() || (!" + idx('public', 'data') + ".exists() && !" + idx('members', 'data') + ".exists()))"
+        "&& (newData.exists() || !data.exists() || (!" + idx('public', 'data') + ".exists() && !" + idx('members', 'data') + ".exists()))",
+        // ...and its district rows are gone and the district count went down by one.
+        "&& (newData.exists() || !" + COUNTED('data') + " || (" + CVAL(dcnt(NR, 'data')) + " === " + CVAL(dcnt('root', 'data')) + " - 1",
+        "&& !" + drow(NR, 'public', 'data') + ".exists() && !" + drow(NR, 'members', 'data') + ".exists()))"
       ),
       '.validate': j(
         "newData.hasChildren(['name','faculty','birthday','md','visibility','createdAt'])",
@@ -133,7 +196,17 @@ function profilesNode() {
         "&& (!data.exists() || data.child('birthday').val() === newData.child('birthday').val() || " + ADMIN + ")",
         "&& ((" + vis + " === 'public' && " + PUB + ".child('n').val() === " + NAME + " && !" + MEM + ".exists())",
         "|| (" + vis + " === 'members' && " + MEM + ".child('n').val() === " + NAME + " && !" + PUB + ".exists())",
-        "|| (" + vis + " === 'private' && !" + PUB + ".exists() && !" + MEM + ".exists()))"
+        "|| (" + vis + " === 'private' && !" + PUB + ".exists() && !" + MEM + ".exists()))",
+        // District rows follow the birthday visibility (private / no district -> no rows).
+        "&& (!newData.child('district').exists() || (" + vis + " === 'public' && " + drow(NR, 'public', 'newData') + ".child('n').val() === " + NAME + " && !" + drow(NR, 'members', 'newData') + ".exists())",
+        "|| (" + vis + " === 'members' && " + drow(NR, 'members', 'newData') + ".child('n').val() === " + NAME + " && !" + drow(NR, 'public', 'newData') + ".exists())",
+        "|| (" + vis + " === 'private' && !" + drow(NR, 'public', 'newData') + ".exists() && !" + drow(NR, 'members', 'newData') + ".exists()))",
+        // Leaving a district (moving, removing it, going private) removes the old rows...
+        "&& (!data.child('district').exists() || (newData.child('district').exists() && " + DK('data') + " === " + DK('newData') + ")",
+        "|| (!" + drow(NR, 'public', 'data') + ".exists() && !" + drow(NR, 'members', 'data') + ".exists()))",
+        // ...and the per-district counts move by exactly one.
+        "&& (!" + COUNTED('newData') + " || (" + COUNTED('data') + " && " + DK('data') + " === " + DK('newData') + ") || " + CVAL(dcnt(NR, 'newData')) + " === " + CVAL(dcnt('root', 'newData')) + " + 1)",
+        "&& (!" + COUNTED('data') + " || (" + COUNTED('newData') + " && " + DK('data') + " === " + DK('newData') + ") || " + CVAL(dcnt(NR, 'data')) + " === " + CVAL(dcnt('root', 'data')) + " - 1)"
       ),
       name: { '.validate': str(2, 60) },
       faculty: { '.validate': str(1, 80) },
@@ -142,6 +215,7 @@ function profilesNode() {
       md: { '.validate': 'newData.isString() && newData.val().matches(' + MD_RE + ')' },
       visibility: { '.validate': "newData.isString() && newData.val().matches(/^(public|members|private)$/)" },
       photo: { '.validate': PHOTO_OK },
+      district: { '.validate': str(3, 30) + " && newData.val().toLowerCase().replace(' ', '-').replace(\"'\", '-').matches(" + DK_RE + ')' },
       createdAt: { '.validate': 'newData.isNumber() && (' + NOW_ONCE + ')' },
       updatedAt: { '.validate': 'newData.isNumber() && newData.val() === now' },
       $other: { '.validate': false }
@@ -300,6 +374,11 @@ rules['birthday-mates'] = birthdayMatesNode();
 rules['bday-public'] = indexNode('public', 'true');
 rules['bday-members'] = indexNode('members', SHARING);
 rules['bday-marks'] = marksNode();
+rules['district-public'] = districtRowsNode('public', 'true');
+rules['district-members'] = districtRowsNode('members', SHARING);
+rules['district-counts'] = districtCountsNode();
+// earlier (no-login) registrations, counted by an admin script; numbers only, never names
+rules['district-legacy'] = { '.read': 'true', '$dk': { '.write': ADMIN, '.validate': '$dk.matches(' + DK_RE + ') && newData.isNumber() && newData.val() >= 0' } };
 rules['profiles'] = profilesNode();
 rules['bday-claims'] = claimsNode();
 rules['wishes'] = wishesNode();

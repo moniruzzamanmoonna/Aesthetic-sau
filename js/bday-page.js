@@ -10,7 +10,7 @@ import {
 
 const C = B.core;
 const main = document.getElementById('bm-main');
-const ROUTES = ['twins', 'today', 'calendar', 'wishes', 'profile'];
+const ROUTES = ['twins', 'districts', 'today', 'calendar', 'wishes', 'profile'];
 let renderSeq = 0;
 
 function route() {
@@ -19,12 +19,13 @@ function route() {
 }
 
 function setActiveTab(r) {
+  const tab = r === 'districts' ? 'twins' : r;
   document.querySelectorAll('.bm-tabs a[data-tab]').forEach(function (a) {
-    const on = a.getAttribute('data-tab') === r;
+    const on = a.getAttribute('data-tab') === tab;
     a.classList.toggle('active', on);
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
-  const titles = { twins: 'Birthday Twins', today: "Today's Birthdays", calendar: 'Birthday Calendar', wishes: 'My Wishes', profile: 'My Birthday Profile' };
+  const titles = { twins: 'Birthday Twins', districts: 'District Mates', today: "Today's Birthdays", calendar: 'Birthday Calendar', wishes: 'My Wishes', profile: 'My Birthday Profile' };
   document.title = titles[r] + ' — Birthday Mate · Aesthetic SAU';
 }
 
@@ -34,7 +35,7 @@ async function render() {
   setActiveTab(r);
   try { ACCESS = await B.access(); } catch (e) { /* keep last known */ }
   if (seq !== renderSeq) return;
-  const views = { twins: viewTwins, today: viewToday, calendar: viewCalendar, wishes: viewWishes, profile: viewProfile };
+  const views = { twins: viewTwins, districts: viewDistricts, today: viewToday, calendar: viewCalendar, wishes: viewWishes, profile: viewProfile };
   try {
     await views[r](seq);
   } catch (e) {
@@ -110,11 +111,11 @@ async function viewToday(seq) {
 
 // ── 🎂 Twins ──────────────────────────────────────────────────────────
 async function viewTwins(seq) {
-  main.innerHTML = head('🎂 Birthday Twins', 'Your Birthday Twins', '') + skeleton(3);
+  main.innerHTML = seg('twins') + head('🎂 Birthday Twins', 'Your Birthday Twins', '') + skeleton(3);
   const res = await B.twins();
   if (stale(seq)) return;
   if (!res.md) {
-    main.innerHTML = head('🎂 Birthday Twins', 'Your Birthday Twins', 'Same day and month, any year.')
+    main.innerHTML = seg('twins') + head('🎂 Birthday Twins', 'Your Birthday Twins', 'Same day and month, any year.')
       + emptyState('🎂', 'Add your birthday to find your twins', 'Create your Birthday Mate profile, or use the quick form on the homepage.',
         '<a class="bm-btn bm-btn-primary" href="#profile">Create my profile</a><a class="bm-btn" href="index.html#birthday">Quick form</a>');
     after(seq);
@@ -128,7 +129,7 @@ async function viewTwins(seq) {
     ? 'You share your birthday (<strong>' + dateTxt + '</strong>) with ' + n + ' other SAU ' + (n === 1 ? 'student' : 'students') + '.'
     : 'Your birthday: <strong>' + dateTxt + '</strong>';
   const leap = res.md === '02-29' ? '<p class="bm-note">🐸 Leap-day birthday! Your twins are others born on 29 February.</p>' : '';
-  main.innerHTML = head('🎂 Birthday Twins', 'Your Birthday Twins', sub) + leap
+  main.innerHTML = seg('twins') + head('🎂 Birthday Twins', 'Your Birthday Twins', sub) + leap
     + (res.items.length ? '<div class="bm-grid">' + res.items.map(function (i) { return personCard(i); }).join('') + '</div>' : '')
     + (hiddenN ? lockedHtml(hiddenN, res.items.length > 0) : '')
     + (n ? '' : emptyState('🌱', "No Birthday Twins found yet. Maybe you're the first one!", 'Maybe someone with the same birthday will join soon! 🎂'))
@@ -233,6 +234,99 @@ function showDay(data, keys, md) {
   bindSignIn(box, render);
 }
 
+// ── 📍 District Mates ─────────────────────────────────────────────────
+function seg(active) {
+  return '<nav class="bm-seg" aria-label="Mates">'
+    + '<a href="#twins"' + (active === 'twins' ? ' class="active" aria-current="page"' : '') + '>🎂 Birthday Twins</a>'
+    + '<a href="#districts"' + (active === 'districts' ? ' class="active" aria-current="page"' : '') + '>📍 District Mates</a></nav>';
+}
+const dist = { showAll: false, selected: '' };
+
+async function viewDistricts(seq) {
+  main.innerHTML = seg('districts') + head('📍 District Mates', 'Your District Mates', '') + skeleton(2);
+  const [dc, profile] = await Promise.all([B.districtCounts(), ACCESS.hasProfile ? B.getProfile() : Promise.resolve(null)]);
+  const counts = dc.total;
+  if (stale(seq)) return;
+  const myDk = profile && profile.district ? C.districtKey(profile.district) : '';
+  let mine = '';
+  if (myDk) {
+    const people = (await B.districtPeople(myDk)).filter(function (p) { return !p.isSelf; });
+    if (stale(seq)) return;
+    const total = Math.max(0, (counts[myDk] || 0) - (profile.visibility !== 'private' ? 1 : 0));
+    const liveOthers = Math.max(0, (+dc.live[myDk] || 0) - (profile.visibility !== 'private' ? 1 : 0));
+    mine = (people.length ? '<div class="bm-grid">' + people.map(function (p) { return personCard(p, { showDate: false }); }).join('') + '</div>' : '')
+      + districtHidden(Math.max(0, liveOthers - people.length), +dc.legacy[myDk] || 0, people.length > 0)
+      + (total ? '' : emptyState('🌱', 'No District Mates yet', 'You\'re the first SAUian from ' + esc(profile.district) + ' here. Share Birthday Mate with friends from home! 💚'));
+    mine = '<p class="bm-sub bm-dist-sub">' + (total ? total + ' other SAUian' + (total > 1 ? 's' : '') + ' from <strong>' + esc(profile.district) + '</strong>' : '') + '</p>' + mine;
+  } else {
+    mine = emptyState('📍', 'Add your district to find District Mates',
+      ACCESS.signedIn ? 'Pick your home district in your profile. It\'s optional.' : 'Sign in, create your profile and pick your home district.',
+      ACCESS.signedIn ? '<a class="bm-btn bm-btn-primary" href="#profile">Add my district</a>' : '<button type="button" class="bm-btn bm-btn-google" data-signin>' + GOOGLE_G + 'Sign in with Google</button>');
+  }
+  main.innerHTML = seg('districts') + head('📍 District Mates', myDk ? 'From ' + esc(profile.district) : 'District Mates', myDk ? '' : 'Find SAUians from your home district.')
+    + mine + districtChart(counts, myDk);
+  bindDistrictChart(dc);
+  after(seq);
+}
+
+/** People counted in a district but not listed: either locked for this viewer, or anonymous earlier registrations. */
+function districtHidden(locked, anon, more) {
+  return (locked ? districtLockedHtml(locked, more) : '')
+    + (anon ? '<p class="bm-note">+ ' + anon + ' from earlier registrations, which stay anonymous.</p>' : '');
+}
+function districtLockedHtml(n, more) {
+  // same wording/actions as the birthday lock, but about people from a district
+  return lockedHtml(n, more).replace(/birthday(s?)<\/b>/, 'SAUian$1</b>').replace('see others\' birthdays', 'see them');
+}
+
+function districtChart(counts, myDk) {
+  const rows = Object.keys(counts).filter(function (k) { return counts[k] > 0 && C.districtName(k); })
+    .sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); });
+  if (!rows.length) return '';
+  const total = rows.reduce(function (s, k) { return s + counts[k]; }, 0);
+  const max = counts[rows[0]];
+  const shown = dist.showAll ? rows : rows.slice(0, 10);
+  return '<section class="bm-dist" aria-labelledby="bm-dist-title">'
+    + '<h2 class="bm-h2" id="bm-dist-title">🗺️ SAUians by district <span class="bm-pill">' + total + ' from ' + rows.length + ' districts</span></h2>'
+    + '<p class="bm-fine">Tap a district to see who\'s from there. Counts include earlier registrations; names are shown only for people who share them.</p>'
+    + '<div class="bm-bars">' + shown.map(function (k) {
+      const w = Math.max(4, Math.round(counts[k] / max * 100));
+      return '<button type="button" class="bm-bar' + (k === myDk ? ' mine' : '') + (k === dist.selected ? ' sel' : '') + '" data-dk="' + k + '" aria-label="' + esc(C.districtName(k)) + ': ' + counts[k] + '">'
+        + '<span class="bm-bar-name">' + esc(C.districtName(k)) + (k === myDk ? ' <i>You</i>' : '') + '</span>'
+        + '<span class="bm-bar-track"><span class="bm-bar-fill" style="width:' + w + '%"></span></span>'
+        + '<span class="bm-bar-n">' + counts[k] + '</span></button>';
+    }).join('') + '</div>'
+    + (rows.length > 10 ? '<button type="button" class="bm-link bm-dist-more" id="bm-dist-more">' + (dist.showAll ? 'Show top 10' : 'Show all ' + rows.length + ' districts') + '</button>' : '')
+    + '<div id="bm-dist-pick" aria-live="polite"></div></section>';
+}
+
+function bindDistrictChart(dc) {
+  const counts = dc.total;
+  const more = document.getElementById('bm-dist-more');
+  if (more) more.addEventListener('click', function () { dist.showAll = !dist.showAll; render(); });
+  main.querySelectorAll('[data-dk]').forEach(function (b) {
+    b.addEventListener('click', async function () {
+      const dk = b.getAttribute('data-dk');
+      dist.selected = dk;
+      main.querySelectorAll('[data-dk]').forEach(function (x) { x.classList.toggle('sel', x === b); });
+      const box = document.getElementById('bm-dist-pick');
+      box.innerHTML = '<p class="bm-muted">Loading…</p>';
+      try {
+        const people = await B.districtPeople(dk);
+        const locked = Math.max(0, (+dc.live[dk] || 0) - people.length);
+        box.innerHTML = '<h3 class="bm-h2 bm-h3">📍 ' + esc(C.districtName(dk)) + ' <span class="bm-pill">' + (counts[dk] || 0) + '</span></h3>'
+          + (people.length ? '<div class="bm-grid">' + people.map(function (p) { return personCard(p, { showDate: false }); }).join('') + '</div>' : '')
+          + districtHidden(locked, +dc.legacy[dk] || 0, people.length > 0);
+        bindWishButtons(box);
+        bindSignIn(box, render);
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (e) {
+        box.innerHTML = '<p class="bm-muted">Couldn\'t load this district. Please try again.</p>';
+      }
+    });
+  });
+}
+
 // ── 💌 My Wishes ──────────────────────────────────────────────────────
 async function viewWishes(seq) {
   await B.ready;
@@ -327,6 +421,9 @@ async function viewProfile(seq) {
     + '<div class="bm-field"><label class="bm-label" for="pf-fac">Faculty</label><select class="bm-input" id="pf-fac" required><option value="">Select faculty</option>'
     + facs.map(function (f) { return '<option' + (f === v.faculty ? ' selected' : '') + '>' + esc(f) + '</option>'; }).join('') + '</select></div>'
     + '<div class="bm-field"><label class="bm-label" for="pf-batch">Batch <span class="bm-opt">(optional)</span></label><input class="bm-input" id="pf-batch" maxlength="20" placeholder="e.g. 2023 or Level-2" value="' + esc(v.batch || '') + '"/></div>'
+    + '<div class="bm-field"><label class="bm-label" for="pf-district">District <span class="bm-opt">(optional)</span></label><select class="bm-input" id="pf-district"><option value="">Choose your district</option>'
+    + C.DISTRICTS.map(function (d) { return '<option' + (d === v.district ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('') + '</select>'
+    + '<p class="bm-fine">📍 For District Mates. Shown on your card to the same people who can see your birthday.</p></div>'
     + '<div class="bm-field"><label class="bm-label" for="pf-dob">Date of birth</label>'
     + (p
       ? '<input class="bm-input" id="pf-dob" type="date" value="' + esc(p.birthday) + '" disabled/><p class="bm-fine">🔒 Your date of birth can\'t be changed. Others only ever see the day and month.</p>'
@@ -359,6 +456,7 @@ async function viewProfile(seq) {
       name: document.getElementById('pf-name').value,
       faculty: document.getElementById('pf-fac').value,
       batch: document.getElementById('pf-batch').value,
+      district: document.getElementById('pf-district').value,
       birthday: document.getElementById('pf-dob').value,
       visibility: visEl ? visEl.value : 'members',
       showPhoto: !!(document.getElementById('pf-photo') && document.getElementById('pf-photo').checked)

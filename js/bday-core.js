@@ -13,6 +13,20 @@
   var FACULTIES = ['Agriculture', 'Fisheries', 'Veterinary, Animal and Biomedical Sciences',
     'Agricultural Economics & Business Studies', 'Agricultural Engineering & Technology',
     'Biotechnology & Genetic Engineering'];
+  var DISTRICTS = ['Bagerhat', 'Bandarban', 'Barguna', 'Barishal', 'Bhola', 'Bogura', 'Brahmanbaria', 'Chandpur',
+    'Chapai Nawabganj', 'Chattogram', 'Chuadanga', "Cox's Bazar", 'Cumilla', 'Dhaka', 'Dinajpur', 'Faridpur', 'Feni',
+    'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jashore', 'Jhalokati', 'Jhenaidah', 'Joypurhat',
+    'Khagrachhari', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura',
+    'Manikganj', 'Meherpur', 'Moulvibazar', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi',
+    'Natore', 'Netrokona', 'Nilphamari', 'Noakhali', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari',
+    'Rajshahi', 'Rangamati', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sirajganj', 'Sunamganj', 'Sylhet',
+    'Tangail', 'Thakurgaon'];
+  /** "Cox's Bazar" -> "cox-s-bazar" (same transform as the database rules). */
+  function districtKey(name) { return String(name || '').toLowerCase().split(' ').join('-').split("'").join('-'); }
+  function districtName(key) {
+    for (var i = 0; i < DISTRICTS.length; i++) if (districtKey(DISTRICTS[i]) === key) return DISTRICTS[i];
+    return '';
+  }
   var WISH_MAX = 300;
   var NAME_MAX = 60;
 
@@ -183,7 +197,7 @@
   }
 
   return {
-    MONTHS: MONTHS, FACULTIES: FACULTIES, WISH_MAX: WISH_MAX, NAME_MAX: NAME_MAX,
+    MONTHS: MONTHS, FACULTIES: FACULTIES, DISTRICTS: DISTRICTS, districtKey: districtKey, districtName: districtName, WISH_MAX: WISH_MAX, NAME_MAX: NAME_MAX,
     isLeap: isLeap, daysInMonth: daysInMonth, parseDob: parseDob, validateDob: validateDob,
     mdKey: mdKey, mdFromDob: mdFromDob, mdFromDate: mdFromDate, celebrationKeys: celebrationKeys,
     formatMd: formatMd, formatLongDate: formatLongDate, monthGrid: monthGrid, shiftMonth: shiftMonth,

@@ -150,6 +150,66 @@ test('wishes are give-to-get too', async () => {
   await assertSucceeds(as('ghost').ref().update(wishUpdate('ghost', 'alice', 'g4', { msg: 'hi', anon: true })));
 });
 
+// ── District Mates ────────────────────────────────────────────────────
+const INC = (n) => ({ '.sv': { increment: n } });
+function withDistrict(uid, p, district, extra) {
+  const u = profileUpdate(uid, p);
+  const dk = district.toLowerCase().split(' ').join('-').split("'").join('-');
+  u['profiles/' + uid].district = district;
+  const row = { n: p.name, f: p.faculty || 'Agriculture' };
+  u['district-public/' + dk + '/u_' + uid] = p.vis === 'public' ? row : null;
+  u['district-members/' + dk + '/u_' + uid] = p.vis === 'members' ? row : null;
+  return Object.assign(u, extra || {});
+}
+
+test('district rows and counts follow the profile', async () => {
+  // join Sylhet as members-only -> count +1, members row
+  await assertFails(as('d1').ref().update(withDistrict('d1', { name: 'Dina', birthday: '2003-01-01', vis: 'members' }, 'Sylhet')), 'count must move');
+  await assertFails(as('d1').ref().update(withDistrict('d1', { name: 'Dina', birthday: '2003-01-01', vis: 'members' }, 'Sylhet', { 'district-counts/sylhet': INC(2) })), 'only by one');
+  await assertFails(as('d1').ref().update(withDistrict('d1', { name: 'Dina', birthday: '2003-01-01', vis: 'members' }, 'Atlantis', { 'district-counts/atlantis': INC(1) })), 'unknown district');
+  await assertSucceeds(as('d1').ref().update(withDistrict('d1', { name: 'Dina', birthday: '2003-01-01', vis: 'members' }, 'Sylhet', { 'district-counts/sylhet': INC(1) })));
+  // apostrophe + space districts map like the client: "Cox's Bazar" -> cox-s-bazar
+  await assertSucceeds(as('d2').ref().update(withDistrict('d2', { name: 'Kabir', birthday: '2002-02-02', vis: 'public' }, "Cox's Bazar", { 'district-counts/cox-s-bazar': INC(1) })));
+  await assertSucceeds(as('d4').ref().update(withDistrict('d4', { name: 'Nabil', birthday: '2002-02-03', vis: 'members' }, 'Chapai Nawabganj', { 'district-counts/chapai-nawabganj': INC(1) })));
+  assert.equal((await anon().ref('district-counts/sylhet').get()).val(), 1);
+  assert.equal((await anon().ref('district-counts/cox-s-bazar').get()).val(), 1);
+  // private with a district: not counted, no rows
+  await assertSucceeds(as('d3').ref().update(withDistrict('d3', { name: 'Priya', birthday: '2001-03-03', vis: 'private' }, 'Sylhet')));
+  assert.equal((await anon().ref('district-counts/sylhet').get()).val(), 1);
+
+  // reading: counts + public rows for everyone, members rows only for people who share
+  await assertSucceeds(anon().ref('district-public/cox-s-bazar').get());
+  await assertFails(anon().ref('district-members/sylhet').get());
+  await assertFails(as('d3').ref('district-members/sylhet').get(), 'private user');
+  await assertSucceeds(as('d2').ref('district-members/sylhet').get());
+
+  // tampering
+  await assertFails(anon().ref('district-counts/sylhet').set(50));
+  await assertFails(as('d2').ref('district-counts/dhaka').set(INC(1)), 'no +1 without joining');
+  await assertFails(as('d2').ref('district-public/dhaka/u_d2').set({ n: 'Kabir', f: 'Agriculture' }), 'row must match profile district');
+  await assertFails(anon().ref('district-legacy/dhaka').set(5));
+  await assertSucceeds(adminDb().ref('district-legacy/dhaka').set(5));
+
+  // move Sylhet -> Dhaka: old row gone, -1 / +1
+  const createdAt = (await as('d1').ref('profiles/d1/createdAt').get()).val();
+  const move = withDistrict('d1', { name: 'Dina', birthday: '2003-01-01', vis: 'members', createdAt }, 'Dhaka', { 'district-members/sylhet/u_d1': null, 'district-counts/dhaka': INC(1) });
+  await assertFails(as('d1').ref().update(move), 'missing the decrement');
+  await assertSucceeds(as('d1').ref().update(Object.assign({}, move, { 'district-counts/sylhet': INC(-1) })));
+  assert.equal((await anon().ref('district-counts/sylhet').get()).val(), 0);
+  assert.equal((await anon().ref('district-counts/dhaka').get()).val(), 1);
+
+  // go private: -1 and rows removed
+  const priv = withDistrict('d1', { name: 'Dina', birthday: '2003-01-01', vis: 'private', createdAt }, 'Dhaka');
+  await assertFails(as('d1').ref().update(priv), 'private must leave the count');
+  await assertSucceeds(as('d1').ref().update(Object.assign({}, priv, { 'district-counts/dhaka': INC(-1) })));
+
+  // delete profile: rows + count must go too
+  const del = { 'profiles/d2': null, 'bday-public/02-02/u_d2': null, 'bday-marks/02-02/u_d2': null };
+  await assertFails(as('d2').ref().update(del));
+  await assertSucceeds(as('d2').ref().update(Object.assign({}, del, { 'district-public/cox-s-bazar/u_d2': null, 'district-counts/cox-s-bazar': INC(-1) })));
+  assert.equal((await anon().ref('district-counts/cox-s-bazar').get()).val(), 0);
+});
+
 // ── profiles ──────────────────────────────────────────────────────────
 test('profile + index must agree', async () => {
   const u = profileUpdate('eve', { name: 'Eve', birthday: '2001-05-05', vis: 'public' });

@@ -275,3 +275,29 @@ select.bm-input{background-image:linear-gradient(45deg,transparent 50%,var(--bm-
 .bm-locked .bm-btn{flex-shrink:0}
 @media(max-width:420px){.bm-locked .bm-btn{width:100%}}
 .bm-chip-lock{border-style:dashed}
+
+/* Twins / District Mates switch */
+.bm-seg{display:flex;gap:4px;padding:4px;margin:0 0 16px;border:1px solid var(--bm-border);border-radius:99px;background:var(--bm-card);width:max-content;max-width:100%}
+.bm-seg a{flex:1;padding:8px 14px;border-radius:99px;text-align:center;text-decoration:none;color:var(--bm-muted);font-size:13.5px;font-weight:600;white-space:nowrap}
+.bm-seg a.active{background:var(--bm-green-soft);color:var(--bm-green)}
+.bm-seg a:focus-visible{outline:2px solid var(--bm-green);outline-offset:1px}
+@media(max-width:380px){.bm-seg{width:100%}.bm-seg a{padding:8px 8px;font-size:13px}}
+
+/* District Mates */
+.bm-dist-sub{margin:-8px 0 14px}
+.bm-dist{margin-top:26px;padding:18px;background:var(--bm-card);border:1px solid var(--bm-border);border-radius:var(--bm-r);box-shadow:var(--bm-shadow)}
+.bm-dist .bm-fine{margin:-4px 0 12px}
+.bm-bars{display:flex;flex-direction:column;gap:4px}
+.bm-bar{display:grid;grid-template-columns:minmax(92px,34%) 1fr 30px;align-items:center;gap:10px;width:100%;padding:7px 8px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--bm-ink);font:500 13.5px var(--bm-sans);text-align:left;cursor:pointer;transition:background .15s,border-color .15s}
+.bm-bar:hover{background:var(--bm-deep)}
+.bm-bar.sel{border-color:var(--bm-green);background:var(--bm-green-soft)}
+.bm-bar:focus-visible{outline:2px solid var(--bm-green);outline-offset:1px}
+.bm-bar-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-bar-name i{font-style:normal;font-size:10.5px;font-weight:700;color:var(--bm-green);background:var(--bm-green-soft);padding:1px 6px;border-radius:99px;margin-left:4px}
+.bm-bar-track{height:10px;border-radius:99px;background:var(--bm-deep);overflow:hidden}
+.bm-bar-fill{display:block;height:100%;border-radius:99px;background:#7fb69a;transition:width .4s ease}
+.bm-bar.mine .bm-bar-fill,.bm-bar.sel .bm-bar-fill{background:var(--bm-green)}
+.bm-bar-n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--bm-muted)}
+.bm-dist-more{margin-top:10px;font-size:13.5px}
+#bm-dist-pick:not(:empty){margin-top:16px}
+.bm-h3{font-size:18px}
