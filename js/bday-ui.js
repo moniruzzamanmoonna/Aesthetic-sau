@@ -31,6 +31,11 @@ export function personCard(item, opts) {
   const wishBtn = item.canWish && !item.isSelf
     ? '<button type="button" class="bm-wish-btn" data-wish="' + esc(item.uid) + '" data-name="' + esc(item.name) + '">💌 <span>Send a Secret Birthday Wish</span></button>'
     : '';
+  // Optional AnonBox link: anyone who can see the card can send an anonymous text there.
+  const anonBtn = item.anonbox && !item.isSelf
+    ? '<a class="bm-wish-btn bm-anon-btn" href="' + esc(C.ANONBOX_BASE + item.anonbox) + '" target="_blank" rel="noopener noreferrer" aria-label="Send ' + esc(item.name) + ' an anonymous message on AnonBox">💬 <span>Anonymous message</span></a>'
+    : '';
+  const actions = wishBtn && anonBtn ? '<div class="bm-card-actions">' + wishBtn.replace('Send a Secret Birthday Wish', 'Secret Wish') + anonBtn.replace('Anonymous message', 'AnonBox') + '</div>' : (wishBtn || anonBtn);
   const you = item.isSelf ? '<span class="bm-you">You</span>' : '';
   return '<article class="bm-card">'
     + avatar(item)
@@ -39,7 +44,7 @@ export function personCard(item, opts) {
     + (item.faculty ? '<p class="bm-card-fac">' + esc(item.faculty) + '</p>' : '')
     + (meta.length ? '<p class="bm-card-meta">' + meta.join(' · ') + '</p>' : '')
     + '</div>'
-    + wishBtn
+    + actions
     + '</article>';
 }
 

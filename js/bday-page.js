@@ -424,6 +424,9 @@ async function viewProfile(seq) {
     + '<div class="bm-field"><label class="bm-label" for="pf-district">District <span class="bm-opt">(optional)</span></label><select class="bm-input" id="pf-district"><option value="">Choose your district</option>'
     + C.DISTRICTS.map(function (d) { return '<option' + (d === v.district ? ' selected' : '') + '>' + esc(d) + '</option>'; }).join('') + '</select>'
     + '<p class="bm-fine">📍 For District Mates. Shown on your card to the same people who can see your birthday.</p></div>'
+    + '<div class="bm-field"><label class="bm-label" for="pf-anon">AnonBox username <span class="bm-opt">(optional)</span></label>'
+    + '<div class="bm-prefix"><span>anon-box2026.web.app/u/</span><input class="bm-input" id="pf-anon" maxlength="80" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="username" value="' + esc(v.anonbox || '') + '"/></div>'
+    + '<p class="bm-fine">💬 Adds an "Anonymous message" button to your card, so people can text you on AnonBox. You can paste your AnonBox link too. No AnonBox yet? <a href="https://anon-box2026.web.app" target="_blank" rel="noopener noreferrer">Create one free →</a></p></div>'
     + '<div class="bm-field"><label class="bm-label" for="pf-dob">Date of birth</label>'
     + (p
       ? '<input class="bm-input" id="pf-dob" type="date" value="' + esc(p.birthday) + '" disabled/><p class="bm-fine">🔒 Your date of birth can\'t be changed. Others only ever see the day and month.</p>'
@@ -457,6 +460,7 @@ async function viewProfile(seq) {
       faculty: document.getElementById('pf-fac').value,
       batch: document.getElementById('pf-batch').value,
       district: document.getElementById('pf-district').value,
+      anonbox: document.getElementById('pf-anon').value,
       birthday: document.getElementById('pf-dob').value,
       visibility: visEl ? visEl.value : 'members',
       showPhoto: !!(document.getElementById('pf-photo') && document.getElementById('pf-photo').checked)

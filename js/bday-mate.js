@@ -167,6 +167,7 @@ function indexRow(p) {
   const row = { n: p.name, f: p.faculty, t: 'u' };
   if (p.batch) row.b = p.batch;
   if (p.photo) row.p = p.photo;
+  if (p.anonbox) row.a = p.anonbox;
   return row;
 }
 
@@ -190,6 +191,7 @@ function districtUpdates(upd, uid, old, next) {
     const row = { n: next.name, f: next.faculty };
     if (next.batch) row.b = next.batch;
     if (next.photo) row.p = next.photo;
+    if (next.anonbox) row.a = next.anonbox;
     upd['district-public/' + newDk + '/u_' + uid] = next.visibility === 'public' ? row : null;
     upd['district-members/' + newDk + '/u_' + uid] = next.visibility === 'members' ? row : null;
   }
@@ -224,6 +226,9 @@ async function saveProfile(input) {
   const district = String(input.district || '').trim();
   if (district && C.DISTRICTS.indexOf(district) < 0) throw new Error('Please pick your district from the list.');
   if (district) p.district = district;
+  const anonbox = C.parseAnonBox(input.anonbox);
+  if (anonbox === null) throw new Error('AnonBox username: 3–20 letters, numbers or _ (or paste your AnonBox link).');
+  if (anonbox) p.anonbox = anonbox;
 
   const upd = {};
   upd['profiles/' + uid] = p;
@@ -459,7 +464,7 @@ async function districtPeople(dk) {
       const r = v[k];
       if (!r || !r.n) return;
       out.push({ key: k, name: String(r.n), faculty: String(r.f || ''), batch: r.b ? String(r.b) : '', photo: r.p ? String(r.p) : '',
-        uid: k.slice(2), canWish: true, isSelf: k === me, md: '' });
+        uid: k.slice(2), canWish: true, isSelf: k === me, md: '', anonbox: r.a ? String(r.a) : '' });
     });
   });
   out.sort(function (a, b) { return a.isSelf - b.isSelf || a.name.localeCompare(b.name); });

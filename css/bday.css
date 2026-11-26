@@ -301,3 +301,14 @@ select.bm-input{background-image:linear-gradient(45deg,transparent 50%,var(--bm-
 .bm-dist-more{margin-top:10px;font-size:13.5px}
 #bm-dist-pick:not(:empty){margin-top:16px}
 .bm-h3{font-size:18px}
+
+/* AnonBox: card button + profile field */
+.bm-card-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bm-card-actions .bm-wish-btn{grid-column:auto;padding:8px 6px;font-size:13px}
+a.bm-wish-btn{text-decoration:none}
+.bm-anon-btn{color:var(--bm-ink)}
+.bm-prefix{display:flex;align-items:stretch;border:1px solid var(--bm-border-2);border-radius:var(--bm-r-sm);background:#fff;overflow:hidden}
+.bm-prefix:focus-within{border-color:var(--bm-green);box-shadow:0 0 0 3px rgba(31,107,69,.14)}
+.bm-prefix span{display:flex;align-items:center;padding:0 2px 0 12px;color:var(--bm-muted);font-size:13px;white-space:nowrap;background:var(--bm-deep)}
+.bm-prefix .bm-input{border:0;border-radius:0;box-shadow:none!important;min-width:0}
+@media(max-width:380px){.bm-prefix span{font-size:11.5px;padding-left:8px}}

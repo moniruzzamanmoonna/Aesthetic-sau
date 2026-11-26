@@ -137,6 +137,7 @@
           faculty: String(r.f || ''),
           batch: r.b ? String(r.b) : '',
           photo: r.p ? String(r.p) : '',
+          anonbox: r.a && /^[a-z0-9_]{3,20}$/.test(String(r.a)) ? String(r.a) : '',
           uid: key.indexOf('u_') === 0 ? key.slice(2) : '',
           canWish: key.indexOf('u_') === 0,
           visibility: g.vis || ''
@@ -165,6 +166,20 @@
     if (/(.)\1{9,}/.test(text)) return { text: text, error: 'That looks like spam — please write a real message.' };
     return { text: text, error: '' };
   }
+
+  /**
+   * AnonBox username from what the user typed: "moonstar", "@moonstar" or a pasted link like
+   * "https://anon-box2026.web.app/u/moonstar". Returns '' for empty, null when invalid.
+   */
+  function parseAnonBox(raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!s) return '';
+    var m = /\/u\/([^/?#\s]+)/.exec(s);
+    if (m) s = m[1];
+    s = s.replace(/^@/, '').toLowerCase();
+    return /^[a-z0-9_]{3,20}$/.test(s) ? s : null;
+  }
+  var ANONBOX_BASE = 'https://anon-box2026.web.app/u/';
 
   function cleanName(s) {
     return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, NAME_MAX);
@@ -201,7 +216,7 @@
     isLeap: isLeap, daysInMonth: daysInMonth, parseDob: parseDob, validateDob: validateDob,
     mdKey: mdKey, mdFromDob: mdFromDob, mdFromDate: mdFromDate, celebrationKeys: celebrationKeys,
     formatMd: formatMd, formatLongDate: formatLongDate, monthGrid: monthGrid, shiftMonth: shiftMonth,
-    mergeEntries: mergeEntries, checkWish: checkWish, cleanName: cleanName, initials: initials,
+    mergeEntries: mergeEntries, checkWish: checkWish, cleanName: cleanName, parseAnonBox: parseAnonBox, ANONBOX_BASE: ANONBOX_BASE, initials: initials,
     pushId: pushId, randomToken: randomToken
   };
 });

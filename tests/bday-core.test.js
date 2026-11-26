@@ -75,7 +75,7 @@ test('mergeEntries: twins, dedupe, exclusions, private never present', () => {
   assert.equal(out.find((x) => x.name === 'Karim').canWish, false, 'guests cannot receive wishes');
   assert.deepEqual(C.mergeEntries([], []), []);
   // output never carries anything beyond the public projection
-  out.forEach((x) => assert.deepEqual(Object.keys(x).sort(), ['batch', 'canWish', 'faculty', 'key', 'md', 'name', 'photo', 'uid', 'visibility']));
+  out.forEach((x) => assert.deepEqual(Object.keys(x).sort(), ['anonbox', 'batch', 'canWish', 'faculty', 'key', 'md', 'name', 'photo', 'uid', 'visibility']));
 });
 
 test('checkWish validation', () => {
@@ -89,6 +89,19 @@ test('checkWish validation', () => {
   const ok = C.checkWish('  Happy Birthday!   Hope this year brings you lots of happiness. 🌻  ');
   assert.equal(ok.error, '');
   assert.equal(ok.text, 'Happy Birthday! Hope this year brings you lots of happiness. 🌻');
+});
+
+test('parseAnonBox accepts usernames and pasted links', () => {
+  assert.equal(C.parseAnonBox(''), '');
+  assert.equal(C.parseAnonBox('  '), '');
+  assert.equal(C.parseAnonBox('MoonStar'), 'moonstar');
+  assert.equal(C.parseAnonBox('@moon_star1'), 'moon_star1');
+  assert.equal(C.parseAnonBox('https://anon-box2026.web.app/u/moonstar'), 'moonstar');
+  assert.equal(C.parseAnonBox('anon-box2026.web.app/u/moonstar?ref=x'), 'moonstar');
+  assert.equal(C.parseAnonBox('ab'), null, 'too short');
+  assert.equal(C.parseAnonBox('bad name!'), null);
+  assert.equal(C.parseAnonBox('javascript:alert(1)'), null);
+  assert.equal(C.parseAnonBox('x'.repeat(21)), null);
 });
 
 test('pushId format matches the guest-key rule', () => {

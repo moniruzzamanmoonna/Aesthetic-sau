@@ -24,6 +24,8 @@ const SIGNED = 'auth != null';
 // Month-day key "MM-DD" (rejects 04-31, 02-30 ...). 02-29 is allowed.
 const MD_RE = '/^((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|02-(0[1-9]|1[0-9]|2[0-9]))$/';
 const DOB_RE = '/^(19[0-9][0-9]|20[0-9][0-9])-((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|02-(0[1-9]|1[0-9]|2[0-9]))$/';
+// AnonBox username (anon-box2026.web.app/u/<username>), same format AnonBox itself allows
+const ANONBOX_OK = "newData.isString() && newData.val().matches(/^[a-z0-9_]{3,20}$/)";
 const PHOTO_OK = "newData.isString() && newData.val().beginsWith('https://lh3.googleusercontent.com/') && newData.val().length <= 400";
 const str = function (min, max) {
   return 'newData.isString() && newData.val().length >= ' + min + ' && newData.val().length <= ' + max;
@@ -46,6 +48,7 @@ function indexNode(vis, readRule) {
     "&& newData.child('f').val() === " + P + ".child('faculty').val()",
     "&& ((!newData.child('b').exists() && !" + P + ".child('batch').exists()) || newData.child('b').val() === " + P + ".child('batch').val())",
     "&& ((!newData.child('p').exists() && !" + P + ".child('photo').exists()) || newData.child('p').val() === " + P + ".child('photo').val())",
+    "&& ((!newData.child('a').exists() && !" + P + ".child('anonbox').exists()) || newData.child('a').val() === " + P + ".child('anonbox').val())",
     ')))'
   );
   // Guest (no-login) entries are only ever indexed as members-only.
@@ -73,6 +76,7 @@ function indexNode(vis, readRule) {
         f: { '.validate': str(1, 80) },
         b: { '.validate': str(1, 20) },
         p: { '.validate': PHOTO_OK },
+        a: { '.validate': ANONBOX_OK },
         t: { '.validate': "newData.val() === 'u' || newData.val() === 'g'" },
         $other: { '.validate': false }
       }
@@ -115,6 +119,7 @@ function districtRowsNode(vis, readRule) {
     "&& newData.child('f').val() === " + P + ".child('faculty').val()",
     "&& ((!newData.child('b').exists() && !" + P + ".child('batch').exists()) || newData.child('b').val() === " + P + ".child('batch').val())",
     "&& ((!newData.child('p').exists() && !" + P + ".child('photo').exists()) || newData.child('p').val() === " + P + ".child('photo').val())",
+    "&& ((!newData.child('a').exists() && !" + P + ".child('anonbox').exists()) || newData.child('a').val() === " + P + ".child('anonbox').val())",
     ')))'
   );
   return {
@@ -128,6 +133,7 @@ function districtRowsNode(vis, readRule) {
         f: { '.validate': str(1, 80) },
         b: { '.validate': str(1, 20) },
         p: { '.validate': PHOTO_OK },
+        a: { '.validate': ANONBOX_OK },
         $other: { '.validate': false }
       }
     }
@@ -215,6 +221,7 @@ function profilesNode() {
       md: { '.validate': 'newData.isString() && newData.val().matches(' + MD_RE + ')' },
       visibility: { '.validate': "newData.isString() && newData.val().matches(/^(public|members|private)$/)" },
       photo: { '.validate': PHOTO_OK },
+      anonbox: { '.validate': ANONBOX_OK },
       district: { '.validate': str(3, 30) + " && newData.val().toLowerCase().replace(' ', '-').replace(\"'\", '-').matches(" + DK_RE + ')' },
       createdAt: { '.validate': 'newData.isNumber() && (' + NOW_ONCE + ')' },
       updatedAt: { '.validate': 'newData.isNumber() && newData.val() === now' },

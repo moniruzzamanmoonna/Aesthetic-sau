@@ -210,6 +210,21 @@ test('district rows and counts follow the profile', async () => {
   assert.equal((await anon().ref('district-counts/cox-s-bazar').get()).val(), 0);
 });
 
+test('AnonBox username: valid format, and rows must match the profile', async () => {
+  const u = profileUpdate('ax', { name: 'Anon Fan', birthday: '2002-06-06', vis: 'public' });
+  u['profiles/ax'].anonbox = 'moonstar';
+  await assertFails(as('ax').ref().update(u), 'row missing the username');
+  u['bday-public/06-06/u_ax'].a = 'someoneelse';
+  await assertFails(as('ax').ref().update(u), 'row username must match profile');
+  u['bday-public/06-06/u_ax'].a = 'moonstar';
+  await assertSucceeds(as('ax').ref().update(u));
+  const bad = profileUpdate('ay', { name: 'Bad', birthday: '2002-06-07', vis: 'public' });
+  bad['profiles/ay'].anonbox = 'javascript:alert(1)';
+  bad['bday-public/06-07/u_ay'].a = 'javascript:alert(1)';
+  await assertFails(as('ay').ref().update(bad), 'invalid username format');
+  assert.equal((await anon().ref('bday-public/06-06/u_ax/a').get()).val(), 'moonstar');
+});
+
 // ── profiles ──────────────────────────────────────────────────────────
 test('profile + index must agree', async () => {
   const u = profileUpdate('eve', { name: 'Eve', birthday: '2001-05-05', vis: 'public' });
