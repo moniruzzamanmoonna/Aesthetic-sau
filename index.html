@@ -2021,16 +2021,29 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
       <div>
         <div class="ev-lbl" style="margin-bottom:8px">Event Gallery</div>
         <div class="ev-gallery" style="grid-template-columns:repeat(2,1fr);gap:8px">
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
-          <div class="ev-gitem"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27400%27%20height%3D%27300%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%23e5e7eb%27/%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20fill%3D%27%236b7280%27%20font-family%3D%27sans-serif%27%20font-size%3D%2720%27%20text-anchor%3D%27middle%27%20dominant-baseline%3D%27middle%27%3E%5Bphoto%5D%3C/text%3E%3C/svg%3E" alt="IBA Session"/></div>
+          <div class="ev-gitem"><img src="images/iba/iba-1.webp" data-full="images/iba/iba-1-full.webp" alt="Road to IBA session: speaker in front of the event banner" loading="lazy" decoding="async" width="640" height="480" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/></div>
+          <div class="ev-gitem"><img src="images/iba/iba-2.webp" data-full="images/iba/iba-2-full.webp" alt="Speaker answering students’ questions" loading="lazy" decoding="async" width="640" height="480" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/></div>
+          <div class="ev-gitem"><img src="images/iba/iba-3.webp" data-full="images/iba/iba-3-full.webp" alt="Students at the Road to IBA session" loading="lazy" decoding="async" width="640" height="480" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/></div>
+          <div class="ev-gitem"><img src="images/iba/iba-4.webp" data-full="images/iba/iba-4-full.webp" alt="Speaker walking through the hall during the session" loading="lazy" decoding="async" width="640" height="480" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"/></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 </section>
+
+<script>
+/* IBA gallery: tap a photo to see it larger (full size loads only then). */
+document.querySelectorAll('.ev-gallery img[data-full]').forEach(function (img) {
+  img.addEventListener('click', function () {
+    var lb = document.getElementById('lightbox');
+    if (!lb) return;
+    document.getElementById('lb-img').src = img.getAttribute('data-full');
+    document.getElementById('lb-cap').textContent = img.alt;
+    lb.classList.add('open');
+  });
+});
+</script>
 
 <!-- NEWS PORTAL PROMO -->
 <section id="news-portal" class="sec-dark">
