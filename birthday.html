@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Birthday Mate — Aesthetic SAU</title>
+<meta name="description" content="Birthday Mate by Aesthetic SAU: find your Birthday Twins, see whose birthday it is today, browse the birthday calendar and send secret birthday wishes."/>
+<meta property="og:title" content="Birthday Mate — Aesthetic SAU"/>
+<meta property="og:description" content="Find your Birthday Twins at Sylhet Agricultural University and send secret birthday wishes."/>
+<meta name="theme-color" content="#f7faf8"/>
+<link rel="icon" type="image/png" href="https://i.imgur.com/aRxuSTw.jpeg"/>
+<link rel="apple-touch-icon" href="https://i.imgur.com/aRxuSTw.jpeg"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/bday.css"/>
+</head>
+<body class="bm-page">
+<header class="bm-top">
+  <a class="bm-brand" href="index.html">
+    <img src="https://i.imgur.com/aRxuSTw.jpeg" alt="" width="32" height="32"/>
+    <span><b>Birthday Mate</b><small>Aesthetic SAU</small></span>
+  </a>
+  <div class="bm-auth" id="bm-auth" aria-live="polite"></div>
+</header>
+<nav class="bm-tabs" aria-label="Birthday Mate">
+  <a href="index.html#birthday" data-tab="home">🏠<span>Home</span></a>
+  <a href="#twins" data-tab="twins">🎂<span>Twins</span></a>
+  <a href="#today" data-tab="today">🎉<span>Today</span></a>
+  <a href="#calendar" data-tab="calendar">🗓️<span>Calendar</span></a>
+  <a href="#wishes" data-tab="wishes">💌<span>Wishes</span><i class="bm-badge" id="bm-wish-badge" hidden></i></a>
+  <a href="#profile" data-tab="profile">👤<span>Profile</span></a>
+</nav>
+<main id="bm-main" class="bm-main" tabindex="-1">
+  <div class="bm-grid" aria-busy="true"><div class="bm-card bm-skel"><span class="bm-avatar"></span><div class="bm-card-body"><i></i><i></i></div></div></div>
+  <noscript><p class="bm-note">Birthday Mate needs JavaScript to load birthdays.</p></noscript>
+</main>
+<script src="js/bday-core.js"></script>
+<script type="module" src="js/bday-page.js"></script>
+</body>
+</html>

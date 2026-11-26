@@ -18,6 +18,7 @@
 <link rel="shortcut icon" type="image/png" href="https://i.imgur.com/aRxuSTw.jpeg"/>
 <link rel="apple-touch-icon" href="https://i.imgur.com/aRxuSTw.jpeg"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/bday.css"/>
 <style>
 :root{--black:#0a0a0a;--deep:#111;--card:#181818;--border:#252525;--green:#4caf50;--gl:#6abf5e;--gg:rgba(76,175,80,.13);--white:#f2f2ee;--muted:#8c8c8c}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -995,10 +996,9 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
 <div id="admin-gate" class="hidden">
   <div class="admin-gate-box">
     <div class="admin-gate-title">🔐 Admin Panel</div>
-    <div class="admin-gate-sub">Aesthetic SAU — Birthday Data</div>
-    <input type="password" class="admin-gate-input" id="adm-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/>
-    <button class="admin-gate-btn" onclick="adminLogin()">প্রবেশ করুন</button>
-    <div class="admin-gate-err" id="adm-err">❌ পাসওয়ার্ড ভুল!</div>
+    <div class="admin-gate-sub">Aesthetic SAU — admin Google account দিয়ে login করুন</div>
+    <button class="admin-gate-btn" id="adm-google-btn" onclick="adminLogin()">Google দিয়ে প্রবেশ করুন</button>
+    <div class="admin-gate-err" id="adm-err">❌ এই Google account admin না।</div>
     <div style="margin-top:16px"><a href="#" onclick="document.getElementById('admin-gate').classList.add('hidden');document.getElementById('admin-panel').classList.remove('visible');return false;" style="font-size:12px;color:rgba(255,255,255,.3);">← মূল সাইটে ফিরে যান</a></div>
   </div>
 </div>
@@ -1019,6 +1019,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
   <!-- TABS -->
   <div class="adm-tabs">
     <button class="adm-tab active" id="tab-data" onclick="switchTab('data')">🎂 Birthday Data</button>
+    <button class="adm-tab" id="tab-wishes" onclick="switchTab('wishes')">💌 Wishes</button>
     <button class="adm-tab" id="tab-likes" onclick="switchTab('likes')">📷 Photo Likes</button>
     <button class="adm-tab" id="tab-live" onclick="switchTab('live')">⚡ Live Editor</button>
     <button class="adm-tab" id="tab-site" onclick="switchTab('site')">✏️ Website Editor</button>
@@ -1044,6 +1045,28 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
         <tbody id="adm-tbody">
           <tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr>
         </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: Anonymous birthday wishes (moderation) -->
+  <div id="adm-tab-wishes" class="adm-body" style="display:none">
+    <div class="adm-stats" style="margin-bottom:16px">
+      <div class="adm-stat"><div class="adm-stat-num" id="wst-total">—</div><div class="adm-stat-lbl">মোট Wishes</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="wst-reported">—</div><div class="adm-stat-lbl">🚩 Reported</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="wst-anon">—</div><div class="adm-stat-lbl">Anonymous</div></div>
+      <div class="adm-stat"><div class="adm-stat-num" id="wst-removed">—</div><div class="adm-stat-lbl">Removed</div></div>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+      <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:rgba(255,255,255,.75)"><input type="checkbox" id="adm-wish-reported" onchange="withBdayHome(function(H){H.renderAdminWishes()})"/> শুধু Reported</label>
+      <label style="display:flex;gap:6px;align-items:center;font-size:13px;color:rgba(255,255,255,.75)"><input type="checkbox" id="adm-wish-removed" onchange="withBdayHome(function(H){H.renderAdminWishes()})"/> Removed গুলোও দেখাও</label>
+      <button class="adm-btn adm-btn-refresh" onclick="withBdayHome(function(H){H.loadAdminWishes()})">↻ Refresh</button>
+    </div>
+    <p style="font-size:12px;color:rgba(255,255,255,.55);margin:0 0 12px">Sender এর পরিচয় শুধু moderation এর জন্য। Recipient বা অন্য কাউকে জানাবেন না।</p>
+    <div class="adm-table-wrap">
+      <table class="adm-table">
+        <thead><tr><th>সময়</th><th>To</th><th>From (admin only)</th><th>Message</th><th>Flag</th><th>Action</th></tr></thead>
+        <tbody id="adm-wish-tbody"><tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -1312,6 +1335,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
   <ul class="nav-links">
     <li><a href="sau-ratings.html" class="nav-strong">SAU Ratings</a></li>
     <li><a href="snapp.html" class="nav-strong nav-snapp" title="SNapp by Aesthetic SAU">SNapp<span class="nav-snapp-by"> by Aesthetic SAU</span></a></li>
+    <li class="nav-bday"><a href="birthday.html">Birthdays</a></li>
     <li><a href="#preorder">Preorder</a></li>
     <li><a href="#contest">Contest</a></li>
     <li><a href="#voting">Vote</a></li>
@@ -1337,6 +1361,7 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
 <div class="nav-mobile-menu" id="mob-menu">
   <a href="sau-ratings.html" onclick="toggleMenu()">SAU Ratings</a>
   <a href="snapp.html" onclick="toggleMenu()">SNapp by Aesthetic SAU</a>
+  <a href="birthday.html" onclick="toggleMenu()">🎂 Birthday Mate</a>
   <a href="#preorder" onclick="toggleMenu()">Preorder</a>
   <a href="#contest" onclick="toggleMenu()">Contest</a>
   <a href="#voting" onclick="toggleMenu()">Vote</a>
@@ -1439,16 +1464,23 @@ footer{background:var(--deep)!important;border-top:1px solid var(--border)!impor
 </style>
 
 
-<!-- TODAY'S BIRTHDAY WISH -->
-<section id="today-bday" style="background:var(--black);padding:48px 0;border-top:1px solid var(--border);display:none">
-  <div class="wrap">
-    <div id="today-bday-card" style="background:linear-gradient(140deg,#1a0f2e,#13131f,#1a0f2e);border:1px solid rgba(167,139,250,.3);border-radius:20px;padding:36px 32px;text-align:center;position:relative;overflow:hidden">
-      <div style="font-size:48px;margin-bottom:10px">🎉🎂🎈</div>
-      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#a78bfa;font-weight:700;margin-bottom:8px">Today's Birthday</div>
-      <h3 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:900;margin-bottom:10px;color:#fff">আজ <span id="tb-count" style="color:#a78bfa">0</span> জন SAUian-এর জন্মদিন!</h3>
-      <p style="font-size:13px;color:var(--muted);max-width:480px;margin:0 auto 22px;line-height:1.7;font-family:'Noto Serif Bengali',serif">Facebook follow করার পর তাদের একটু শুভেচ্ছা জানিয়ে দিন — দিনটা আরও সুন্দর হয়ে উঠুক ✨</p>
-      <div id="tb-list" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px"></div>
-      <a href="https://www.facebook.com/share/1CMzNM8vvG/" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;padding:12px 28px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.5px" rel="noopener noreferrer">💌 Facebook-এ শুভেচ্ছা জানাও</a>
+<!-- TODAY'S BIRTHDAY MATES — rendered by js/bday-home.js (privacy-aware, today's date only) -->
+<section id="today-bday" aria-labelledby="bm-today-title">
+  <div class="bm-home">
+    <div class="bm-home-card" id="bm-today-widget">
+      <div class="bm-home-top">
+        <div>
+          <h2 class="bm-home-title" id="bm-today-title">🎂 Today's Birthday Mates</h2>
+          <p class="bm-home-date"><span id="bm-today-date"></span><span id="bm-today-count"></span></p>
+        </div>
+        <a class="bm-home-all" href="birthday.html#today">View All →</a>
+      </div>
+      <div id="bm-today-list"><div class="bm-home-skel"></div></div>
+      <div class="bm-home-links">
+        <a class="bm-btn" href="birthday.html#twins">🎂 Twins</a>
+        <a class="bm-btn" href="birthday.html#calendar">🗓️ Calendar</a>
+        <a class="bm-btn" href="birthday.html#wishes">💌 My Wishes</a>
+      </div>
     </div>
   </div>
 </section>
@@ -2947,6 +2979,25 @@ function formatBdayDisplay(dateStr) {
   } catch(e) { return esc(dateStr); }
 }
 
+// Birthday Mate data lives in js/bday-mate.js (ES module). Classic code reaches it through
+// window.BdayHome once the module has loaded.
+function withBdayHome(fn) {
+  if (window.BdayHome) return fn(window.BdayHome);
+  window.addEventListener('bdayhome:ready', function(){ fn(window.BdayHome); }, { once: true });
+}
+var BM_PRIVACY_NOTE = '<p class="bm-form-note">🔒 Only your name, faculty and birthday (day &amp; month) are shown — and only to signed-in SAU members. Your year of birth, district and email are never shown to other students.</p>';
+
+function bmSavedCard(name, dateLine, note, actions) {
+  return '<div class="bm-saved-card">'
+    + '<div class="bm-saved-row"><span class="bm-avatar" aria-hidden="true">🎂</span><div>'
+    + '<p class="bm-eyebrow">Your birthday is registered</p>'
+    + '<p class="bm-saved-name">' + esc(name) + '</p>'
+    + '<p class="bm-saved-meta">' + dateLine + '</p></div></div>'
+    + '<p class="bm-form-note">' + note + '</p>'
+    + '<button class="bday-submit" id="bd-btn" onclick="findBdayMate()">🔍 Find My Birthday Twins</button>'
+    + '<div class="bm-form-actions">' + actions + '</div></div>';
+}
+
 function renderBdayForm() {
   var wrap = document.getElementById('bd-form-wrap');
   if (!wrap) return;
@@ -2954,32 +3005,15 @@ function renderBdayForm() {
   try { saved = JSON.parse(localStorage.getItem('sau_bday_entry')); } catch(e){}
 
   if (saved && saved.name && saved.birthday) {
-    // ── Returning visitor — show saved state ──
-    wrap.innerHTML = '<div style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(167,139,250,.05));border:1px solid rgba(167,139,250,.25);border-radius:16px;padding:28px 32px;display:flex;flex-direction:column;gap:20px">'
-
-      // Info row
-      + '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
-      + '<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎂</div>'
-      + '<div style="flex:1;min-width:180px">'
-      + '<div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(167,139,250,.7);margin-bottom:4px">Your Birthday is Registered</div>'
-      + '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:800;color:#fff">' + esc(saved.name) + '</div>'
-      + '<div style="font-size:13px;color:rgba(167,139,250,.8);margin-top:3px">📅 ' + formatBdayDisplay(saved.birthday) + (saved.district ? ' &nbsp;·&nbsp; 📍 ' + esc(saved.district) : '') + '</div>'
-      + '</div>'
-      + '<div style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.2);border-radius:10px;padding:8px 16px;font-size:11px;color:rgba(167,139,250,.6);font-weight:600;letter-spacing:1px;text-transform:uppercase;white-space:nowrap">🔒 Saved</div>'
-      + '</div>'
-
-      // Lock notice
-      + '<div style="background:rgba(0,0,0,.25);border-radius:10px;padding:12px 16px;font-size:12px;color:rgba(255,255,255,.4);line-height:1.7;border-left:3px solid rgba(167,139,250,.3)">'
-      + 'Your date of birth <strong style="color:rgba(167,139,250,.7)">' + formatBdayDisplay(saved.birthday) + '</strong> has been saved and cannot be changed from this device. This keeps the data accurate for everyone.'
-      + '</div>'
-
-      // Find mate button
-      + '<button class="bday-submit" id="bd-btn" onclick="findBdayMate()" style="margin-top:4px">🔍 Find My Birthday Mate</button>'
-      + '</div>';
+    // ── Returning visitor (registered without login on this device) ──
+    wrap.innerHTML = bmSavedCard(saved.name,
+      '📅 ' + formatBdayDisplay(saved.birthday) + (saved.district ? ' &nbsp;·&nbsp; 📍 ' + esc(saved.district) : ''),
+      'Your date of birth is saved and can\'t be changed from this device. Only signed-in SAU members see your name, faculty and birthday (day &amp; month).',
+      '<a class="bm-btn" href="birthday.html#twins">View Birthday Twins →</a><a class="bm-btn" href="birthday.html#profile">Sign in for privacy &amp; wishes</a>');
   } else {
     // ── New visitor — show full form ──
     wrap.innerHTML = '<div class="bday-fields">'
-      + '<div class="bday-field"><label>Your Name</label><input type="text" id="bd-name" placeholder="Full Name"/></div>'
+      + '<div class="bday-field"><label>Your Name</label><input type="text" id="bd-name" placeholder="Full Name" maxlength="60" autocomplete="name"/></div>'
       + '<div class="bday-field"><label>Faculty</label>'
       + '<select id="bd-faculty"><option value="">Select Faculty</option>'
       + '<option>Agriculture</option>'
@@ -2993,11 +3027,24 @@ function renderBdayForm() {
       + '<select id="bd-district"><option value="">Select District</option>'
       + ['Bagerhat','Bandarban','Barguna','Barishal','Bhola','Bogura','Brahmanbaria','Chandpur','Chapai Nawabganj','Chattogram','Chuadanga','Cox\'s Bazar','Cumilla','Dhaka','Dinajpur','Faridpur','Feni','Gaibandha','Gazipur','Gopalganj','Habiganj','Jamalpur','Jashore','Jhalokati','Jhenaidah','Joypurhat','Khagrachhari','Khulna','Kishoreganj','Kurigram','Kushtia','Lakshmipur','Lalmonirhat','Madaripur','Magura','Manikganj','Meherpur','Moulvibazar','Munshiganj','Mymensingh','Naogaon','Narail','Narayanganj','Narsingdi','Natore','Netrokona','Nilphamari','Noakhali','Pabna','Panchagarh','Patuakhali','Pirojpur','Rajbari','Rajshahi','Rangamati','Rangpur','Satkhira','Shariatpur','Sherpur','Sirajganj','Sunamganj','Sylhet','Tangail','Thakurgaon'].map(function(d){ return '<option>'+d+'</option>'; }).join('')
       + '</select></div>'
-      + '<div class="bday-field"><label>Date of Birth</label><input type="date" id="bd-date"/></div>'
-      + '<div class="bday-field"><label>Gmail <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.5px">(optional — get notified when a match is found)</span></label><input type="email" id="bd-gmail" placeholder="yourname@gmail.com"/></div>'
+      + '<div class="bday-field"><label>Date of Birth</label><input type="date" id="bd-date" max="' + new Date().toISOString().slice(0,10) + '"/></div>'
+      + '<div class="bday-field"><label>Gmail <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.5px">(optional — private, never shown to anyone)</span></label><input type="email" id="bd-gmail" placeholder="yourname@gmail.com" maxlength="100"/></div>'
       + '</div>'
-      + '<button class="bday-submit" id="bd-btn" onclick="findBdayMate()" style="margin-top:4px">🎂 Find My Birthday Mate!</button>';
+      + '<button class="bday-submit" id="bd-btn" onclick="findBdayMate()" style="margin-top:4px">🎂 Find My Birthday Mate!</button>'
+      + BM_PRIVACY_NOTE
+      + '<div class="bm-form-actions"><a class="bm-btn" href="birthday.html#profile">Or sign in with Google →</a><a class="bm-btn" href="birthday.html#twins">View Birthday Twins →</a></div>';
   }
+  // Signed-in members with a profile see their profile instead of the guest form.
+  withBdayHome(function(H) {
+    H.profileSummary().then(function(p) {
+      if (!p) return;
+      var vis = { 'public': 'Public', 'members': 'SAU Members Only', 'private': 'Private' }[p.visibility] || '';
+      wrap.innerHTML = bmSavedCard(p.name,
+        '📅 ' + formatBdayDisplay(p.birthday) + ' &nbsp;·&nbsp; 👁 ' + esc(vis),
+        'This is your Birthday Mate profile. You can change who sees your birthday at any time.',
+        '<a class="bm-btn" href="birthday.html#twins">View Birthday Twins →</a><a class="bm-btn" href="birthday.html#profile">Edit profile &amp; visibility</a>');
+    });
+  });
 }
 renderBdayForm();
 var deadline = new Date('2026-05-22T23:59:59+06:00').getTime();
@@ -3066,143 +3113,72 @@ function closeBdayPopup() {
   if (modal) { modal.classList.remove('open'); setTimeout(function(){ modal.remove(); }, 300); }
 }
 
+function bmButton(btn, busy, label) {
+  if (!btn) return;
+  btn.disabled = !!busy;
+  if (label) btn.textContent = label;
+}
+function bmPopupError(title, msg) {
+  showBdayPopup('<div class="bmp-icon">⚠️</div>'
+    + '<div class="bmp-title">' + esc(title) + '</div>'
+    + '<div class="bmp-sub">' + esc(msg) + '</div>');
+}
+
 function findBdayMate() {
   var btn = document.getElementById('bd-btn');
 
-  // ── Returning visitor path ──
-  var alreadySaved = null;
-  try { alreadySaved = JSON.parse(localStorage.getItem('sau_bday_entry')); } catch(e){}
-  if (alreadySaved && alreadySaved.name && alreadySaved.birthday) {
-    searchBdayMatches(alreadySaved.name, alreadySaved.birthday, btn);
+  // ── Already registered (guest on this device, or signed-in member) ──
+  if (!document.getElementById('bd-name')) {
+    var idle = btn ? btn.textContent : '';
+    bmButton(btn, true, 'Searching...');
+    withBdayHome(function(H) {
+      H.findTwins().then(function(html) {
+        bmButton(btn, false, idle);
+        showBdayPopup(html);
+        H.bindPopup(document.getElementById('bday-modal'));
+      }).catch(function() {
+        bmButton(btn, false, idle);
+        bmPopupError('Connection Error', 'Could not connect to the server. Please check your internet and try again.');
+      });
+    });
     return;
   }
 
-  // ── New visitor path ──
-  var name    = document.getElementById('bd-name') ? document.getElementById('bd-name').value.trim() : '';
-  var faculty = document.getElementById('bd-faculty') ? document.getElementById('bd-faculty').value.trim() : '';
-  var dateVal = document.getElementById('bd-date') ? document.getElementById('bd-date').value.trim() : '';
-  var district= document.getElementById('bd-district') ? document.getElementById('bd-district').value.trim() : '';
-  var gmail   = document.getElementById('bd-gmail') ? document.getElementById('bd-gmail').value.trim() : '';
+  // ── New visitor ──
+  var name     = document.getElementById('bd-name').value.trim();
+  var faculty  = document.getElementById('bd-faculty').value.trim();
+  var dateVal  = document.getElementById('bd-date').value.trim();
+  var district = document.getElementById('bd-district').value.trim();
+  var gmail    = document.getElementById('bd-gmail') ? document.getElementById('bd-gmail').value.trim() : '';
 
   if (!name || !faculty || !dateVal || !district) {
-    showBdayPopup('<div class="bmp-icon">⚠️</div>'
-      + '<div class="bmp-title">Fill in all fields!</div>'
-      + '<div class="bmp-sub">Please enter your name, faculty, district, and date of birth.</div>');
+    bmPopupError('Fill in all fields!', 'Please enter your name, faculty, district, and date of birth.');
     return;
   }
+  var dobErr = window.BdayCore ? BdayCore.validateDob(dateVal) : '';
+  if (dobErr) { bmPopupError('Check your date of birth', dobErr); return; }
 
-  var parts   = dateVal.split('-');
-  var myYear  = parseInt(parts[0], 10);
-  var myMonth = parseInt(parts[1], 10);
-  var myDay   = parseInt(parts[2], 10);
-  var myMD    = String(myMonth).padStart(2,'0') + '-' + String(myDay).padStart(2,'0');
-
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
-
-  var entry = { name: name, faculty: faculty, district: district, birthday: dateVal, timestamp: new Date().toISOString() };
-  if (gmail) entry.gmail = gmail;
-
-  fbWrite(FIREBASE_URL + '/birthday-mates.json', 'POST', entry)
-  .then(function(saved) {
-    if (!saved || !saved.name) throw new Error('not saved');
-    try { localStorage.setItem('sau_bday_entry', JSON.stringify({ name: name, birthday: dateVal, district: district, key: saved.name })); } catch(e){}
-    // Re-render form to show locked state
-    renderBdayForm();
-    return fbJson(FIREBASE_URL + '/birthday-mates.json');
-  })
-  .then(function(allData) {
-    btn.disabled = false;
-    btn.textContent = '🎂 Find My Birthday Mate!';
-    showMatchResults(allData, name, myMD, myYear);
-  })
-  .catch(function(err) {
-    btn.disabled = false;
-    btn.textContent = '🎂 Find My Birthday Mate!';
-    showBdayPopup('<div class="bmp-icon">⚠️</div>'
-      + '<div class="bmp-title">Connection Error</div>'
-      + '<div class="bmp-sub">Could not connect to the server. Please check your internet and try again.</div>');
-    console.log('Firebase error:', err);
+  bmButton(btn, true, 'Saving...');
+  withBdayHome(function(H) {
+    H.registerAndFindTwins({ name: name, faculty: faculty, district: district, birthday: dateVal, gmail: gmail })
+      .then(function(html) {
+        renderBdayForm();
+        showBdayPopup(html);
+        H.bindPopup(document.getElementById('bday-modal'));
+      })
+      .catch(function(err) {
+        bmButton(btn, false, '🎂 Find My Birthday Mate!');
+        var m = (err && err.message) || '';
+        if (!m || /permission|network|fetch|HTTP|unavailable/i.test(m)) m = 'Could not connect to the server. Please check your internet and try again.';
+        bmPopupError('Could not save', m);
+        console.log('Birthday Mate error:', err && (err.code || err.message));
+      });
   });
-}
-
-// ── Search matches without re-submitting (for returning visitors) ──
-function searchBdayMatches(savedName, savedBirthday, btn) {
-  if (btn) { btn.disabled = true; btn.textContent = 'Searching...'; }
-  var parts  = savedBirthday.split('-');
-  var myYear = parseInt(parts[0], 10);
-  var myMD   = String(parseInt(parts[1],10)).padStart(2,'0') + '-' + String(parseInt(parts[2],10)).padStart(2,'0');
-
-  fbJson(FIREBASE_URL + '/birthday-mates.json')
-    .then(function(allData) {
-      if (btn) { btn.disabled = false; btn.textContent = '🎂 Find My Birthday Mate!'; }
-      showMatchResults(allData, savedName, myMD, myYear);
-    })
-    .catch(function(err) {
-      if (btn) { btn.disabled = false; btn.textContent = '🎂 Find My Birthday Mate!'; }
-      showBdayPopup('<div class="bmp-icon">⚠️</div>'
-        + '<div class="bmp-title">Connection Error</div>'
-        + '<div class="bmp-sub">Could not connect to the server. Please check your internet and try again.</div>');
-    });
-}
-
-// ── Render match results (shared by both paths) ──
-function showMatchResults(allData, myName, myMD, myYear) {
-  var matches = [];
-  var myNameLower = myName.toLowerCase();
-  if (allData && typeof allData === 'object') {
-    // Collect all entries with same MM-DD, exclude own name+birthday combo
-    var seenNames = {};
-    Object.keys(allData).forEach(function(k) {
-      var p = allData[k];
-      if (!p || typeof p !== 'object' || !p.birthday || !p.name) return;
-      var pp  = String(p.birthday).split('-');
-      if (pp.length < 3) return;
-      var pMD = String(parseInt(pp[1],10)).padStart(2,'0') + '-' + String(parseInt(pp[2],10)).padStart(2,'0');
-      // Exclude self: same name AND same full birthday
-      if (pMD === myMD && !(p.name.toLowerCase() === myNameLower)) {
-        // Deduplicate by name to avoid same person appearing multiple times
-        if (!seenNames[p.name.toLowerCase()]) {
-          seenNames[p.name.toLowerCase()] = true;
-          matches.push(p);
-        }
-      }
-    });
-  }
-
-  if (matches.length > 0) {
-    var cards = matches.map(function(m) {
-      var ageLine = '';
-      if (m.birthday && String(m.birthday).split('-').length === 3) {
-        var mYear = parseInt(m.birthday.split('-')[0], 10);
-        var diff  = myYear - mYear;
-        if (diff > 0)      ageLine = 'You are ' + diff + ' year' + (diff > 1 ? 's' : '') + ' older 🎈';
-        else if (diff < 0) ageLine = 'You are ' + Math.abs(diff) + ' year' + (Math.abs(diff) > 1 ? 's' : '') + ' younger 🎈';
-        else               ageLine = 'You were both born the same year! 🎊';
-      }
-      return '<div class="bmp-match-card">'
-        + '<div class="bmp-match-name">🎂 ' + esc(m.name) + '</div>'
-        + '<div class="bmp-match-fac">' + esc(m.faculty) + (m.district ? ' · 📍 ' + esc(m.district) : '') + '</div>'
-        + (ageLine ? '<div class="bmp-match-age">' + ageLine + '</div>' : '')
-        + '</div>';
-    }).join('');
-
-    showBdayPopup('<div class="bmp-icon">🎉</div>'
-      + '<div class="bmp-title">Birthday Mate Found!</div>'
-      + '<div class="bmp-sub">There are <strong>' + matches.length + '</strong> more people at SAU who share your birthday!</div>'
-      + '<div class="bmp-cards">' + cards + '</div>'
-      + '<div class="bmp-saved">Your info has been saved ✓</div>');
-  } else {
-    showBdayPopup('<div class="bmp-icon">🌸</div>'
-      + '<div class="bmp-title">No Match Yet!</div>'
-      + '<div class="bmp-sub">Your data is saved safely. Check back in a few days — your birthday mate might register soon!</div>'
-      + '<div class="bmp-saved">Your info has been saved ✓</div>');
-  }
 }
 
 // ── LIVE EDITOR ──
 function switchTab(tab) {
-  ['data','likes','live','site'].forEach(function(t) {
+  ['data','wishes','likes','live','site'].forEach(function(t) {
     var tabEl = document.getElementById('adm-tab-'+t);
     var btnEl = document.getElementById('tab-'+t);
     if (tabEl) tabEl.style.display = tab === t ? 'block' : 'none';
@@ -3211,6 +3187,7 @@ function switchTab(tab) {
   if (tab === 'site') loadSiteEditorValues();
   if (tab === 'live') loadLiveEditorValues();
   if (tab === 'likes') loadPhotoLikes();
+  if (tab === 'wishes') withBdayHome(function(H){ H.loadAdminWishes(); });
 }
 
 // ── PHOTO LIKES ADMIN ──
@@ -3604,28 +3581,40 @@ function applyAnnouncement() {
 function showAdmToast(msg, kind) { siteToast(msg, kind); }
 
 
-var ADMIN_PASS = '2024'; // পাসওয়ার্ড এখানে পরিবর্তন করো
 var adminData  = {};
+var adminClaims = {};
 
 // URL এ ?admin থাকলে gate খুলবে
 if (window.location.search.includes('admin')) {
   document.getElementById('admin-gate').classList.remove('hidden');
 }
 
+// Admin access is decided by the database rules (verified Google account on the admin list),
+// not by a password in this page.
 function adminLogin() {
-  var pass = document.getElementById('adm-pass').value;
-  var err  = document.getElementById('adm-err');
-  if (pass === ADMIN_PASS) {
-    document.getElementById('admin-gate').classList.add('hidden');
-    document.getElementById('admin-panel').classList.add('visible');
-    document.getElementById('adm-tab-data').style.display = 'block';
-    document.getElementById('adm-tab-site').style.display = 'none';
-    err.style.display = 'none';
-    setTimeout(function(){ loadAdminData(); }, 100);
-  } else {
-    err.style.display = 'block';
-    document.getElementById('adm-pass').value = '';
-  }
+  var err = document.getElementById('adm-err');
+  var btn = document.getElementById('adm-google-btn');
+  err.style.display = 'none';
+  if (btn) btn.disabled = true;
+  withBdayHome(function(H) {
+    H.adminSignIn().then(function(r) {
+      if (btn) btn.disabled = false;
+      if (r.ok) {
+        document.getElementById('admin-gate').classList.add('hidden');
+        document.getElementById('admin-panel').classList.add('visible');
+        document.getElementById('adm-tab-data').style.display = 'block';
+        document.getElementById('adm-tab-site').style.display = 'none';
+        setTimeout(function(){ loadAdminData(); }, 100);
+      } else if (r.reason === 'not-admin') {
+        err.textContent = '❌ ' + (r.email || 'এই account') + ' admin না।';
+        err.style.display = 'block';
+      }
+    }).catch(function() {
+      if (btn) btn.disabled = false;
+      err.textContent = '❌ Login করা যায়নি, আবার চেষ্টা করো';
+      err.style.display = 'block';
+    });
+  });
 }
 
 // ── PRE-ORDER ──
@@ -3680,20 +3669,23 @@ document.addEventListener('keydown', function(e) {
 function adminLogout() {
   document.getElementById('admin-panel').classList.remove('visible');
   document.getElementById('admin-gate').classList.remove('hidden');
-  document.getElementById('adm-pass').value = '';
+  withBdayHome(function(H){ H.B.signOut(); });
 }
 
 function loadAdminData() {
   document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="6" class="adm-empty">লোড হচ্ছে...</td></tr>';
-  fbJson(FIREBASE_URL + '/birthday-mates.json')
-    .then(function(data) {
-      adminData = (data && typeof data === 'object') ? data : {};
+  withBdayHome(function(H) {
+    H.B.adminBirthdayMates()
+    .then(function(res) {
+      adminData = res.entries || {};
+      adminClaims = res.claims || {};
       renderAdminTable(adminData);
       updateStats(adminData);
     })
     .catch(function() {
       document.getElementById('adm-tbody').innerHTML = '<tr><td colspan="6" class="adm-empty">ডাটা লোড করতে সমস্যা হয়েছে। ↻ Refresh চাপুন।</td></tr>';
     });
+  });
   // Photo likes total (admin-only display)
   fbJson(FIREBASE_URL + '/photo-votes.json')
     .then(function(votes){
@@ -3753,7 +3745,7 @@ function renderAdminTable(data) {
     var dt  = p.timestamp ? new Date(p.timestamp).toLocaleString('bn-BD') : '—';
     return '<tr id="row-'+esc(k)+'">'
       + '<td class="adm-dim">' + (i+1) + '</td>'
-      + '<td><strong>' + esc(p.name||'—') + '</strong></td>'
+      + '<td><strong>' + esc(p.name||'—') + '</strong>' + (adminClaims[k] ? ' <span title="Google profile এর সাথে linked" style="font-size:11px">🔗</span>' : '') + '</td>'
       + '<td class="adm-dim2">' + esc(p.faculty||'—') + '</td>'
       + '<td>' + esc(p.birthday||'—') + '</td>'
       + '<td class="adm-dim3">' + esc(dt) + '</td>'
@@ -3780,9 +3772,11 @@ function filterTable() {
 
 function deleteEntry(key) {
   if (!confirm('এই এন্ট্রি ডিলিট করবেন?')) return;
-  fbWrite(FIREBASE_URL + '/birthday-mates/' + encodeURIComponent(key) + '.json', 'DELETE')
-    .then(function(){ delete adminData[key]; filterTable(); updateStats(adminData); showAdmToast('🗑 এন্ট্রি মুছে গেছে'); })
-    .catch(function(){ showAdmToast('⚠️ মুছতে পারিনি, internet চেক করো', 'warn'); });
+  withBdayHome(function(H) {
+    H.B.adminDeleteEntry(key, (adminData[key] || {}).birthday)
+      .then(function(){ delete adminData[key]; filterTable(); updateStats(adminData); showAdmToast('🗑 এন্ট্রি মুছে গেছে'); })
+      .catch(function(){ showAdmToast('⚠️ মুছতে পারিনি, internet চেক করো', 'warn'); });
+  });
 }
 
 function openEdit(key) {
@@ -3817,13 +3811,16 @@ function saveEdit(key) {
     timestamp: adminData[key].timestamp
   };
   if (!updated.name || !updated.birthday) { showAdmToast('⚠️ নাম আর জন্মতারিখ দিন', 'warn'); return; }
-  fbWrite(FIREBASE_URL + '/birthday-mates/' + encodeURIComponent(key) + '.json', 'PATCH', updated).then(function(){
+  if (window.BdayCore && BdayCore.validateDob(updated.birthday)) { showAdmToast('⚠️ জন্মতারিখ ঠিক নেই', 'warn'); return; }
+  withBdayHome(function(H) {
+  H.B.adminEditEntry(key, adminData[key], updated, !!adminClaims[key]).then(function(){
     adminData[key] = Object.assign({}, adminData[key], updated);
     var m = document.getElementById('adm-edit-modal'); if (m) m.remove();
     filterTable();
     updateStats(adminData);
     showAdmToast('✅ সেভ হয়েছে');
   }).catch(function(){ showAdmToast('⚠️ সেভ হয়নি, internet চেক করো', 'warn'); });
+  });
 }
 
 function exportExcel() {
@@ -4008,52 +4005,6 @@ function toggleMenu() {
 })();
 </script>
 
-<script>
-// ── TODAY'S BIRTHDAY LOADER ──
-(function(){
-  function loadTodayBdays(){
-    var FB = (typeof FIREBASE_URL !== 'undefined') ? FIREBASE_URL : 'https://aesthetic-sau-default-rtdb.firebaseio.com';
-    fetch(FB + '/birthday-mates.json').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(data){
-      if(!data || typeof data !== 'object') return;
-      var now = new Date();
-      var todayMD = String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-      var seen = {};
-      var today = [];
-      Object.keys(data).forEach(function(k){
-        var p = data[k];
-        if(!p || typeof p !== 'object' || !p.birthday || !p.name) return;
-        var pp = String(p.birthday).split('-');
-        if(pp.length < 3) return;
-        var md = String(parseInt(pp[1],10)).padStart(2,'0') + '-' + String(parseInt(pp[2],10)).padStart(2,'0');
-        if(md !== todayMD) return;
-        var key = p.name.trim().toLowerCase();
-        if(seen[key]) return;
-        seen[key] = 1;
-        today.push(p);
-      });
-      if(today.length === 0) return;
-      var sec = document.getElementById('today-bday');
-      var list = document.getElementById('tb-list');
-      var cnt = document.getElementById('tb-count');
-      if(!sec || !list || !cnt) return;
-      cnt.textContent = today.length;
-      list.innerHTML = today.slice(0,12).map(function(p){
-        var sub = [p.faculty, p.district].filter(Boolean).join(' • ');
-        return '<div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:10px 16px;min-width:140px">'
-          + '<div style="font-weight:700;font-size:14px;color:#fff">🎂 ' + escapeHTML(p.name) + '</div>'
-          + (sub ? '<div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:3px">' + escapeHTML(sub) + '</div>' : '')
-          + '</div>';
-      }).join('');
-      if(today.length > 12){
-        list.innerHTML += '<div style="background:rgba(255,255,255,.05);border:1px dashed rgba(167,139,250,.3);border-radius:12px;padding:10px 16px;font-size:12px;color:#a78bfa;display:flex;align-items:center">+ আরও ' + (today.length-12) + ' জন</div>';
-      }
-      sec.style.display = 'block';
-    }).catch(function(){});
-  }
-  function escapeHTML(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadTodayBdays);else loadTodayBdays();
-})();
-</script>
 
 <script>
 // Fallbacks: the Firebase SDK for live games is an ES module loaded from gstatic. If it is blocked/offline the
@@ -4987,5 +4938,8 @@ html[data-mode] .gc-teaser-icon{color:var(--tx3)!important;opacity:1}
 @media(prefers-reduced-motion:reduce){.nav-yt,.nav-yt .yt-new,.nav-mobile-menu .mob-yt{animation:none!important}}
 
 </style>
+<!-- Birthday Mate (Phase 1): twins, today, calendar, wishes -->
+<script src="js/bday-core.js"></script>
+<script type="module" src="js/bday-home.js"></script>
 </body>
 </html>

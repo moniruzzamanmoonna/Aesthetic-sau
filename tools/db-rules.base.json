@@ -1,0 +1,204 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "counts": {
+      ".read": true,
+      "$d": {
+        ".validate": "$d.matches(/^(bagerhat|bandarban|barguna|barishal|bhola|bogura|brahmanbaria|chandpur|chapai-nawabganj|chattogram|chuadanga|cox-s-bazar|cumilla|dhaka|dinajpur|faridpur|feni|gaibandha|gazipur|gopalganj|habiganj|jamalpur|jashore|jhalokati|jhenaidah|joypurhat|khagrachhari|khulna|kishoreganj|kurigram|kushtia|lakshmipur|lalmonirhat|madaripur|magura|manikganj|meherpur|moulvibazar|munshiganj|mymensingh|naogaon|narail|narayanganj|narsingdi|natore|netrokona|nilphamari|noakhali|pabna|panchagarh|patuakhali|pirojpur|rajbari|rajshahi|rangamati|rangpur|satkhira|shariatpur|sherpur|sirajganj|sunamganj|sylhet|tangail|thakurgaon|outside)$/) && newData.isNumber() && newData.val() >= 0 && newData.val() < 10000000",
+        ".write": "auth != null && ((newData.val() === (data.exists() ? data.val() : 0) + 1 && !root.child('sessions').child(auth.uid).child('d').exists() && newData.parent().parent().child('sessions').child(auth.uid).child('d').val() === $d) || (data.exists() && newData.val() === data.val() - 1 && root.child('sessions').child(auth.uid).child('d').val() === $d && !newData.parent().parent().child('sessions').child(auth.uid).child('d').exists()))"
+      }
+    },
+    "stats": {
+      ".read": true,
+      "visitors": {
+        ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 100000000",
+        ".write": "auth != null && !root.child('sessions').child(auth.uid).child('c').exists() && newData.parent().parent().child('sessions').child(auth.uid).child('c').exists() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+      },
+      "totalVisits": {
+        ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 1000000000",
+        ".write": "auth != null && newData.val() === (data.exists() ? data.val() : 0) + 1 && newData.parent().parent().child('sessions').child(auth.uid).child('lv').val() === now && (!root.child('sessions').child(auth.uid).child('lv').exists() || now - root.child('sessions').child(auth.uid).child('lv').val() >= 1000)"
+      }
+    },
+    "sessions": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "c": {
+          ".validate": "newData.isNumber() && newData.val() === now",
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists()"
+        },
+        "lv": {
+          ".validate": "newData.isNumber() && newData.val() === now",
+          ".write": "auth != null && auth.uid === $uid"
+        },
+        "d": {
+          ".validate": "newData.isString() && newData.val().matches(/^(bagerhat|bandarban|barguna|barishal|bhola|bogura|brahmanbaria|chandpur|chapai-nawabganj|chattogram|chuadanga|cox-s-bazar|cumilla|dhaka|dinajpur|faridpur|feni|gaibandha|gazipur|gopalganj|habiganj|jamalpur|jashore|jhalokati|jhenaidah|joypurhat|khagrachhari|khulna|kishoreganj|kurigram|kushtia|lakshmipur|lalmonirhat|madaripur|magura|manikganj|meherpur|moulvibazar|munshiganj|mymensingh|naogaon|narail|narayanganj|narsingdi|natore|netrokona|nilphamari|noakhali|pabna|panchagarh|patuakhali|pirojpur|rajbari|rajshahi|rangamati|rangpur|satkhira|shariatpur|sherpur|sirajganj|sunamganj|sylhet|tangail|thakurgaon|outside)$/)",
+          ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.exists() && newData.parent().parent().parent().child('counts').child(newData.val()).val() === (root.child('counts').child(newData.val()).exists() ? root.child('counts').child(newData.val()).val() : 0) + 1) || (data.exists() && !newData.exists() && newData.parent().parent().parent().child('counts').child(data.val()).val() === root.child('counts').child(data.val()).val() - 1))"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "pins": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['latE3','lonE3','t'])",
+        "latE3": {
+          ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() > 20500 && newData.val() < 26700"
+        },
+        "lonE3": {
+          ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() > 87900 && newData.val() < 92800"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() === now"
+        },
+        "n": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "presence": {
+      ".read": true,
+      "$sid": {
+        ".write": true
+      }
+    },
+    "daily-visits": {
+      "$date": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "total-visits": {
+      ".read": true,
+      ".write": true
+    },
+    "site-config": {
+      ".read": true,
+      ".write": true
+    },
+    "birthday-mates": {
+      ".read": true,
+      ".write": true
+    },
+    "photo-votes": {
+      ".read": true,
+      ".write": true
+    },
+    "pre-orders": {
+      ".read": true,
+      ".write": true
+    },
+    "total-games": {
+      ".read": true,
+      ".write": true
+    },
+    "game-requests": {
+      ".read": true,
+      ".write": true
+    },
+    "game-rooms": {
+      "$roomId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "game-chat": {
+      "$roomId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "sau-ratings": {
+      ".read": true,
+      "items": {
+        "$id": {
+          "counts": {
+            "$s": {
+              ".write": true,
+              ".validate": "($id === 'surjaloke-bornomala' || $id === 'july-36-gate' || $id === 'tsc-cafeteria' || $id === 'premchattar' || $id === 'auditorium' || $id.matches(/^(chicken-chap|chicken-kacchi|burger|halim)$/) || root.child('sau-ratings').child('items').child($id).child('name').exists()) && $s.matches(/^s([1-9]|10)$/) && newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+            }
+          },
+          "updatedAt": {
+            ".write": true,
+            ".validate": "($id === 'surjaloke-bornomala' || $id === 'july-36-gate' || $id === 'tsc-cafeteria' || $id === 'premchattar' || $id === 'auditorium' || $id.matches(/^(chicken-chap|chicken-kacchi|burger|halim)$/) || root.child('sau-ratings').child('items').child($id).child('name').exists()) && newData.val() === now"
+          },
+          "likes": {
+            ".write": true,
+            ".validate": "$id.matches(/^(chicken-chap|chicken-kacchi|burger|halim)$/) && newData.isNumber() && newData.val() >= 0 && (newData.val() === (data.exists() ? data.val() : 0) + 1 || newData.val() === (data.exists() ? data.val() : 0) - 1)"
+          }
+        }
+      },
+      "polls": {
+        "season": {
+          "$o": {
+            ".write": true,
+            ".validate": "($o === 'winter' || $o === 'summer') && newData.isNumber() && newData.val() >= 0 && (newData.val() === (data.exists() ? data.val() : 0) + 1 || newData.val() === (data.exists() ? data.val() : 0) - 1)"
+          },
+          "updatedAt": {
+            ".write": true,
+            ".validate": "newData.isNumber() && newData.val() === now"
+          }
+        },
+        "$pollId": {
+          ".validate": "$pollId.matches(/^m([1-9]|1[0-5])$/)",
+          "a": {
+            ".write": true,
+            ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          },
+          "b": {
+            ".write": true,
+            ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          },
+          "updatedAt": {
+            ".write": true,
+            ".validate": "newData.isNumber() && newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "stats": {
+        "visitors": {
+          ".write": true,
+          ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+        },
+        "returning": {
+          ".write": true,
+          ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+        }
+      },
+      "community": {
+        "$id": {
+          ".write": "newData.exists()",
+          ".validate": "$id.matches(/^c[a-z0-9]{6,30}$/) && newData.hasChildren(['name','text','ts','likes','dislikes'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24 && !data.exists()"
+          },
+          "text": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500 && !data.exists()"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() === now && !data.exists()"
+          },
+          "likes": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (data.exists() ? (newData.val() === data.val() + 1 || newData.val() === data.val() - 1) : newData.val() === 0)"
+          },
+          "dislikes": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (data.exists() ? (newData.val() === data.val() + 1 || newData.val() === data.val() - 1) : newData.val() === 0)"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  }
+}
+
