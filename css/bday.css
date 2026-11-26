@@ -240,3 +240,28 @@ select.bm-input{background-image:linear-gradient(45deg,transparent 50%,var(--bm-
 
 /* homepage nav: the desktop link only shows where the existing nav has room (it is always in the mobile menu) */
 @media(max-width:1279px){.nav-links .nav-bday{display:none}}
+
+/* "Is one of these you?" popup */
+.bm-claim-list{display:flex;flex-direction:column;gap:8px;margin:4px 0 10px}
+.bm-claim{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:1px solid var(--bm-border-2);border-radius:var(--bm-r-sm);background:#fff;color:var(--bm-ink);font:inherit;text-align:left;cursor:pointer;transition:border-color .2s,background .2s}
+.bm-claim:hover:not(:disabled){border-color:var(--bm-green);background:var(--bm-green-soft)}
+.bm-claim:disabled{opacity:.55;cursor:wait}
+.bm-claim:focus-visible{outline:2px solid var(--bm-green);outline-offset:2px}
+.bm-claim-who{flex:1;min-width:0}
+.bm-claim-who b{display:block;font-size:14.5px;font-weight:600;overflow-wrap:anywhere}
+.bm-claim-who small{display:block;font-size:12.5px;color:var(--bm-muted)}
+.bm-claim-yes{flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--bm-green);background:var(--bm-green-soft);padding:5px 10px;border-radius:99px}
+#bm-claim-err{color:var(--bm-warn);margin:0}
+#bm-claim-err:empty{display:none}
+
+/* Profile: AnonBox (anonymous messages) */
+.bm-anonbox{display:flex;align-items:center;gap:14px;max-width:560px;margin-top:14px;padding:16px 18px;border:1px solid var(--bm-border);border-radius:var(--bm-r);background:var(--bm-card);box-shadow:var(--bm-shadow);color:var(--bm-ink);text-decoration:none;transition:border-color .2s,transform .15s}
+.bm-anonbox:hover{border-color:var(--bm-green)}
+.bm-anonbox:active{transform:scale(.99)}
+.bm-anonbox:focus-visible{outline:2px solid var(--bm-green);outline-offset:2px}
+.bm-anonbox-icon{width:44px;height:44px;flex-shrink:0;display:grid;place-items:center;border-radius:12px;background:var(--bm-green-soft);font-size:22px}
+.bm-anonbox-text{flex:1;min-width:0}
+.bm-anonbox-text b{display:block;font-size:15px;font-weight:600}
+.bm-anonbox-text small{display:block;margin-top:2px;font-size:13px;line-height:1.45;color:var(--bm-muted)}
+.bm-anonbox-go{flex-shrink:0;font-size:20px;color:var(--bm-green)}
+.bm-signin+.bm-anonbox{margin:14px auto 0}

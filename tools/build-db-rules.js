@@ -63,10 +63,8 @@ function indexNode(vis, readRule) {
   const claimDelete = "(!newData.exists() && " + SIGNED + " && " + NR +
     ".child('bday-claims').child($key).child('uid').val() === auth.uid)";
 
-  return {
-    '.read': readRule,
-    '$md': {
-      '.validate': '$md.matches(' + MD_RE + ')',
+  const md = {
+    '.validate': '$md.matches(' + MD_RE + ')',
       '$key': {
         '.write': [ADMIN, ownProfile, guestCreate, claimDelete].join(' || '),
         '.validate': "newData.hasChildren(['n','f','t'])",
@@ -77,9 +75,19 @@ function indexNode(vis, readRule) {
         t: { '.validate': "newData.val() === 'u' || newData.val() === 'g'" },
         $other: { '.validate': false }
       }
-    }
   };
+  // Members-only rows: also readable for your own birthday (MM-DD) so a new user can be
+  // asked "is one of these earlier registrations you?" even before sharing.
+  if (vis === 'members') {
+    md['.read'] = SIGNED + " && root.child('profiles').child(auth.uid).child('md').val() === $md";
+  }
+  return { '.read': readRule, '$md': md };
 }
+
+// Give-to-get: only people who share their own birthday (Public or SAU Members Only)
+// can see members-only birthdays. Private users and signed-in users without a profile cannot.
+const SHARING = '(' + SIGNED + " && (root.child('profiles').child(auth.uid).child('visibility').val() === 'public'" +
+  " || root.child('profiles').child(auth.uid).child('visibility').val() === 'members'))";
 
 // ── profiles/$uid ─────────────────────────────────────────────────────
 function profilesNode() {
@@ -155,8 +163,8 @@ function claimsNode() {
         ADMIN,
         "|| (" + SIGNED + " && !data.exists() && newData.exists() && newData.child('uid').val() === auth.uid && " + P + ".exists() && (",
         "(" + G + ".child('claim').exists() && newData.child('token').val() === " + G + ".child('claim').val())",
-        "|| (!" + G + ".child('claim').exists() && " + G + ".child('birthday').val() === " + P + ".child('birthday').val()",
-        "&& " + G + ".child('name').val().toLowerCase() === " + P + ".child('name').val().toLowerCase())",
+        // "Is this you?" — the full date of birth (incl. year, never shown to anyone) must match.
+        "|| (!" + G + ".child('claim').exists() && " + G + ".child('birthday').val() === " + P + ".child('birthday').val())",
         '))'
       ),
       '.validate': "newData.hasChildren(['uid','at'])",
@@ -269,7 +277,7 @@ const base = JSON.parse(fs.readFileSync(path.join(__dirname, 'db-rules.base.json
 const rules = base.rules;
 rules['birthday-mates'] = birthdayMatesNode();
 rules['bday-public'] = indexNode('public', 'true');
-rules['bday-members'] = indexNode('members', SIGNED);
+rules['bday-members'] = indexNode('members', SHARING);
 rules['profiles'] = profilesNode();
 rules['bday-claims'] = claimsNode();
 rules['wishes'] = wishesNode();

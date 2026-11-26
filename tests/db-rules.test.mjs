@@ -82,6 +82,7 @@ test('visitors see public rows only; full entries and profiles stay private', as
 
 test('members see members-only rows; private users appear nowhere', async () => {
   await seedProfiles();
+  await assertSucceeds(as('dave').ref().update(profileUpdate('dave', { name: 'Dave Das', birthday: '2001-03-03', vis: 'members' })));
   const db = as('dave');
   const mem = (await assertSucceeds(db.ref('bday-members/11-26').get())).val();
   const pub = (await db.ref('bday-public/11-26').get()).val();
@@ -98,7 +99,26 @@ test('month query (orderByKey range) works for both index nodes', async () => {
   await seedProfiles();
   await assertSucceeds(anon().ref('bday-public').orderByKey().startAt('11-01').endAt('11-31').get());
   await assertFails(anon().ref('bday-members').orderByKey().startAt('11-01').endAt('11-31').get());
+  await assertFails(as('dave').ref('bday-members').orderByKey().startAt('11-01').endAt('11-31').get(), 'signed in but no profile');
+  await assertSucceeds(as('dave').ref().update(profileUpdate('dave', { name: 'Dave Das', birthday: '2001-03-03', vis: 'public' })));
   await assertSucceeds(as('dave').ref('bday-members').orderByKey().startAt('11-01').endAt('11-31').get());
+});
+
+test('give-to-get: private users and users without a profile cannot see members-only birthdays', async () => {
+  await seedProfiles();
+  // no profile
+  await assertFails(as('nobody').ref('bday-members/11-26').get());
+  await assertFails(as('nobody').ref('bday-members').get());
+  // carol is private (born 26 Nov): no month/other-day access ...
+  await assertFails(as('carol').ref('bday-members').orderByKey().startAt('11-01').endAt('11-31').get());
+  await assertFails(as('carol').ref('bday-members/11-12').get());
+  // ... but she may read her own day, for the "is one of these you?" check
+  await assertSucceeds(as('carol').ref('bday-members/11-26').get());
+  // sharing users (public or members) can read
+  await assertSucceeds(as('alice').ref('bday-members/11-12').get());
+  await assertSucceeds(as('bob').ref('bday-members').orderByKey().startAt('11-01').endAt('11-31').get());
+  // public rows stay public for everyone
+  await assertSucceeds(as('carol').ref('bday-public/11-26').get());
 });
 
 // ── profiles ──────────────────────────────────────────────────────────
@@ -165,11 +185,13 @@ test('guest registration: create-only, members-only, consistent', async () => {
 
 test('claiming a guest entry: name+birthday match (legacy) or token (new)', async () => {
   await seedProfiles();
-  // dave has a different name -> cannot claim the legacy row
-  await assertSucceeds(as('dave').ref().update(profileUpdate('dave', { name: 'Dave Das', birthday: '2003-11-26', vis: 'members' })));
+  // same day + month but a different year -> cannot claim the legacy row
+  await assertSucceeds(as('dave').ref().update(profileUpdate('dave', { name: 'Dave Das', birthday: '2004-11-26', vis: 'members' })));
   await assertFails(as('dave').ref().update({ ['bday-claims/' + LEGACY]: { uid: 'dave', at: TS }, ['bday-members/11-26/' + LEGACY]: null }));
-  // the real owner (same name + full birthday)
-  await assertSucceeds(as('olds').ref().update(profileUpdate('olds', { name: 'old student', birthday: '2003-11-26', vis: 'private' })));
+  // no profile yet -> cannot claim
+  await assertFails(as('noprof').ref().update({ ['bday-claims/' + LEGACY]: { uid: 'noprof', at: TS } }));
+  // "this is me": full date of birth matches (name may differ, e.g. Google display name)
+  await assertSucceeds(as('olds').ref().update(profileUpdate('olds', { name: 'Different Display Name', birthday: '2003-11-26', vis: 'private' })));
   await assertFails(as('olds').ref().update({ ['bday-claims/' + LEGACY]: { uid: 'someone-else', at: TS }, ['bday-members/11-26/' + LEGACY]: null }));
   await assertSucceeds(as('olds').ref().update({ ['bday-claims/' + LEGACY]: { uid: 'olds', at: TS }, ['bday-members/11-26/' + LEGACY]: null }));
   assert.equal((await as('dave').ref('bday-members/11-26/' + LEGACY).get()).exists(), false, 'private now applies to the old row too');

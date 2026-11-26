@@ -32,6 +32,8 @@ async function render() {
   const r = route();
   const seq = ++renderSeq;
   setActiveTab(r);
+  try { ACCESS = await B.access(); } catch (e) { /* keep last known */ }
+  if (seq !== renderSeq) return;
   const views = { twins: viewTwins, today: viewToday, calendar: viewCalendar, wishes: viewWishes, profile: viewProfile };
   try {
     await views[r](seq);
@@ -53,8 +55,13 @@ function head(eyebrow, title, sub) {
     + (sub ? '<p class="bm-sub">' + sub + '</p>' : '')
     + '</header>';
 }
+// Give-to-get: members-only birthdays are shown only to people who share their own.
+let ACCESS = { signedIn: false, hasProfile: false, sharing: false, visibility: '' };
 function membersNote() {
-  return B.user() ? '' : '<p class="bm-note">🔒 Some birthdays are shared with <strong>SAU members only</strong>. <button type="button" class="bm-link" data-signin>Sign in</button> to see them too.</p>';
+  if (!ACCESS.signedIn) return '<p class="bm-note">🔒 Some birthdays are shared with <strong>SAU members only</strong>. <button type="button" class="bm-link" data-signin>Sign in</button> and share your birthday to see them too.</p>';
+  if (!ACCESS.hasProfile) return '<p class="bm-note">🔒 Members-only birthdays are visible to people who share their own. <a href="#profile">Create your profile →</a></p>';
+  if (!ACCESS.sharing) return '<p class="bm-note">🔒 Your birthday is private, so members-only birthdays are hidden from you too. <a href="#profile">Share yours (Public or SAU Members Only) →</a></p>';
+  return '';
 }
 function after(seq) {
   if (stale(seq)) return;
@@ -103,7 +110,7 @@ async function viewTwins(seq) {
     + (n
       ? '<div class="bm-grid">' + res.items.map(function (i) { return personCard(i); }).join('') + '</div>'
       : emptyState('🌱', "No Birthday Twins found yet. Maybe you're the first one!", 'Maybe someone with the same birthday will join soon! 🎂'))
-    + (res.membersHidden ? membersNote() : '');
+    + membersNote();
   after(seq);
 }
 
@@ -264,7 +271,7 @@ function wishCard(w) {
 const VIS = [
   ['public', 'Public', 'Anyone visiting the site can see your name, faculty, batch and birthday (day & month).'],
   ['members', 'SAU Members Only', 'Only signed-in Birthday Mate members can see you. Recommended.'],
-  ['private', 'Private', 'Hidden from Birthday Twins, Today\'s Birthdays and the Calendar. Nobody can send you wishes.']
+  ['private', 'Private', 'Hidden from Birthday Twins, Today\'s Birthdays and the Calendar. Nobody can send you wishes, and you won\'t see members-only birthdays either.']
 ];
 
 async function viewProfile(seq) {
@@ -272,7 +279,8 @@ async function viewProfile(seq) {
   const u = B.user();
   if (!u) {
     main.innerHTML = head('👤 Profile', 'Your Birthday Mate profile', '')
-      + signInPromptHtml('Sign in with Google', 'Create your profile to choose who sees your birthday, find your Birthday Twins and receive secret birthday wishes.');
+      + signInPromptHtml('Sign in with Google', 'Create your profile to choose who sees your birthday, find your Birthday Twins and receive secret birthday wishes.')
+      + anonBoxCard();
     after(seq);
     return;
   }
@@ -313,7 +321,8 @@ async function viewProfile(seq) {
     + '<div class="bm-account-row">' + avatar({ name: u.displayName || u.email || '?', photo: hasPhoto ? u.photoURL : '' }, 'sm')
     + '<span><span class="bm-fine">Signed in as</span><br/><strong>' + esc(u.email || u.displayName || '') + '</strong><br/><span class="bm-fine">Only you can see your email.</span></span></div>'
     + '<div class="bm-account-actions"><button type="button" class="bm-btn bm-btn-sm" id="pf-out">Sign out</button>'
-    + (p ? '<button type="button" class="bm-btn bm-btn-sm bm-btn-danger" id="pf-del">Delete my profile</button>' : '') + '</div></div>';
+    + (p ? '<button type="button" class="bm-btn bm-btn-sm" id="pf-link">Link an earlier registration</button><button type="button" class="bm-btn bm-btn-sm bm-btn-danger" id="pf-del">Delete my profile</button>' : '') + '</div></div>'
+    + anonBoxCard();
 
   const form = document.getElementById('bm-profile');
   const errEl = document.getElementById('pf-err');
@@ -340,13 +349,17 @@ async function viewProfile(seq) {
       const res = await B.saveProfile(input);
       toast(res.claimed ? 'Profile saved ✓ Your earlier Birthday Mate entry is now linked.' : 'Profile saved ✓');
       cal.cache = {};
-      render();
+      await render();
+      // First profile: ask whether one of the earlier (no-login) registrations is this person.
+      if (!p && !res.claimed) offerClaim(true);
     } catch (ex) {
       errEl.textContent = /permission/i.test(ex && (ex.code || ex.message) || '') ? 'Could not save. Please check your details and try again.' : (ex.message || 'Could not save.');
       btn.disabled = false; btn.textContent = p ? 'Save changes' : 'Create profile';
     }
   });
   document.getElementById('pf-out').addEventListener('click', async function () { await B.signOut(); toast('Signed out'); });
+  const link = document.getElementById('pf-link');
+  if (link) link.addEventListener('click', function () { offerClaim(false); });
   const del = document.getElementById('pf-del');
   if (del) del.addEventListener('click', async function () {
     if (!confirm('Delete your Birthday Mate profile? You will disappear from Twins, Today and the Calendar. Received wishes stay in "My Wishes" until you delete them.')) return;
@@ -386,3 +399,52 @@ B.onUser(function (u) {
 });
 B.watchWishCount(function (fresh) { if (route() !== 'wishes') updateBadge(fresh); });
 window.addEventListener('hashchange', function () { render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+// ── "Is one of these you?" — link an earlier no-login registration ───
+async function offerClaim(auto) {
+  let list = [];
+  try { list = await B.claimCandidates(); } catch (e) { list = []; }
+  if (!list.length) { if (!auto) toast('No earlier registrations found on your birthday.'); return; }
+  const day = esc(C.formatMd(list[0].md));
+  const m = openModal('<div class="bm-modal-icon" aria-hidden="true">🎂</div>'
+    + '<h2 class="bm-modal-title" id="bm-modal-title">' + (list.length === 1 ? 'Is this you?' : 'Is one of these you?') + '</h2>'
+    + '<p class="bm-modal-text">' + (list.length === 1 ? 'Someone' : list.length + ' people') + ' registered earlier with your birthday (' + day + '). If one of them is you, we\'ll sync it with your account.</p>'
+    + '<div class="bm-claim-list">' + list.map(function (c) {
+      return '<button type="button" class="bm-claim" data-claim="' + esc(c.key) + '">' + avatar(c, 'sm')
+        + '<span class="bm-claim-who"><b>' + esc(c.name) + '</b><small>' + esc(c.faculty) + '</small></span>'
+        + '<span class="bm-claim-yes">This is me</span></button>';
+    }).join('') + '</div>'
+    + '<p class="bm-fine" id="bm-claim-err" role="alert"></p>'
+    + '<button type="button" class="bm-btn bm-full" data-close>None of these — I\'m new</button>'
+    + '<p class="bm-fine bm-center">For safety, an entry is linked only if its full date of birth matches yours.</p>',
+    { focus: '.bm-claim' });
+  m.querySelectorAll('[data-claim]').forEach(function (b) {
+    b.addEventListener('click', async function () {
+      const err = m.querySelector('#bm-claim-err');
+      err.textContent = '';
+      m.querySelectorAll('[data-claim]').forEach(function (x) { x.disabled = true; });
+      try {
+        await B.claimEntry(b.getAttribute('data-claim'));
+        m.querySelector('.bm-modal-box').innerHTML = '<button type="button" class="bm-modal-x" data-close aria-label="Close">✕</button>'
+          + '<div class="bm-modal-icon bm-pop" aria-hidden="true">💚</div>'
+          + '<h2 class="bm-modal-title" id="bm-modal-title">Synced with your account ✓</h2>'
+          + '<p class="bm-modal-text">Your earlier registration is now part of your profile, and your visibility choice applies to it.</p>'
+          + '<button type="button" class="bm-btn bm-btn-primary bm-full" data-close>Done</button>';
+        cal.cache = {};
+        render();
+      } catch (e) {
+        err.textContent = e.message || 'Could not link this entry.';
+        m.querySelectorAll('[data-claim]').forEach(function (x) { x.disabled = false; });
+        b.disabled = true;
+      }
+    });
+  });
+}
+
+// ── 💬 AnonBox: get anonymous messages ────────────────────────────────
+function anonBoxCard() {
+  return '<a class="bm-anonbox" href="https://anon-box2026.web.app" target="_blank" rel="noopener noreferrer">'
+    + '<span class="bm-anonbox-icon" aria-hidden="true">💬</span>'
+    + '<span class="bm-anonbox-text"><b>Get anonymous messages</b><small>Share your AnonBox link and let friends send you anonymous messages — no login needed.</small></span>'
+    + '<span class="bm-anonbox-go" aria-hidden="true">→</span></a>';
+}

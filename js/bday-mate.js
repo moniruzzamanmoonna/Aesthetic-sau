@@ -231,6 +231,42 @@ async function claimGuest() {
   return true;
 }
 
+/**
+ * Earlier (no-login) registrations on the same day + month as the signed-in user's profile.
+ * Shown in the "Is one of these you?" popup. Only name + faculty are visible.
+ */
+async function claimCandidates() {
+  const p = await getProfile(true);
+  if (!p || !p.md) return [];
+  let rows = null;
+  try { rows = (await get(ref(db, 'bday-members/' + p.md))).val(); } catch (e) { return []; }
+  const g = guestEntry();
+  return Object.keys(rows || {}).filter(function (k) {
+    const r = rows[k];
+    return r && r.t === 'g' && !(g && g.key === k && g.claimedBy);
+  }).map(function (k) { return { key: k, name: String(rows[k].n || ''), faculty: String(rows[k].f || ''), md: p.md }; });
+}
+
+/**
+ * "Yes, that's me": link an earlier registration to this account. The rules only allow it
+ * when that entry's full date of birth (including the year, never shown) matches the profile.
+ */
+async function claimEntry(key) {
+  await ready;
+  const p = await getProfile(true);
+  if (!currentUser || !p) throw new Error('Please create your profile first.');
+  const upd = {};
+  upd['bday-claims/' + key] = { uid: currentUser.uid, at: serverTimestamp() };
+  upd['bday-members/' + p.md + '/' + key] = null;
+  try {
+    await update(ref(db), upd);
+  } catch (e) {
+    if (friendly(e) === 'permission') throw new Error("This entry's date of birth (year) doesn't match yours, so it can't be linked. You'll continue as a new user.");
+    throw new Error('Could not link the entry. Please check your connection and try again.');
+  }
+  return true;
+}
+
 async function deleteProfile() {
   await ready;
   if (!currentUser) return;
@@ -246,11 +282,23 @@ async function deleteProfile() {
 }
 
 // ── reading birthdays (only ever one day or one month) ───────────────
-function canSeeMembers() { return !!currentUser; }
+/**
+ * Give-to-get: members-only birthdays are visible only to signed-in users who share their
+ * own birthday (Public or SAU Members Only). Enforced by the database rules too.
+ */
+async function access() {
+  await ready;
+  if (!currentUser) return { signedIn: false, hasProfile: false, sharing: false, visibility: '' };
+  let p = null;
+  try { p = await getProfile(); } catch (e) { p = null; }
+  const vis = p ? p.visibility : '';
+  return { signedIn: true, hasProfile: !!p, sharing: vis === 'public' || vis === 'members', visibility: vis };
+}
+async function canSeeMembers() { return (await access()).sharing; }
 
 async function readDay(md) {
   const tasks = [get(ref(db, 'bday-public/' + md)).then(function (s) { return { md: md, vis: 'public', rows: s.val() }; })];
-  if (canSeeMembers()) {
+  if (await canSeeMembers()) {
     tasks.push(get(ref(db, 'bday-members/' + md)).then(function (s) { return { md: md, vis: 'members', rows: s.val() }; }));
   }
   return Promise.all(tasks);
@@ -291,10 +339,10 @@ async function myMd() {
 /** People who share the exact day and month (any year). */
 async function twins() {
   const me = await myMd();
-  if (!me.md) return { md: '', items: [], membersHidden: !currentUser, source: '' };
+  if (!me.md) return { md: '', items: [], membersHidden: !(await canSeeMembers()), source: '' };
   const groups = await readDay(me.md);
   const items = C.mergeEntries(groups, ownKeys());
-  return { md: me.md, items: items, membersHidden: !currentUser, source: me.source };
+  return { md: me.md, items: items, membersHidden: !(await canSeeMembers()), source: me.source };
 }
 
 /** All visible birthdays in one month: { 'MM-DD': [items] }. */
@@ -302,7 +350,7 @@ async function month(year, monthNum) {
   await ready;
   const mm = (monthNum < 10 ? '0' : '') + monthNum;
   const nodes = ['bday-public'];
-  if (canSeeMembers()) nodes.push('bday-members');
+  if (await canSeeMembers()) nodes.push('bday-members');
   const snaps = await Promise.all(nodes.map(function (n) {
     return get(query(ref(db, n), orderByKey(), startAt(mm + '-01'), endAt(mm + '-31')));
   }));
@@ -481,7 +529,7 @@ async function adminEditEntry(key, before, after, claimed) {
 const api = {
   ready, onUser, user, signIn, signOut, getIdToken, isAdmin, inAppBrowser,
   guestEntry, registerGuest, getProfile, saveProfile, deleteProfile, claimGuest,
-  birthdaysOn, twins, month, myMd,
+  birthdaysOn, twins, month, myMd, access, claimCandidates, claimEntry,
   sendWish, myWishes, watchWishCount, markWishesSeen, reportWish, deleteWish,
   adminWishes, adminRemoveWish, adminBirthdayMates, adminDeleteEntry, adminEditEntry,
   core: C
