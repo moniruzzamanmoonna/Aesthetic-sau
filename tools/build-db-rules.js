@@ -321,6 +321,56 @@ function wishesNode() {
   };
 }
 
+// guest-wishes/$key/$wid — wishes for people who registered without an account (guest rows).
+// Held until that person signs in and claims the entry; only the claimer (and admins) can read them.
+function guestWishesNode() {
+  const NR = 'newData.parent().parent().parent()';
+  const META = NR + ".child('wish-meta').child($wid)";
+  const OWNER = "(" + REAL_USER + " && root.child('bday-claims').child($key).child('uid').val() === auth.uid)";
+  const create = j(
+    "(" + SIGNED + " && !data.exists() && newData.exists()",
+    "&& " + META + ".child('from').val() === auth.uid",
+    "&& " + META + ".child('to').val() === 'g:' + $key",
+    "&& root.child('birthday-mates').child($key).exists() && !root.child('bday-claims').child($key).exists()",
+    // the entry must be visible to the sender: public, or members-only for people who share theirs
+    "&& (root.child('bday-public').child(" + META + ".child('md').val()).child($key).exists()",
+    "|| (" + SHARING + " && root.child('bday-members').child(" + META + ".child('md').val()).child($key).exists()))",
+    "&& ((newData.child('anon').val() === true && !newData.child('fromName').exists())",
+    "|| (newData.child('anon').val() === false && newData.child('fromName').val() === root.child('profiles').child(auth.uid).child('name').val())))"
+  );
+  return {
+    '.read': ADMIN,
+    '$key': {
+      '.read': OWNER,
+      '$wid': {
+        '.write': [ADMIN, '(' + OWNER + ' && !newData.exists())', create].join(' || '),
+        '.validate': "newData.hasChildren(['msg','anon','at'])",
+        msg: { '.validate': j(str(1, 300), '&& newData.val().matches(/[^ \\t\\r\\n]/)', '&& !newData.val().matches(/(https?:|www\\.)/i)') },
+        anon: { '.validate': 'newData.isBoolean()' },
+        fromName: { '.validate': str(2, 60) },
+        at: { '.validate': 'newData.isNumber() && (' + NOW_ONCE + ')' },
+        reported: { '.write': OWNER, '.validate': 'newData.val() === true' },
+        reportedAt: { '.write': OWNER, '.validate': 'newData.isNumber() && newData.val() === now' },
+        $other: { '.validate': false }
+      }
+    }
+  };
+}
+
+// my-claims/$uid/$key: the entries a signed-in user claimed (so the app can find their held wishes).
+function myClaimsNode() {
+  const NR = 'newData.parent().parent().parent()';
+  return {
+    '$uid': {
+      '.read': REAL_USER + ' && auth.uid === $uid',
+      '$key': {
+        '.write': REAL_USER + " && auth.uid === $uid && (!newData.exists() || " + NR + ".child('bday-claims').child($key).child('uid').val() === auth.uid)",
+        '.validate': 'newData.val() === true'
+      }
+    }
+  };
+}
+
 function wishMetaNode() {
   const NR = 'newData.parent().parent()';
   return {
@@ -329,7 +379,8 @@ function wishMetaNode() {
       '.write': j(
         ADMIN,
         "|| (" + SIGNED + " && !data.exists() && newData.exists() && newData.child('from').val() === auth.uid",
-        "&& " + NR + ".child('wishes').child(newData.child('to').val()).child($wid).exists()",
+        "&& (" + NR + ".child('wishes').child(newData.child('to').val()).child($wid).exists()",
+        "|| (newData.child('to').val().beginsWith('g:') && " + NR + ".child('guest-wishes').child(newData.child('to').val().replace('g:', '')).child($wid).exists()))",
         "&& " + NR + ".child('wish-rate').child(auth.uid).child('last').val() === now",
         "&& " + NR + ".child('wish-pair').child(auth.uid).child(newData.child('to').val()).val() === now)"
       ),
@@ -337,6 +388,7 @@ function wishMetaNode() {
       from: { '.validate': str(1, 128) },
       to: { '.validate': str(1, 128) },
       at: { '.validate': 'newData.isNumber() && (' + NOW_ONCE + ')' },
+      md: { '.validate': 'newData.isString() && newData.val().matches(' + MD_RE + ')' },
       removedAt: { '.validate': 'newData.isNumber()' },
       $other: { '.validate': false }
     }
@@ -393,6 +445,8 @@ rules['profiles'] = profilesNode();
 rules['bday-claims'] = claimsNode();
 rules['wishes'] = wishesNode();
 rules['wish-meta'] = wishMetaNode();
+rules['guest-wishes'] = guestWishesNode();
+rules['my-claims'] = myClaimsNode();
 rules['wish-rate'] = wishRateNode();
 rules['wish-pair'] = wishPairNode();
 rules['admin-check'] = { '.read': ADMIN };

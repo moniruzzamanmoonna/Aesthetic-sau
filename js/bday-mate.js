@@ -268,6 +268,7 @@ async function claimGuest() {
   const claim = { uid: currentUser.uid, at: serverTimestamp() };
   if (g.token) claim.token = g.token;
   upd['bday-claims/' + g.key] = claim;
+  upd['my-claims/' + currentUser.uid + '/' + g.key] = true;
   upd['bday-members/' + md + '/' + g.key] = null;
   upd['bday-public/' + md + '/' + g.key] = null;
   upd['bday-marks/' + md + '/' + g.key] = null;
@@ -307,6 +308,7 @@ async function claimEntry(key) {
   if (!currentUser || !p) throw new Error('Please create your profile first.');
   const upd = {};
   upd['bday-claims/' + key] = { uid: currentUser.uid, at: serverTimestamp() };
+  upd['my-claims/' + currentUser.uid + '/' + key] = true;
   upd['bday-members/' + p.md + '/' + key] = null;
   upd['bday-public/' + p.md + '/' + key] = null;
   upd['bday-marks/' + p.md + '/' + key] = null;
@@ -479,7 +481,7 @@ async function districtPeople(dk) {
       const r = v[k];
       if (!r || !r.n) return;
       out.push({ key: k, name: String(r.n), faculty: String(r.f || ''), batch: r.b ? String(r.b) : '', photo: r.p ? String(r.p) : '',
-        uid: k.slice(2), canWish: true, isSelf: k === me, md: '', anonbox: r.a ? String(r.a) : '' });
+        uid: k.slice(2), to: k.slice(2), canWish: true, isSelf: k === me, md: '', anonbox: r.a ? String(r.a) : '' });
     });
   });
   out.sort(function (a, b) { return a.isSelf - b.isSelf || a.name.localeCompare(b.name); });
@@ -498,7 +500,11 @@ function friendly(e) {
   return 'unknown';
 }
 
-async function sendWish(toUid, rawText, anonymous) {
+/**
+ * toUid is a profile uid, or "g:<key>" for someone who registered without an account — that wish
+ * is held in guest-wishes until they sign in and claim their entry. md is needed for "g:" targets.
+ */
+async function sendWish(toUid, rawText, anonymous, md) {
   await ready;
   // No Google account? Send through an invisible anonymous session (still rate-limited, and an
   // admin can trace abuse to the device session if a wish is reported).
@@ -508,7 +514,10 @@ async function sendWish(toUid, rawText, anonymous) {
   const sender = auth.currentUser;
   const uid = sender.uid;
   if (sender.isAnonymous) anonymous = true;
-  if (!toUid || toUid === uid) throw new Error("You can't send a wish to yourself.");
+  const guestKey = String(toUid || '').indexOf('g:') === 0 ? toUid.slice(2) : '';
+  const own = guestEntry();
+  if (!toUid || toUid === uid || (guestKey && own && own.key === guestKey)) throw new Error("You can't send a wish to yourself.");
+  if (guestKey && !/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/.test(md || '')) throw new Error('Could not send this wish. Please reload the page and try again.');
   const chk = C.checkWish(rawText);
   if (chk.error) throw new Error(chk.error);
 
@@ -539,8 +548,10 @@ async function sendWish(toUid, rawText, anonymous) {
   const wish = { msg: chk.text, anon: !!anonymous, at: serverTimestamp() };
   if (fromName) wish.fromName = fromName;
   const upd = {};
-  upd['wishes/' + toUid + '/' + wid] = wish;
-  upd['wish-meta/' + wid] = { from: uid, to: toUid, at: serverTimestamp() };
+  const meta = { from: uid, to: toUid, at: serverTimestamp() };
+  if (guestKey) { upd['guest-wishes/' + guestKey + '/' + wid] = wish; meta.md = md; }
+  else upd['wishes/' + toUid + '/' + wid] = wish;
+  upd['wish-meta/' + wid] = meta;
   upd['wish-rate/' + uid] = { last: serverTimestamp(), win: win, n: n };
   upd['wish-pair/' + uid + '/' + toUid] = serverTimestamp();
   try {
@@ -550,18 +561,34 @@ async function sendWish(toUid, rawText, anonymous) {
     if (friendly(e) === 'network') throw new Error('No connection. Please check your internet and try again.');
     throw e;
   }
-  return wid;
+  return { id: wid, held: !!guestKey };
 }
 
+// Where each wish shown in "My Wishes" lives (own inbox, or held wishes of a claimed entry).
+const wishPaths = {};
 async function myWishes() {
   await ready;
   if (!currentUser) return [];
-  const s = await get(ref(db, 'wishes/' + currentUser.uid));
-  const v = s.val() || {};
-  return Object.keys(v).map(function (id) {
-    const w = v[id];
-    return { id: id, msg: String(w.msg || ''), anon: w.anon !== false, fromName: w.anon === false ? String(w.fromName || '') : '', at: w.at || 0, reported: !!w.reported };
-  }).sort(function (a, b) { return b.at - a.at; });
+  const uid = currentUser.uid;
+  const [own, claims] = await Promise.all([
+    get(ref(db, 'wishes/' + uid)),
+    get(ref(db, 'my-claims/' + uid)).catch(function () { return null; })
+  ]);
+  const sources = [{ base: 'wishes/' + uid, val: own.val() || {} }];
+  const keys = Object.keys((claims && claims.val()) || {});
+  const held = await Promise.all(keys.map(function (k) {
+    return get(ref(db, 'guest-wishes/' + k)).then(function (s) { return { base: 'guest-wishes/' + k, val: s.val() || {} }; })
+      .catch(function () { return { base: '', val: {} }; });
+  }));
+  const out = [];
+  sources.concat(held).forEach(function (src) {
+    Object.keys(src.val).forEach(function (id) {
+      const w = src.val[id];
+      wishPaths[id] = src.base + '/' + id;
+      out.push({ id: id, msg: String(w.msg || ''), anon: w.anon !== false, fromName: w.anon === false ? String(w.fromName || '') : '', at: w.at || 0, reported: !!w.reported });
+    });
+  });
+  return out.sort(function (a, b) { return b.at - a.at; });
 }
 
 function watchWishCount(fn) {
@@ -583,7 +610,7 @@ function markWishesSeen() { if (currentUser) try { localStorage.setItem('sau_wis
 
 async function reportWish(id) {
   if (!currentUser) return;
-  const base = 'wishes/' + currentUser.uid + '/' + id;
+  const base = wishPaths[id] || ('wishes/' + currentUser.uid + '/' + id);
   const upd = {};
   upd[base + '/reported'] = true;
   upd[base + '/reportedAt'] = serverTimestamp();
@@ -592,23 +619,26 @@ async function reportWish(id) {
 async function deleteWish(id) {
   if (!currentUser) return;
   const upd = {};
-  upd['wishes/' + currentUser.uid + '/' + id] = null;
+  upd[wishPaths[id] || ('wishes/' + currentUser.uid + '/' + id)] = null;
   await update(ref(db), upd);
 }
 
 // ── admin moderation ──────────────────────────────────────────────────
 async function adminWishes() {
   if (!(await isAdmin())) throw new Error('Not an admin.');
-  const [meta, wishes, profiles] = await Promise.all([
-    get(ref(db, 'wish-meta')), get(ref(db, 'wishes')), get(ref(db, 'profiles'))
+  const [meta, wishes, held, profiles, guests] = await Promise.all([
+    get(ref(db, 'wish-meta')), get(ref(db, 'wishes')), get(ref(db, 'guest-wishes')), get(ref(db, 'profiles')), get(ref(db, 'birthday-mates'))
   ]);
-  const m = meta.val() || {}, w = wishes.val() || {}, p = profiles.val() || {};
+  const m = meta.val() || {}, w = wishes.val() || {}, gw = held.val() || {}, p = profiles.val() || {}, gm = guests.val() || {};
   const pname = function (uid) { return (p[uid] && p[uid].name) || ''; };
   return Object.keys(m).map(function (id) {
     const mm = m[id];
-    const ww = (w[mm.to] || {})[id] || null;
+    const isHeld = String(mm.to).indexOf('g:') === 0;
+    const gk = isHeld ? mm.to.slice(2) : '';
+    const ww = isHeld ? ((gw[gk] || {})[id] || null) : ((w[mm.to] || {})[id] || null);
     return {
-      id: id, from: mm.from, to: mm.to, at: mm.at || 0, fromName: pname(mm.from), toName: pname(mm.to),
+      id: id, from: mm.from, to: mm.to, at: mm.at || 0, fromName: pname(mm.from),
+      toName: isHeld ? ((gm[gk] && gm[gk].name ? gm[gk].name : '') + ' (no account yet)') : pname(mm.to),
       msg: ww ? String(ww.msg || '') : '', anon: ww ? ww.anon !== false : true, reported: !!(ww && ww.reported),
       reportedAt: ww && ww.reportedAt || 0, removed: !ww, removedAt: mm.removedAt || 0
     };
@@ -617,7 +647,7 @@ async function adminWishes() {
 async function adminRemoveWish(id, to) {
   if (!(await isAdmin())) throw new Error('Not an admin.');
   const upd = {};
-  upd['wishes/' + to + '/' + id] = null;
+  upd[(String(to).indexOf('g:') === 0 ? 'guest-wishes/' + to.slice(2) : 'wishes/' + to) + '/' + id] = null;
   upd['wish-meta/' + id + '/removedAt'] = serverTimestamp();
   await update(ref(db), upd);
 }

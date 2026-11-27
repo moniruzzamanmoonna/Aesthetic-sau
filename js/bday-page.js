@@ -104,8 +104,7 @@ async function viewToday(seq) {
     + (items.length ? '<div class="bm-grid">' + items.map(function (i) { return personCard(i, { showDate: false }); }).join('') + '</div>' : '')
     + (hiddenN ? lockedHtml(hiddenN, items.length > 0) : '')
     + (total ? '' : emptyState('🎈', 'No Birthday Mates today.', 'Tomorrow is another day to celebrate! 💚',
-        '<a class="bm-btn" href="#calendar">🗓️ Open the calendar</a>'))
-    + (hiddenN ? '' : membersNote());
+        '<a class="bm-btn" href="#calendar">🗓️ Open the calendar</a>'));
   after(seq);
 }
 
@@ -132,8 +131,7 @@ async function viewTwins(seq) {
   main.innerHTML = seg('twins') + head('🎂 Birthday Twins', 'Your Birthday Twins', sub) + leap
     + (res.items.length ? '<div class="bm-grid">' + res.items.map(function (i) { return personCard(i); }).join('') + '</div>' : '')
     + (hiddenN ? lockedHtml(hiddenN, res.items.length > 0) : '')
-    + (n ? '' : emptyState('🌱', "No Birthday Twins found yet. Maybe you're the first one!", 'Maybe someone with the same birthday will join soon! 🎂'))
-    + (hiddenN ? '' : membersNote());
+    + (n ? '' : emptyState('🌱', "No Birthday Twins found yet. Maybe you're the first one!", 'Maybe someone with the same birthday will join soon! 🎂'));
   after(seq);
 }
 
@@ -161,8 +159,7 @@ async function viewCalendar(seq) {
     if (stale(seq)) return;
     cal.cache[key] = data;
   }
-  const anyHidden = Object.keys(data.hidden).length > 0;
-  main.innerHTML = shell(calendarGrid(data, today) + '<div class="bm-cal-day" id="bm-cal-day" aria-live="polite"></div>' + (anyHidden ? '' : membersNote()));
+  main.innerHTML = shell(calendarGrid(data, today) + '<div class="bm-cal-day" id="bm-cal-day" aria-live="polite"></div>');
   bindCalNav(seq);
   main.querySelectorAll('[data-md]').forEach(function (b) {
     b.addEventListener('click', function () {

@@ -139,13 +139,15 @@
           photo: r.p ? String(r.p) : '',
           anonbox: r.a && /^[a-z0-9_]{3,20}$/.test(String(r.a)) ? String(r.a) : '',
           uid: key.indexOf('u_') === 0 ? key.slice(2) : '',
-          canWish: key.indexOf('u_') === 0,
+          // everyone visible can get a wish: accounts directly, no-account entries are held ("g:<key>")
+          canWish: true,
+          to: key.indexOf('u_') === 0 ? key.slice(2) : 'g:' + key,
           visibility: g.vis || ''
         };
         var nk = name.toLowerCase() + '|' + g.md;
         var prev = byName[nk];
         if (prev !== undefined) {
-          if (!out[prev].canWish && item.canWish) out[prev] = item;
+          if (!out[prev].uid && item.uid) out[prev] = item; // prefer the person's account row
           return;
         }
         byName[nk] = out.length;

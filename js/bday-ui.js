@@ -29,7 +29,7 @@ export function personCard(item, opts) {
     meta.push('🎂 ' + esc(C.formatMd(item.md)));
   }
   const wishBtn = item.canWish && !item.isSelf
-    ? '<button type="button" class="bm-wish-btn" data-wish="' + esc(item.uid) + '" data-name="' + esc(item.name) + '">💌 <span>Send a Secret Birthday Wish</span></button>'
+    ? '<button type="button" class="bm-wish-btn" data-wish="' + esc(item.to || item.uid) + '" data-md="' + esc(item.md || '') + '" data-name="' + esc(item.name) + '">💌 <span>Send a Secret Birthday Wish</span></button>'
     : '';
   // Optional AnonBox link: anyone who can see the card can send an anonymous text there.
   const anonBtn = item.anonbox && !item.isSelf
@@ -54,7 +54,7 @@ export function bindWishButtons(root) {
     if (btn._bmBound) return;
     btn._bmBound = true;
     btn.addEventListener('click', function () {
-      openWishModal({ uid: btn.getAttribute('data-wish'), name: btn.getAttribute('data-name') });
+      openWishModal({ uid: btn.getAttribute('data-wish'), md: btn.getAttribute('data-md') || '', name: btn.getAttribute('data-name') });
     });
   });
 }
@@ -223,11 +223,13 @@ export function openWishModal(person) {
     send.disabled = true;
     send.textContent = 'Sending…';
     try {
-      await B.sendWish(person.uid, chk.text, anon.checked);
+      const res = await B.sendWish(person.uid, chk.text, anon.checked, person.md);
       m.querySelector('.bm-modal-box').innerHTML = '<button type="button" class="bm-modal-x" data-close aria-label="Close">✕</button>'
         + '<div class="bm-modal-icon bm-pop" aria-hidden="true">💚</div>'
         + '<h2 class="bm-modal-title" id="bm-modal-title">Wish sent successfully! 💚</h2>'
-        + '<p class="bm-modal-text">' + esc(person.name) + ' will see it in their Birthday Mate wishes.</p>'
+        + '<p class="bm-modal-text">' + (res && res.held
+          ? esc(person.name) + " hasn't joined Birthday Mate yet. Your wish is saved and they'll see it as soon as they sign in. Tell them! 💌"
+          : esc(person.name) + ' will see it in their Birthday Mate wishes.') + '</p>'
         + '<button type="button" class="bm-btn bm-full" data-close>Done</button>';
     } catch (ex) {
       err.textContent = (ex && ex.message) || 'Could not send the wish. Please try again.';

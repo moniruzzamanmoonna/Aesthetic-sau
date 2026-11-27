@@ -70,12 +70,15 @@ test('mergeEntries: twins, dedupe, exclusions, private never present', () => {
   const out = C.mergeEntries([pub, mem], ['u_me']);
   assert.deepEqual(out.map((x) => x.name).sort(), ['Karim', 'Rahim']);
   const rahim = out.find((x) => x.name === 'Rahim');
-  assert.equal(rahim.canWish, true, 'signed-in row wins over duplicate guest row');
+  assert.equal(rahim.uid, 'a', 'account row wins over duplicate guest row');
   assert.equal(rahim.uid, 'a');
-  assert.equal(out.find((x) => x.name === 'Karim').canWish, false, 'guests cannot receive wishes');
+  const karim = out.find((x) => x.name === 'Karim');
+  assert.equal(karim.canWish, true, 'no-account entries get held wishes');
+  assert.equal(karim.to, 'g:-guest1');
+  assert.equal(rahim.to, 'a');
   assert.deepEqual(C.mergeEntries([], []), []);
   // output never carries anything beyond the public projection
-  out.forEach((x) => assert.deepEqual(Object.keys(x).sort(), ['anonbox', 'batch', 'canWish', 'faculty', 'key', 'md', 'name', 'photo', 'uid', 'visibility']));
+  out.forEach((x) => assert.deepEqual(Object.keys(x).sort(), ['anonbox', 'batch', 'canWish', 'faculty', 'key', 'md', 'name', 'photo', 'to', 'uid', 'visibility']));
 });
 
 test('checkWish validation', () => {

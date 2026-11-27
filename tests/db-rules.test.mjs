@@ -248,6 +248,55 @@ test('anonymous sessions cannot create profiles or see members-only rows', async
   await assertSucceeds(visitor('v9').ref('bday-public/11-26').get());
 });
 
+// ── held wishes for people without an account ──────────────────────
+const PG = '-PublicGuest000001AB';
+function heldWish(from, key, wid, md, wish, extra) {
+  return Object.assign({
+    ['guest-wishes/' + key + '/' + wid]: Object.assign({ at: TS }, wish),
+    ['wish-meta/' + wid]: { from, to: 'g:' + key, md, at: TS },
+    ['wish-rate/' + from]: { last: TS, win: TS, n: 1 },
+    ['wish-pair/' + from + '/g:' + key]: TS
+  }, extra || {});
+}
+async function seedPublicGuest() {
+  await env.withSecurityRulesDisabled((ctx) => ctx.database().ref().update({
+    ['birthday-mates/' + PG]: { name: 'Ira Roy', faculty: 'Biotechnology', birthday: '2003-11-27', timestamp: 'x' },
+    ['bday-public/11-27/' + PG]: { n: 'Ira Roy', f: 'Biotechnology', t: 'g' },
+    ['bday-marks/11-27/' + PG]: true
+  }));
+}
+
+test('wishes to people without an account are held, readable only after they claim', async () => {
+  await seedProfiles();
+  await seedPublicGuest();
+  // a visitor (no Google) can wish a public no-account entry
+  await assertSucceeds(visitor('v1').ref().update(heldWish('v1', PG, 'h1', '11-27', { msg: 'Happy Birthday Ira!', anon: true })));
+  await assertFails(visitor('v2').ref().update(heldWish('v2', PG, 'h2', '11-28', { msg: 'hi', anon: true })), 'wrong day');
+  await assertFails(visitor('v3').ref().update(heldWish('v3', LEGACY, 'h3', '11-26', { msg: 'hi', anon: true })), 'members-only entry, visitor');
+  await assertSucceeds(as('bob').ref().update(heldWish('bob', LEGACY, 'h4', '11-26', { msg: 'hi', anon: true })), 'members-only entry, sharing member');
+  await assertFails(visitor('v5').ref('guest-wishes/' + PG + '/h5').set({ msg: 'x', anon: true, at: TS }), 'needs meta + rate rows');
+  // nobody can read held wishes yet
+  await assertFails(anon().ref('guest-wishes/' + PG).get());
+  await assertFails(as('alice').ref('guest-wishes/' + PG).get());
+  // Ira signs in, creates her profile and claims her entry -> she can read them
+  await assertSucceeds(as('ira').ref().update(profileUpdate('ira', { name: 'Ira Ispita Roy', birthday: '2003-11-27', vis: 'public' })));
+  await assertFails(as('ira').ref('my-claims/ira/' + PG).set(true), 'my-claims only after a real claim');
+  await assertSucceeds(as('ira').ref().update({ ['bday-claims/' + PG]: { uid: 'ira', at: TS }, ['my-claims/ira/' + PG]: true,
+    ['bday-public/11-27/' + PG]: null, ['bday-marks/11-27/' + PG]: null }));
+  const held = (await assertSucceeds(as('ira').ref('guest-wishes/' + PG).get())).val();
+  assert.deepEqual(Object.keys(held.h1).sort(), ['anon', 'at', 'msg'], 'no sender info');
+  await assertFails(as('ira').ref('wish-meta/h1').get());
+  await assertFails(as('alice').ref('guest-wishes/' + PG).get(), 'still private to others');
+  await assertFails(as('alice').ref('my-claims/ira').get());
+  // claimed entries take no new held wishes (they go to the account now)
+  await assertFails(as('alice').ref().update(heldWish('alice', PG, 'h6', '11-27', { msg: 'late wish', anon: true })));
+  // owner may report or delete, not edit
+  await assertFails(as('ira').ref('guest-wishes/' + PG + '/h1/msg').set('edited'));
+  await assertSucceeds(as('ira').ref('guest-wishes/' + PG + '/h1').update({ reported: true, reportedAt: TS }));
+  await assertSucceeds(as('ira').ref('guest-wishes/' + PG + '/h1').remove());
+  assert.equal((await adminDb().ref('wish-meta/h1/from').get()).val(), 'v1', 'admin can still trace the sender');
+});
+
 // ── profiles ──────────────────────────────────────────────────────────
 test('profile + index must agree', async () => {
   const u = profileUpdate('eve', { name: 'Eve', birthday: '2001-05-05', vis: 'public' });
