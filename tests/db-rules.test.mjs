@@ -225,6 +225,29 @@ test('AnonBox username: valid format, and rows must match the profile', async ()
   assert.equal((await anon().ref('bday-public/06-06/u_ax/a').get()).val(), 'moonstar');
 });
 
+// ── no-login visitors (invisible anonymous session) ───────────────────
+const visitor = (uid) => env.authenticatedContext(uid, { firebase: { sign_in_provider: 'anonymous' } }).database();
+
+test('visitors without Google can send anonymous wishes to public people only', async () => {
+  await seedProfiles();
+  // alice is public, bob members-only
+  await assertSucceeds(visitor('v1').ref().update(wishUpdate('v1', 'alice', 'vw1', { msg: 'Happy Birthday!', anon: true })));
+  await assertFails(visitor('v2').ref().update(wishUpdate('v2', 'bob', 'vw2', { msg: 'Happy Birthday!', anon: true })), 'members-only people');
+  await assertFails(visitor('v3').ref().update(wishUpdate('v3', 'alice', 'vw3', { msg: 'hi', anon: false, fromName: 'Fake Name' })), 'no name without a profile');
+  // same rate limits apply to the visitor session
+  await assertFails(visitor('v1').ref().update(wishUpdate('v1', 'alice', 'vw4', { msg: 'again', anon: true }, { 'wish-rate/v1': { last: TS, win: TS, n: 1 } })));
+  // the sender is still traceable by admins
+  assert.equal((await adminDb().ref('wish-meta/vw1/from').get()).val(), 'v1');
+  assert.deepEqual(Object.keys((await as('alice').ref('wishes/alice/vw1').get()).val()).sort(), ['anon', 'at', 'msg']);
+});
+
+test('anonymous sessions cannot create profiles or see members-only rows', async () => {
+  await seedProfiles();
+  await assertFails(visitor('v9').ref().update(profileUpdate('v9', { name: 'Anon Person', birthday: '2001-01-01', vis: 'public' })));
+  await assertFails(visitor('v9').ref('bday-members/11-26').get());
+  await assertSucceeds(visitor('v9').ref('bday-public/11-26').get());
+});
+
 // ── profiles ──────────────────────────────────────────────────────────
 test('profile + index must agree', async () => {
   const u = profileUpdate('eve', { name: 'Eve', birthday: '2001-05-05', vis: 'public' });
@@ -276,13 +299,14 @@ test('deleting a profile requires removing its index row in the same write', asy
 test('guest registration: create-only, members-only, consistent', async () => {
   const k = '-NewGuestKey00000001';
   const entry = { name: 'Guest One', faculty: 'Fisheries', district: 'Dhaka', birthday: '2005-03-14', timestamp: '2026-11-26T10:00:00Z', claim: 'T'.repeat(32) };
-  await assertFails(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-public/03-14/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' } }), 'guests never public');
+  // since 27 Nov 2026 new guest rows are public (with their count marker)
   await assertFails(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-15/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' } }), 'wrong day');
   await assertFails(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-14/' + k]: { n: 'Other Name', f: 'Fisheries', t: 'g' } }), 'name mismatch');
   await assertFails(anon().ref().update({ ['birthday-mates/u_x']: entry }), 'bad key');
   await assertFails(anon().ref().update({ ['birthday-mates/' + k]: Object.assign({}, entry, { birthday: '2005-02-30' }) }), 'bad date');
   await assertFails(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-14/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' } }), 'row without its count marker');
-  await assertSucceeds(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-members/03-14/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' }, ['bday-marks/03-14/' + k]: true }));
+  await assertSucceeds(anon().ref().update({ ['birthday-mates/' + k]: entry, ['bday-public/03-14/' + k]: { n: 'Guest One', f: 'Fisheries', t: 'g' }, ['bday-marks/03-14/' + k]: true }));
+  assert.equal((await anon().ref('bday-public/03-14/' + k + '/n').get()).val(), 'Guest One', 'visible without sign-in');
   await assertFails(anon().ref('birthday-mates/' + k).update({ name: 'Changed' }), 'no overwrite');
   await assertFails(anon().ref('birthday-mates/' + LEGACY).remove(), 'no delete');
   await assertFails(anon().ref('bday-members/11-26/' + LEGACY).remove());

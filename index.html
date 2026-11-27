@@ -2985,7 +2985,7 @@ function withBdayHome(fn) {
   if (window.BdayHome) return fn(window.BdayHome);
   window.addEventListener('bdayhome:ready', function(){ fn(window.BdayHome); }, { once: true });
 }
-var BM_PRIVACY_NOTE = '<p class="bm-form-note">🔒 Only your name, faculty and birthday (day &amp; month) are shown — and only to signed-in SAU members. Your year of birth, district and email are never shown to other students.</p>';
+var BM_PRIVACY_NOTE = '<p class="bm-form-note">🔒 Only your name, faculty and birthday (day &amp; month) are shown on Birthday Mate. Your year of birth, district and email are never shown to other students.</p>';
 
 function bmSavedCard(name, dateLine, note, actions) {
   return '<div class="bm-saved-card">'
@@ -3008,7 +3008,7 @@ function renderBdayForm() {
     // ── Returning visitor (registered without login on this device) ──
     wrap.innerHTML = bmSavedCard(saved.name,
       '📅 ' + formatBdayDisplay(saved.birthday) + (saved.district ? ' &nbsp;·&nbsp; 📍 ' + esc(saved.district) : ''),
-      'Your date of birth is saved and can\'t be changed from this device. Only signed-in SAU members see your name, faculty and birthday (day &amp; month).',
+      'Your date of birth is saved and can\'t be changed from this device. Others only see your name, faculty and birthday (day &amp; month).',
       '<a class="bm-btn" href="birthday.html#twins">View Birthday Twins →</a><a class="bm-btn" href="birthday.html#profile">Sign in for privacy &amp; wishes</a>');
   } else {
     // ── New visitor — show full form ──

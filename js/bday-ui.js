@@ -180,12 +180,8 @@ export function bindSignIn(root, after) {
 
 // ── wish modal ────────────────────────────────────────────────────────
 export function openWishModal(person) {
-  if (!B.user()) {
-    const m = openModal('<h2 class="bm-modal-title" id="bm-modal-title">💌 Send a Secret Birthday Wish</h2>'
-      + signInPromptHtml('Sign in to send a wish', 'You need to be signed in so we can keep wishes safe from spam. If you send it anonymously, <strong>' + esc(person.name) + '</strong> won\'t see who you are.'));
-    bindSignIn(m, function () { openWishModal(person); });
-    return;
-  }
+  // No sign-in needed: visitors without a Google account always send anonymously.
+  const guest = !B.user();
   const max = C.WISH_MAX;
   const m = openModal(
     '<h2 class="bm-modal-title" id="bm-modal-title">💌 Send a Secret Birthday Wish</h2>'
@@ -194,10 +190,13 @@ export function openWishModal(person) {
     + '<label class="bm-label" for="bm-wish-text">Your message</label>'
     + '<textarea id="bm-wish-text" class="bm-input bm-textarea" maxlength="' + max + '" rows="4" placeholder="Happy Birthday! Hope this year brings you lots of happiness. 🌻" required></textarea>'
     + '<div class="bm-row-between"><span class="bm-fine" id="bm-wish-err" role="alert"></span><span class="bm-count" id="bm-wish-count">0/' + max + '</span></div>'
-    + '<label class="bm-check"><input type="checkbox" id="bm-wish-anon" checked/> <span>Send anonymously</span></label>'
-    + '<p class="bm-fine" id="bm-anon-note">They\'ll only see "Someone sent you a birthday wish". Admins can see the sender only if a wish is reported for abuse.</p>'
+    + '<label class="bm-check"><input type="checkbox" id="bm-wish-anon" checked' + (guest ? ' disabled' : '') + '/> <span>Send anonymously</span></label>'
+    + '<p class="bm-fine" id="bm-anon-note">They\'ll only see "Someone sent you a birthday wish".'
+    + (guest ? ' No sign-in needed. Want to send it with your name? <button type="button" class="bm-link" data-signin>Sign in with Google</button> (optional).'
+      : ' Admins can see the sender only if a wish is reported for abuse.') + '</p>'
     + '<button type="submit" class="bm-btn bm-btn-primary bm-full" id="bm-wish-send">Send wish</button>'
     + '</form>', { focus: '#bm-wish-text' });
+  if (guest) bindSignIn(m, function () { openWishModal(person); });
   const ta = m.querySelector('#bm-wish-text');
   const cnt = m.querySelector('#bm-wish-count');
   const err = m.querySelector('#bm-wish-err');

@@ -18,7 +18,7 @@
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
-  onAuthStateChanged, signOut as fbSignOut, connectAuthEmulator
+  onAuthStateChanged, signOut as fbSignOut, connectAuthEmulator, signInAnonymously
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import {
   getDatabase, ref, get, update, push, query, orderByKey, startAt, endAt, serverTimestamp, onValue, connectDatabaseEmulator, increment
@@ -52,17 +52,27 @@ if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
 }
 
 // ── auth ──────────────────────────────────────────────────────────────
+// currentUser = the Google-signed-in user (or null). Visitors who send a wish without signing in
+// get an invisible anonymous Firebase session (authUser) — the app never treats that as signed in.
 let currentUser = null;
+let authUser = null;
 let profileCache; // undefined = not loaded, null = no profile
 const listeners = new Set();
 let resolveReady;
 const ready = new Promise(function (r) { resolveReady = r; });
 
+let lastRealUid;
 onAuthStateChanged(auth, function (u) {
-  currentUser = u;
-  profileCache = undefined;
+  authUser = u;
+  const real = u && !u.isAnonymous ? u : null;
+  const changed = (real ? real.uid : null) !== lastRealUid;
+  currentUser = real;
+  lastRealUid = real ? real.uid : null;
   resolveReady();
-  listeners.forEach(function (fn) { try { fn(u); } catch (e) { console.error(e); } });
+  if (!changed) return; // e.g. a visitor got an anonymous session just to send a wish
+  profileCache = undefined;
+  adminCache = null;
+  listeners.forEach(function (fn) { try { fn(real); } catch (e) { console.error(e); } });
 });
 getRedirectResult(auth).catch(function (e) { console.warn('[BirthdayMate] redirect sign-in failed:', e && e.code); });
 
@@ -145,7 +155,7 @@ async function registerGuest(entry) {
   }
   const upd = {};
   upd['birthday-mates/' + key] = full;
-  upd['bday-members/' + md + '/' + key] = { n: full.name, f: full.faculty, t: 'g' };
+  upd['bday-public/' + md + '/' + key] = { n: full.name, f: full.faculty, t: 'g' };
   upd['bday-marks/' + md + '/' + key] = true;
   await update(ref(db), upd);
   const local = { name: full.name, faculty: full.faculty, birthday: full.birthday, district: full.district, key: key, token: token };
@@ -213,7 +223,7 @@ async function saveProfile(input) {
   const birthday = old ? old.birthday : input.birthday;
   const dobErr = C.validateDob(birthday);
   if (dobErr) throw new Error(dobErr);
-  const vis = ['public', 'members', 'private'].indexOf(input.visibility) >= 0 ? input.visibility : 'members';
+  const vis = ['public', 'members', 'private'].indexOf(input.visibility) >= 0 ? input.visibility : 'public';
   const photo = input.showPhoto && currentUser.photoURL && currentUser.photoURL.indexOf('https://lh3.googleusercontent.com/') === 0 &&
     currentUser.photoURL.length <= 400 ? currentUser.photoURL : null;
   const md = C.mdFromDob(birthday);
@@ -274,8 +284,12 @@ async function claimGuest() {
 async function claimCandidates() {
   const p = await getProfile(true);
   if (!p || !p.md) return [];
-  let rows = null;
-  try { rows = (await get(ref(db, 'bday-members/' + p.md))).val(); } catch (e) { return []; }
+  let rows = {};
+  const [pubS, memS] = await Promise.all([
+    get(ref(db, 'bday-public/' + p.md)).catch(function () { return null; }),
+    get(ref(db, 'bday-members/' + p.md)).catch(function () { return null; })
+  ]);
+  rows = Object.assign({}, (pubS && pubS.val()) || {}, (memS && memS.val()) || {});
   const g = guestEntry();
   return Object.keys(rows || {}).filter(function (k) {
     const r = rows[k];
@@ -294,6 +308,7 @@ async function claimEntry(key) {
   const upd = {};
   upd['bday-claims/' + key] = { uid: currentUser.uid, at: serverTimestamp() };
   upd['bday-members/' + p.md + '/' + key] = null;
+  upd['bday-public/' + p.md + '/' + key] = null;
   upd['bday-marks/' + p.md + '/' + key] = null;
   try {
     await update(ref(db), upd);
@@ -485,8 +500,14 @@ function friendly(e) {
 
 async function sendWish(toUid, rawText, anonymous) {
   await ready;
-  if (!currentUser) throw new Error('Please sign in to send a wish.');
-  const uid = currentUser.uid;
+  // No Google account? Send through an invisible anonymous session (still rate-limited, and an
+  // admin can trace abuse to the device session if a wish is reported).
+  if (!authUser) {
+    try { await signInAnonymously(auth); } catch (e) { throw new Error('Could not connect. Please check your internet and try again.'); }
+  }
+  const sender = auth.currentUser;
+  const uid = sender.uid;
+  if (sender.isAnonymous) anonymous = true;
   if (!toUid || toUid === uid) throw new Error("You can't send a wish to yourself.");
   const chk = C.checkWish(rawText);
   if (chk.error) throw new Error(chk.error);
@@ -624,8 +645,11 @@ async function adminEditEntry(key, before, after, claimed) {
   upd['birthday-mates/' + key + '/faculty'] = after.faculty;
   upd['birthday-mates/' + key + '/birthday'] = after.birthday;
   if (!claimed) {
-    if (oldMd && oldMd !== newMd) { upd['bday-members/' + oldMd + '/' + key] = null; upd['bday-marks/' + oldMd + '/' + key] = null; }
-    upd['bday-members/' + newMd + '/' + key] = { n: C.cleanName(after.name), f: after.faculty, t: 'g' };
+    const node = oldMd && (await get(ref(db, 'bday-members/' + oldMd + '/' + key))).exists() ? 'bday-members' : 'bday-public';
+    if (oldMd && oldMd !== newMd) {
+      upd['bday-members/' + oldMd + '/' + key] = null; upd['bday-public/' + oldMd + '/' + key] = null; upd['bday-marks/' + oldMd + '/' + key] = null;
+    }
+    upd[node + '/' + newMd + '/' + key] = { n: C.cleanName(after.name), f: after.faculty, t: 'g' };
     upd['bday-marks/' + newMd + '/' + key] = true;
   }
   await update(ref(db), upd);

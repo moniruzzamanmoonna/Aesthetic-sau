@@ -55,11 +55,11 @@ function twinsPopupHtml(res, justSaved) {
       + '<div class="bmp-sub">Maybe you\'re the first one! Someone with the same birthday might join soon 🎂</div>';
   const cards = n ? '<div class="bm-grid bm-popup-grid">' + res.items.slice(0, 8).map(function (i) { return personCard(i, { showDate: false }); }).join('') + '</div>' : '';
   const hidden = res.membersHidden
-    ? '<p class="bm-form-note">🔒 Most birthdays are visible to signed-in SAU members only. Sign in to see all your twins and receive secret birthday wishes.</p>' : '';
+    ? '<p class="bm-form-note">🔒 Some birthdays are shared with members only. Sign in with Google (optional) to see them and to receive wishes yourself.</p>' : '';
   return head + cards + hidden
     + '<div class="bm-form-actions"><a class="bm-btn bm-btn-primary" href="birthday.html#twins">View Birthday Twins →</a>'
     + (B.user() ? '' : '<a class="bm-btn" href="birthday.html#profile">Sign in with Google</a>') + '</div>'
-    + (justSaved ? '<div class="bmp-saved">Your info has been saved ✓ — only your name, faculty and birthday (day &amp; month) are shown to members.</div>' : '');
+    + (justSaved ? '<div class="bmp-saved">Your info has been saved ✓ — only your name, faculty and birthday (day &amp; month) are shown on Birthday Mate.</div>' : '');
 }
 
 async function registerAndFindTwins(entry) {

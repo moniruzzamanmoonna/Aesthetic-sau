@@ -387,8 +387,8 @@ function wishCard(w) {
 
 // ── 👤 Profile ────────────────────────────────────────────────────────
 const VIS = [
-  ['public', 'Public', 'Anyone visiting the site can see your name, faculty, batch and birthday (day & month).'],
-  ['members', 'SAU Members Only', 'Only signed-in Birthday Mate members can see you. Recommended.'],
+  ['public', 'Public', 'Anyone can see your name, faculty, batch and birthday (day & month) and send you a wish, no sign-in needed. Recommended.'],
+  ['members', 'SAU Members Only', 'Only signed-in members who share their own birthday can see you.'],
   ['private', 'Private', 'Hidden from Birthday Twins, Today\'s Birthdays and the Calendar. Nobody can send you wishes, and you won\'t see members-only birthdays either.']
 ];
 
@@ -410,7 +410,7 @@ async function viewProfile(seq) {
     name: u.displayName || (g && g.name) || '',
     faculty: (g && g.faculty) || '',
     birthday: (g && g.birthday) || '',
-    visibility: 'members'
+    visibility: 'public'
   };
   const facs = C.FACULTIES.slice();
   if (v.faculty && facs.indexOf(v.faculty) < 0) facs.push(v.faculty);

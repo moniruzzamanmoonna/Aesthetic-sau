@@ -21,6 +21,9 @@ const ADMIN_EMAILS = ['aestheticsau3100@gmail.com', 'moniruzzamanmoonna@gmail.co
 const ADMIN = '(auth != null && auth.token.email_verified === true && (' +
   ADMIN_EMAILS.map(function (e) { return "auth.token.email === '" + e + "'"; }).join(' || ') + '))';
 const SIGNED = 'auth != null';
+// Visitors get an invisible anonymous account so they can send wishes without Google sign-in;
+// profiles (and so receiving wishes, members-only access) still need a real Google account.
+const REAL_USER = "(auth != null && auth.token.firebase.sign_in_provider !== 'anonymous')";
 // Month-day key "MM-DD" (rejects 04-31, 02-30 ...). 02-29 is allowed.
 const MD_RE = '/^((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|02-(0[1-9]|1[0-9]|2[0-9]))$/';
 const DOB_RE = '/^(19[0-9][0-9]|20[0-9][0-9])-((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|02-(0[1-9]|1[0-9]|2[0-9]))$/';
@@ -51,8 +54,8 @@ function indexNode(vis, readRule) {
     "&& ((!newData.child('a').exists() && !" + P + ".child('anonbox').exists()) || newData.child('a').val() === " + P + ".child('anonbox').val())",
     ')))'
   );
-  // Guest (no-login) entries are only ever indexed as members-only.
-  const guestCreate = vis !== 'members' ? 'false' : j(
+  // Guest (no-login) entries: public by default since 27 Nov 2026 (members-only before that).
+  const guestCreate = j(
     "(!data.exists() && newData.exists() && !$key.beginsWith('u_')",
     "&& " + G + ".exists()",
     "&& " + G + ".child('birthday').val().endsWith('-' + $md)",
@@ -190,7 +193,7 @@ function profilesNode() {
       '.read': "(" + SIGNED + " && auth.uid === $uid) || " + ADMIN,
       // Deleting a profile is only allowed once its index rows are gone too.
       '.write': j(
-        "((" + SIGNED + " && auth.uid === $uid) || " + ADMIN + ")",
+        "((" + REAL_USER + " && auth.uid === $uid) || " + ADMIN + ")",
         "&& (newData.exists() || !data.exists() || (!" + idx('public', 'data') + ".exists() && !" + idx('members', 'data') + ".exists()))",
         // ...and its district rows are gone and the district count went down by one.
         "&& (newData.exists() || !" + COUNTED('data') + " || (" + CVAL(dcnt(NR, 'data')) + " === " + CVAL(dcnt('root', 'data')) + " - 1",
